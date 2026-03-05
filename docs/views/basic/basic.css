@@ -11,6 +11,7 @@
     border-radius: 10px;
     display: flex;
     flex-direction: column;
+    border: 1px solid #e0e0e0;
 }
 
 .basic-layout {

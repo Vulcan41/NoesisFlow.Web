@@ -297,23 +297,25 @@ body {
     position: absolute;
     top: 40px;
     right: 0;
-
     background: white;
     border-radius: 10px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-
     padding: 6px;
     min-width: 150px;
-
     display: flex;
     flex-direction: column;
     gap: 4px;
-
     z-index: 100;
+    /* animation setup */
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 .dropdown-hidden {
-    display: none;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
 }
 
 .dropdown-item {

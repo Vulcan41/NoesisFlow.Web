@@ -17,13 +17,11 @@ if (!session) {
 ========================================================= */
 
 const main = document.getElementById("main-content");
-
 const homeBtn = document.getElementById("home-btn");
 const friendsBtn = document.getElementById("friends-btn");
 const messagesBtn = document.getElementById("messages-btn");
 const notificationsBtn = document.getElementById("notifications-btn");
 const settingsBtn = document.getElementById("settings-btn");
-
 const userBtn = document.getElementById("user-btn");
 
 /* =========================================================

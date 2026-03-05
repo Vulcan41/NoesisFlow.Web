@@ -21,6 +21,7 @@ export async function loadProfile() {
         return;
     }
 
+
     /* ---------- HEADER USERNAME ---------- */
 
     document.getElementById("user-name")?.textContent =
@@ -57,6 +58,7 @@ export async function loadProfile() {
 
     document.getElementById("avatar-preview")?.src =
     data.avatar_url || "";
+
 }
 
 /* ---------- SAVE PROFILE ---------- */
