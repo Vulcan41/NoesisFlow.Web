@@ -1,66 +1,22 @@
-export function initView() {
+import { userStore } from "../../state/userStore.js";
 
-    const buttons = document.querySelectorAll(".basic-menu-btn");
-    const content = document.getElementById("basic-content");
+export function initBasic() {
 
-    buttons.forEach(btn => {
+    const profile = userStore.getProfile();
+    const user = userStore.getUser();
 
-        btn.addEventListener("click", () => {
+    if (!profile || !user) return;
 
-            buttons.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
+    document.getElementById("debug-id").textContent = user.id;
+    document.getElementById("debug-email").textContent = user.email;
 
-            const section = btn.dataset.section;
+    document.getElementById("debug-username").textContent =
+    profile.username ?? "";
 
-            switch (section) {
+    document.getElementById("debug-fullname").textContent =
+    profile.full_name ?? "";
 
-                case "overview":
-                    content.innerHTML = BasicOverviewSection();
-                    break;
-
-                case "projects":
-                    content.innerHTML = BasicProjectsSection();
-                    break;
-
-                case "activity":
-                    content.innerHTML = BasicActivitySection();
-                    break;
-
-            }
-
-        });
-
-    });
-
-}
-
-/* =========================================================
-   SECTIONS
-========================================================= */
-
-function BasicOverviewSection() {
-
-    return `
-        <h2>Overview</h2>
-        <p>This is the overview section.</p>
-    `;
-
-}
-
-function BasicProjectsSection() {
-
-    return `
-        <h2>Projects</h2>
-        <p>Project list will appear here.</p>
-    `;
-
-}
-
-function BasicActivitySection() {
-
-    return `
-        <h2>Activity</h2>
-        <p>Recent activity will appear here.</p>
-    `;
+    document.getElementById("debug-credits").textContent =
+    profile.credits ?? 0;
 
 }

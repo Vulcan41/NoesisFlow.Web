@@ -1,5 +1,5 @@
 // index.js
-import { supabase } from "./supabase.js";
+import { supabase } from "./core/supabase.js";
 
 /* =========================================================
    INPUT REFERENCES
