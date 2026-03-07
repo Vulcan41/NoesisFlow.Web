@@ -74,42 +74,53 @@ function loadCredits() {
 
 function setupDropdown() {
 
-    const userBtn = document.getElementById("user-btn");
-    const userDropdown = document.getElementById("user-dropdown");
+    const wrapper = document.querySelector(".user-wrapper");
+    const dropdown = document.getElementById("user-dropdown");
+
     const dropdownProfile = document.getElementById("dropdown-profile");
     const dropdownLogout = document.getElementById("dropdown-logout");
 
-    userBtn?.addEventListener("click", (e) => {
+    if (!wrapper || !dropdown) return;
 
-        e.stopPropagation();
-        userDropdown.classList.toggle("dropdown-hidden");
+    let hideTimer;
+
+    /* show dropdown */
+
+    wrapper.addEventListener("mouseenter", () => {
+
+        clearTimeout(hideTimer);
+        dropdown.classList.remove("dropdown-hidden");
 
     });
 
-    userDropdown?.addEventListener("click", (e) => {
-        e.stopPropagation();
+    /* hide dropdown with delay */
+
+    wrapper.addEventListener("mouseleave", () => {
+
+        hideTimer = setTimeout(() => {
+            dropdown.classList.add("dropdown-hidden");
+        }, 120);
+
     });
+
+    /* profile */
 
     dropdownProfile?.addEventListener("click", () => {
 
-        userDropdown.classList.add("dropdown-hidden");
+        dropdown.classList.add("dropdown-hidden");
         loadView("profile");
 
     });
 
+    /* logout */
+
     dropdownLogout?.addEventListener("click", (e) => {
 
         e.stopPropagation();
-        userDropdown.classList.add("dropdown-hidden");
+        dropdown.classList.add("dropdown-hidden");
 
         const modal = document.getElementById("logout-modal");
         modal?.classList.remove("modal-hidden");
-
-    });
-
-    document.addEventListener("click", () => {
-
-        userDropdown?.classList.add("dropdown-hidden");
 
     });
 
