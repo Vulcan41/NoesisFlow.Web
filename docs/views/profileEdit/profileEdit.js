@@ -149,21 +149,17 @@ function setupSave() {
 
         }
 
-        /* ---------- refresh store ---------- */
+        /* ---------- update store ---------- */
 
-        await userStore.refreshProfile();
+        const currentProfile = userStore.getProfile();
 
-        /* ---------- update header UI ---------- */
-
-        const headerAvatar = document.querySelector("#user-btn img");
-        if (headerAvatar && avatarUrl) {
-            headerAvatar.src = avatarUrl;
-        }
-
-        const headerUsername = document.getElementById("user-name");
-        if (headerUsername) {
-            headerUsername.textContent = username || full_name || "User";
-        }
+        userStore.setProfile({
+            ...currentProfile,
+            full_name,
+            username,
+            bio,
+            avatar_url: avatarUrl
+        });
 
         /* ---------- go back to profile ---------- */
 

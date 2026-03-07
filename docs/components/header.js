@@ -1,5 +1,6 @@
 import { supabase } from "../core/supabase.js";
 import { loadView } from "../core/router.js";
+import { userStore } from "../state/userStore.js";
 
 /* =========================================================
    INIT HEADER
@@ -7,7 +8,7 @@ import { loadView } from "../core/router.js";
 
 export async function initHeader() {
 
-    await loadHeaderUser();
+    loadHeaderUser();
     await loadCredits();
 
     setupNavigation();
@@ -42,21 +43,10 @@ function setupNavigation() {
    LOAD HEADER USERNAME + AVATAR
 ========================================================= */
 
-async function loadHeaderUser() {
+function loadHeaderUser() {
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("username, avatar_url")
-        .eq("id", user.id)
-        .single();
-
-    if (error) {
-        console.error("Header profile load failed:", error);
-        return;
-    }
+    const profile = userStore.getProfile();
+    if (!profile) return;
 
     const nameEl = document.getElementById("user-name");
     const avatarEl = document.getElementById("user-avatar");
@@ -66,7 +56,15 @@ async function loadHeaderUser() {
     }
 
     if (avatarEl) {
-        avatarEl.src = profile.avatar_url || "assets/user_icon_2.jpg";
+
+        avatarEl.src =
+        profile.avatar_url && profile.avatar_url.trim() !== ""
+        ? profile.avatar_url
+        : "assets/user_icon_2.jpg";
+
+        avatarEl.onerror = () => {
+            avatarEl.src = "assets/user_icon_2.jpg";
+        };
     }
 
 }
@@ -115,16 +113,12 @@ function setupDropdown() {
 
     let hideTimer;
 
-    /* show dropdown */
-
     wrapper.addEventListener("mouseenter", () => {
 
         clearTimeout(hideTimer);
         dropdown.classList.remove("dropdown-hidden");
 
     });
-
-    /* hide dropdown with delay */
 
     wrapper.addEventListener("mouseleave", () => {
 
@@ -134,16 +128,12 @@ function setupDropdown() {
 
     });
 
-    /* profile */
-
     dropdownProfile?.addEventListener("click", () => {
 
         dropdown.classList.add("dropdown-hidden");
         loadView("profile");
 
     });
-
-    /* logout */
 
     dropdownLogout?.addEventListener("click", (e) => {
 
