@@ -5,7 +5,9 @@ const routes = {
     messages: "messages",
     notifications: "notifications",
     settings: "settings",
-    debug: "debug"
+    profile: "profile",
+    debug: "debug",
+    profileEdit: "profileEdit"
 
 };
 
@@ -20,36 +22,50 @@ export async function loadView(name) {
 
     const htmlPath = `./views/${folder}/${folder}.html`;
     const jsPath = `../views/${folder}/${folder}.js`;
+    const cssPath = `./views/${folder}/${folder}.css`;
 
-    /* load HTML */
+    /* ===============================
+       LOAD HTML
+    =============================== */
 
     const res = await fetch(htmlPath);
     const html = await res.text();
 
     document.getElementById("main-content").innerHTML = html;
 
-    /* load JS if exists */
+    /* ===============================
+       LOAD CSS (if exists)
+    =============================== */
+
+    const oldCss = document.getElementById("view-css");
+    if (oldCss) oldCss.remove();
+
+    const link = document.createElement("link");
+    link.id = "view-css";
+    link.rel = "stylesheet";
+    link.href = cssPath;
+
+    document.head.appendChild(link);
+
+    /* ===============================
+       LOAD JS (if exists)
+    =============================== */
 
     try {
 
         const module = await import(jsPath);
 
-        const initFunction = `init${capitalize(folder)}`;
+        const initFunction =
+        "init" + folder.charAt(0).toUpperCase() + folder.slice(1);
 
         if (module[initFunction]) {
             module[initFunction]();
         }
 
-    } catch {
+    } catch (err) {
 
-        /* view has no JS */
+        console.error("Router JS load error:", err);
 
     }
 
-}
-
-/* helper */
-
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
 }
