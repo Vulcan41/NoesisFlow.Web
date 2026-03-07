@@ -86,13 +86,13 @@ function setupSave() {
         }
 
         /* refresh local store */
-
         await userStore.refreshProfile();
 
-        /* return to profile view */
 
+        /* return to profile view */
         loadView("profile");
 
     });
 
 }
+
