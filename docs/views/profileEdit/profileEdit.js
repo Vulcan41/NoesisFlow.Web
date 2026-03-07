@@ -76,6 +76,10 @@ function setupCancel() {
    SAVE PROFILE
 ========================= */
 
+/* =========================
+   SAVE PROFILE
+========================= */
+
 function setupSave() {
 
     const btn = document.getElementById("save-edit");
@@ -141,16 +145,27 @@ function setupSave() {
 
             console.error("Profile update failed:", error);
             alert("Σφάλμα αποθήκευσης");
-
             return;
 
         }
 
-        /* refresh store */
+        /* ---------- refresh store ---------- */
 
         await userStore.refreshProfile();
 
-        /* go back to profile */
+        /* ---------- update header UI ---------- */
+
+        const headerAvatar = document.querySelector("#user-btn img");
+        if (headerAvatar && avatarUrl) {
+            headerAvatar.src = avatarUrl;
+        }
+
+        const headerUsername = document.getElementById("user-name");
+        if (headerUsername) {
+            headerUsername.textContent = username || full_name || "User";
+        }
+
+        /* ---------- go back to profile ---------- */
 
         loadView("profile");
 
