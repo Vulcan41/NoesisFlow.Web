@@ -13,7 +13,7 @@ html, body {
 
 #top-area {
     flex-shrink: 0;
-    padding: 40px;
+    padding: 20px;
     border-bottom: 1px solid #e0e0e0;
 }
 
@@ -23,37 +23,88 @@ html, body {
     font-weight: 600;
 }
 
+
 /* SCROLL AREA */
 
 #profile-content {
     flex: 1;
     overflow-y: auto;
     padding: 30px 40px;
-    max-width: 600px;
 }
+
+
+/* MAIN LAYOUT */
+
+#profile-main {
+    display: flex;
+    width: 100%;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+
+/* AVATAR COLUMN */
+
+#avatar-section {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+
+/* FIELDS COLUMN */
+
+#profile-fields {
+    width: 800px;
+    display: flex;
+    flex-direction: column;
+}
+
 
 /* AVATAR UPLOAD */
 
 #avatar-upload {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    position: relative;
+    width: 110px;
+    height: 110px;
+    cursor: pointer;
 }
 
 #edit-avatar-preview {
-
-    width: 80px;
-    height: 80px;
-
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
-
-    border: 1px solid #d2d2d7;
+    display: block;
+    border: none;
 }
 
 #edit-avatar-input {
     border: none;
+    display: none;
 }
+
+#avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+#avatar-upload:hover #avatar-overlay {
+    opacity: 1;
+}
+
 
 /* FORM FIELDS */
 
@@ -69,13 +120,22 @@ html, body {
     color: #555;
 }
 
-input,
-textarea {
-    padding: 10px 12px;
+#profile-edit-page input,
+#profile-edit-page textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
     font-size: 14px;
     border: 1px solid #d2d2d7;
-    border-radius: 10px;
+    border-radius: 12px;
     outline: none;
+    transition: border 0.15s ease, box-shadow 0.15s ease;
+}
+
+#profile-edit-page input:focus,
+#profile-edit-page textarea:focus {
+    border-color: #a66aff;
+    box-shadow: 0 0 0 3px rgba(161,106,255,0.15);
 }
 
 textarea {
@@ -83,38 +143,33 @@ textarea {
     resize: vertical;
 }
 
-/* BOTTOM STRIP (same as profile) */
+
+/* BOTTOM STRIP */
 
 #profile-actions {
-
     flex-shrink: 0;
     height: 80px;
-
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-
     padding: 0 30px;
-
     border-top: 1px solid #e0e0e0;
+    border-radius: 0 0 10px 10px;
     background: white;
 }
+
 
 /* BUTTON STYLE */
 
 #profile-actions button {
-
     padding: 10px 20px;
     font-size: 14px;
     font-weight: 500;
-
     background: transparent;
     color: #1c1c1e;
-
     border: 1px solid #d2d2d7;
     border-radius: 10px;
-
     cursor: pointer;
     transition: all 0.18s ease;
 }
