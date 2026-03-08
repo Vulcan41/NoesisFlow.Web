@@ -67,38 +67,84 @@ html, body {
 
 #avatar-upload {
     position: relative;
-    width: 110px;
-    height: 110px;
+    width: 140px;
+    height: 140px;
     cursor: pointer;
+}
+
+#avatar-image-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    overflow: hidden;
 }
 
 #edit-avatar-preview {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     object-fit: cover;
-    display: block;
-    border: none;
+    position: relative;
+    z-index: 1;
 }
 
+
+/* CROP MASK */
+
+#avatar-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+    radial-gradient(circle 69px at center,
+    transparent 69px,
+    rgba(255,255,255,0.6) 69px);
+}
+
+
+/* CIRCLE RING */
+
+#avatar-mask::after {
+    content: "";
+    position: absolute;
+    width: 138px;
+    height: 138px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,1);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+
+/* FILE INPUT */
+
 #edit-avatar-input {
-    border: none;
     display: none;
 }
+
+
+/* HOVER OVERLAY */
 
 #avatar-overlay {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: 500;
+
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+
     color: white;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.55);
+
     opacity: 0;
     transition: opacity 0.2s ease;
+
+    z-index: 3;
 }
 
 #avatar-upload:hover #avatar-overlay {

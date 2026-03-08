@@ -11,15 +11,14 @@
         <div id="profile-main">
 
             <!-- LEFT: AVATAR -->
-            <div id="avatar-section">
-                <label></label>
-
-                <label id="avatar-upload">
+            <label id="avatar-upload">
+                <div id="avatar-image-wrapper">
                     <img id="edit-avatar-preview" src="assets/user_icon_2.jpg">
-                    <input type="file" id="edit-avatar-input" accept="image/*">
-                    <span id="avatar-overlay">Change</span>
-                </label>
-            </div>
+                    <div id="avatar-mask"></div>
+                </div>
+                <div id="avatar-overlay">Αλλαγή</div>
+                <input type="file" id="edit-avatar-input" accept="image/*">
+            </label>
 
             <!-- RIGHT: FORM FIELDS -->
             <div id="profile-fields">
