@@ -150,7 +150,7 @@ async function signUp(e) {
 
     const { error: profileError } = await supabase
         .from("profiles")
-        .insert({
+        .upsert({
         id: user.id,
         username: username,
         full_name: fullname,
