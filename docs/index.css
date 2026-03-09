@@ -175,6 +175,32 @@ input::placeholder {
     border-color: #5d093f;
 }
 
+/* ---------- LOGIN BUTTON ---------- */
+
+#login-btn {
+    background: #000;
+    font-weight: 550;
+}
+
+#login-btn:hover {
+    background: #5d093f;
+    border-color: #5d093f;
+    font-weight: 550;
+}
+
+/* ---------- SIGNUP BUTTON ---------- */
+
+#signup-btn {
+    background: #000;
+    font-weight: 550;
+}
+
+#signup-btn:hover {
+    background: #5d093f;
+    border-color: #5d093f;
+    font-weight: 550;
+}
+
 
 /* ---------- LEFT PANEL ---------- */
 

@@ -193,17 +193,83 @@ MODAL ANIMATION
 }
 
 
-
-
-
 /* FORM SECTION TITLES */
 
 .register-section {
     margin-top: 12px;
     margin-bottom: 2px;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
-    color: #555;
+    color: #8a8a8a;
     letter-spacing: 0.3px;
 }
+
+/* PASSWORD FIELD */
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    padding-right: 38px;
+}
+
+/* EYE BUTTON */
+
+.password-eye{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+
+    width:32px;
+    height:32px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+    background:none;
+    cursor:pointer;
+}
+
+.password-eye img{
+    width:25px;
+    height:25px;
+}
+
+.password-eye:hover {
+    opacity: 1;
+}
+
+
+/* ---------- REGISTER BUTTON ---------- */
+
+#register-submit {
+    background: #000;
+    font-weight: 550;
+}
+
+#register-submit:hover {
+    background: #5d093f;
+    border-color: #5d093f;
+    font-weight: 550;
+}
+
+/* ---------- CANCEL BUTTON ---------- */
+
+#register-cancel {
+    background: #000;
+    font-weight: 550;
+}
+
+#register-cancel:hover {
+    background: #5d093f;
+    border-color: #5d093f;
+    font-weight: 550;
+}
+
+
 

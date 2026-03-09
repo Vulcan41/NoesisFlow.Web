@@ -236,3 +236,26 @@ document.getElementById("register-submit")?.addEventListener("click", signUp);
 document.getElementById("register-cancel")?.addEventListener("click", () => {
     registerOverlay.style.display = "none";
 });
+
+/* PASSWORD VISIBILITY */
+
+const togglePassword = document.getElementById("toggle-password");
+const passwordInput = document.getElementById("register-password");
+const passwordIcon = document.getElementById("password-icon");
+
+togglePassword?.addEventListener("click", () => {
+
+    if (passwordInput.type === "password") {
+
+        passwordInput.type = "text";
+        passwordIcon.src = "assets/view.png";
+
+    } else {
+
+        passwordInput.type = "password";
+        passwordIcon.src = "assets/no_view.png";
+
+    }
+
+});
+

@@ -25,7 +25,7 @@
 
         <!-- ACCOUNT INFO -->
 
-        <h3 class="register-section">Στοιχεία Λογαριασμού</h3>
+        <h3 class="register-section">ΣΤΟΙΧΕΙΑ ΛΟΓΑΡΙΑΣΜΟΥ</h3>
 
         <input
                 id="register-email"
@@ -34,16 +34,34 @@
                 autocomplete="off"
         >
 
-        <input
-                id="register-password"
-                type="password"
-                placeholder="Κωδικός Πρόσβασης"
-                autocomplete="new-password"
-        >
+        <div class="password-wrapper">
+
+            <input
+                    id="register-password"
+                    type="password"
+                    placeholder="Password"
+                    autocomplete="new-password"
+            >
+
+            <button
+                    type="button"
+                    id="toggle-password"
+                    class="password-eye"
+            >
+
+                <img
+                        id="password-icon"
+                        src="assets/no_view.png"
+                        alt="toggle password"
+                >
+
+            </button>
+
+        </div>
 
         <!-- PROFILE INFO -->
 
-        <h3 class="register-section">Στοιχεία Προφίλ</h3>
+        <h3 class="register-section">ΣΤΟΙΧΕΙΑ ΠΡΟΦΙΛ</h3>
 
         <input
                 id="register-username"
@@ -62,7 +80,7 @@
         <input
                 id="register-bio"
                 type="text"
-                placeholder="Ειδικότητα"
+                placeholder="Ιδιότητα"
                 autocomplete="off"
         >
 
@@ -72,12 +90,11 @@
 
         <div class="auth-buttons">
 
-            <button class="glow-btn" id="register-submit">
-                <span>Δημιουργία</span>
-            </button>
-
             <button class="glow-btn" id="register-cancel">
                 <span>Ακύρωση</span>
+            </button>
+            <button class="glow-btn" id="register-submit">
+                <span>Δημιουργία</span>
             </button>
 
         </div>
