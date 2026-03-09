@@ -1,6 +1,8 @@
 import { supabase } from "../core/supabase.js";
 import { loadView } from "../core/router.js";
 import { userStore } from "../state/userStore.js";
+import { DEFAULT_AVATAR } from "../state/userStore.js";
+
 
 /* =========================================================
    INIT HEADER
@@ -57,10 +59,10 @@ function loadHeaderUser() {
         avatarEl.src =
         profile.avatar_url && profile.avatar_url.trim() !== ""
         ? profile.avatar_url
-        : "/assets/user_icon_2.jpg";
+        : DEFAULT_AVATAR;
 
         avatarEl.onerror = () => {
-            avatarEl.src = "/assets/user_icon_2.jpg";
+            avatarEl.src = DEFAULT_AVATAR;
         };
 
     }
@@ -228,7 +230,7 @@ function setupSearch() {
 
                 const avatar = document.createElement("img");
                 avatar.className = "search-avatar";
-                avatar.src = user.avatar_url || "/assets/user_icon_2.jpg";
+                avatar.src = user.avatar_url || DEFAULT_AVATAR;
 
                 const textContainer = document.createElement("div");
                 textContainer.className = "search-text";
