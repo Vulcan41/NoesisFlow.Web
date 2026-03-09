@@ -1,0 +1,44 @@
+#register-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.4);
+    display:none;              /* IMPORTANT */
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+}
+
+#register-modal{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:400px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.register-avatar-section{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+}
+
+.register-avatar{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    object-fit:cover;
+    cursor:pointer;
+}
+
+#register-avatar-input{
+    font-size:12px;
+}
+
+.register-buttons{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+}

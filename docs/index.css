@@ -287,3 +287,31 @@ input::placeholder {
 
 
 
+
+
+
+
+#register-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.4);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+}
+
+#register-modal{
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    width:400px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+
+
+
+
