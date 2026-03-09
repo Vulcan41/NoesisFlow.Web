@@ -6,49 +6,26 @@
 
         <!-- AVATAR -->
 
-        <div class="register-avatar-section">
+        <div id="avatar-section">
 
-            <img
-                    id="register-avatar-preview"
-                    src="assets/avatar.png"
-                    class="register-avatar"
-            >
+            <label id="avatar-upload">
 
-            <input
-                    type="file"
-                    id="register-avatar-input"
-                    accept="image/*"
-            >
+                <div id="avatar-image-wrapper">
+                    <img id="register-avatar-preview" src="assets/avatar.png">
+                    <div id="avatar-mask"></div>
+                </div>
+
+                <div id="avatar-overlay">Αλλαγή</div>
+
+                <input type="file" id="register-avatar-input" accept="image/*">
+
+            </label>
 
         </div>
 
-        <!-- USERNAME -->
+        <!-- ACCOUNT INFO -->
 
-        <input
-                id="register-username"
-                type="text"
-                placeholder="Username"
-                autocomplete="off"
-        >
-
-        <!-- FULL NAME -->
-
-        <input
-                id="register-fullname"
-                type="text"
-                placeholder="Full Name"
-                autocomplete="off"
-        >
-
-        <!-- BIO -->
-
-        <textarea
-                id="register-bio"
-                placeholder="Bio"
-                rows="2"
-        ></textarea>
-
-        <!-- EMAIL -->
+        <h3 class="register-section">Στοιχεία Λογαριασμού</h3>
 
         <input
                 id="register-email"
@@ -57,23 +34,50 @@
                 autocomplete="off"
         >
 
-        <!-- PASSWORD -->
-
         <input
                 id="register-password"
                 type="password"
-                placeholder="Password"
+                placeholder="Κωδικός Πρόσβασης"
                 autocomplete="new-password"
         >
 
-        <div class="register-buttons">
+        <!-- PROFILE INFO -->
 
-            <button id="register-submit">
-                Δημιουργία Λογαριασμού
+        <h3 class="register-section">Στοιχεία Προφίλ</h3>
+
+        <input
+                id="register-username"
+                type="text"
+                placeholder="Όνομα Χρήστη"
+                autocomplete="off"
+        >
+
+        <input
+                id="register-fullname"
+                type="text"
+                placeholder="Όνομα"
+                autocomplete="off"
+        >
+
+        <input
+                id="register-bio"
+                type="text"
+                placeholder="Ειδικότητα"
+                autocomplete="off"
+        >
+
+
+
+        <!-- BUTTONS -->
+
+        <div class="auth-buttons">
+
+            <button class="glow-btn" id="register-submit">
+                <span>Δημιουργία</span>
             </button>
 
-            <button id="register-cancel">
-                Ακύρωση
+            <button class="glow-btn" id="register-cancel">
+                <span>Ακύρωση</span>
             </button>
 
         </div>

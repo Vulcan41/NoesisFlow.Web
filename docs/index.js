@@ -216,7 +216,15 @@ document.getElementById("login-btn")?.addEventListener("click", login);
 /* OPEN REGISTER MODAL */
 
 document.getElementById("signup-btn")?.addEventListener("click", () => {
+
     registerOverlay.style.display = "flex";
+
+    document.getElementById("register-username").value = "";
+    document.getElementById("register-fullname").value = "";
+    document.getElementById("register-bio").value = "";
+    document.getElementById("register-email").value = "";
+    document.getElementById("register-password").value = "";
+
 });
 
 /* REGISTER SUBMIT */

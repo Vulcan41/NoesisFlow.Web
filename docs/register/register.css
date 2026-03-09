@@ -1,3 +1,11 @@
+#register-modal h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
 #register-overlay{
     position:fixed;
     inset:0;
@@ -18,27 +26,184 @@
     gap:12px;
 }
 
-.register-avatar-section{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:10px;
+/* =========================================================
+MODAL ANIMATION
+========================================================= */
+
+#register-overlay {
+    animation: overlayFade 0.18s ease;
 }
 
-.register-avatar{
-    width:80px;
-    height:80px;
+#register-modal {
+    animation: modalScale 0.18s ease;
+}
+
+
+/* OVERLAY FADE */
+
+@keyframes overlayFade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* MODAL SCALE */
+
+@keyframes modalScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   AVATAR SECTION
+========================================================= */
+
+#avatar-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+#register-avatar-bg{
+    width:100%;
+    height:100%;
     border-radius:50%;
-    object-fit:cover;
-    cursor:pointer;
-}
-
-#register-avatar-input{
-    font-size:12px;
-}
-
-.register-buttons{
     display:flex;
-    justify-content:space-between;
-    margin-top:10px;
+    align-items:center;
+    justify-content:center;
 }
+
+
+/* =========================================================
+   AVATAR UPLOAD WRAPPER
+========================================================= */
+
+#avatar-upload {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   IMAGE WRAPPER
+========================================================= */
+
+#avatar-image-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   AVATAR IMAGE
+========================================================= */
+
+#register-avatar-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* =========================================================
+   CROP MASK
+========================================================= */
+
+#avatar-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+    radial-gradient(circle 70px at center,
+    transparent 70px,
+    rgba(255,255,255,0.6) 71px);
+}
+
+
+/* =========================================================
+   CIRCLE RING
+========================================================= */
+
+#avatar-mask::after {
+    content: "";
+    position: absolute;
+    width: 138px;
+    height: 138px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   FILE INPUT (HIDDEN)
+========================================================= */
+
+#register-avatar-input {
+    display: none;
+}
+
+
+/* =========================================================
+   HOVER OVERLAY
+========================================================= */
+
+#avatar-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: white;
+    background: rgba(0,0,0,0.55);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 3;
+}
+
+
+/* =========================================================
+   SHOW OVERLAY ON HOVER
+========================================================= */
+
+#avatar-upload:hover #avatar-overlay {
+    opacity: 1;
+}
+
+
+
+
+
+/* FORM SECTION TITLES */
+
+.register-section {
+    margin-top: 12px;
+    margin-bottom: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.3px;
+}
+

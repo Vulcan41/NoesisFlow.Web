@@ -179,7 +179,7 @@ input::placeholder {
 /* ---------- LEFT PANEL ---------- */
 
 #left-panel {
-    width: 800px;
+    width: 600px;
     height: 600px;
     display: flex;
     flex-direction: column;
@@ -194,20 +194,6 @@ input::placeholder {
     color: #5d093f;
 }
 
-.x1 {
-    top: 300px;
-    left: 300px;
-}
-
-.x2 {
-    top: 400px;
-    left: 880px;
-}
-
-.x3 {
-    top: 650px;
-    left: 500px;
-}
 
 /* ---------- LABELS ---------- */
 
@@ -216,7 +202,7 @@ input::placeholder {
     display: inline-block;
     width: fit-content;
     padding: 0px 0px 0px 0px;
-    font-size: 60px;        /* very large */
+    font-size: 40px;        /* very large */
     font-weight: 800;       /* heavy */
     line-height: 1;      /* compact */
     letter-spacing: -1.5px; /* VERY important */
