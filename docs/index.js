@@ -160,8 +160,9 @@ async function signUp(e) {
 
     if (profileError) {
 
-        console.error(profileError);
-        alert("Profile creation failed");
+        console.error("PROFILE ERROR:", profileError);
+        alert(profileError.message);
+
         return;
 
     }
