@@ -37,7 +37,12 @@ function setupNavigation() {
     const debugBtn = document.getElementById("debug-btn");
 
     homeBtn?.addEventListener("click", () => loadView("basic"));
-    friendsBtn?.addEventListener("click", () => loadView("friends"));
+    friendsBtn?.addEventListener("click", () => {
+        loadView("friends");
+        const dot = document.getElementById("friends-dot");
+        if (dot) dot.classList.add("hidden");
+    });
+
     messagesBtn?.addEventListener("click", () => loadView("messages"));
     notificationsBtn?.addEventListener("click", () => loadView("notifications"));
     settingsBtn?.addEventListener("click", () => loadView("settings"));
