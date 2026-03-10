@@ -64,10 +64,26 @@ async function setupFriendButton(viewedUserId, friendship) {
     const btn = document.getElementById("add-friend-btn");
     if (!btn) return;
 
-    if (friendship && friendship.status === "pending") {
+    if (friendship) {
 
-        btn.textContent = "Αίτημα στάλθηκε";
-        btn.disabled = true;
+        if (friendship.status === "pending") {
+
+            btn.textContent = "Friend Request Sent";
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+            btn.style.cursor = "default";
+
+        }
+
+        if (friendship.status === "accepted") {
+
+            btn.textContent = "Friends";
+            btn.disabled = true;
+            btn.style.opacity = "0.6";
+            btn.style.cursor = "default";
+
+        }
+
         return;
 
     }
@@ -114,15 +130,19 @@ async function checkFriendship(viewedUserId) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const { data } = await supabase
+    const { data, error } = await supabase
         .from("friendships")
         .select("*")
         .or(
         `and(requester_id.eq.${user.id},receiver_id.eq.${viewedUserId}),
          and(requester_id.eq.${viewedUserId},receiver_id.eq.${user.id})`
-    )
-        .maybeSingle();
+    );
 
-    return data;
+    if (error) {
+        console.error("Friendship check failed:", error);
+        return null;
+    }
+
+    return data && data.length > 0 ? data[0] : null;
 
 }
