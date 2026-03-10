@@ -20,7 +20,10 @@ export async function initProfileOther(userId) {
     }
 
     renderProfile(profile);
-    setupFriendButton(userId);
+
+    const friendship = await checkFriendship(userId);
+
+    setupFriendButton(userId, friendship);
 
 }
 
@@ -56,10 +59,18 @@ function renderProfile(profile) {
    ADD FRIEND BUTTON
 ========================= */
 
-async function setupFriendButton(viewedUserId) {
+async function setupFriendButton(viewedUserId, friendship) {
 
     const btn = document.getElementById("add-friend-btn");
     if (!btn) return;
+
+    if (friendship && friendship.status === "pending") {
+
+        btn.textContent = "Αίτημα στάλθηκε";
+        btn.disabled = true;
+        return;
+
+    }
 
     btn.addEventListener("click", async () => {
 
@@ -91,5 +102,27 @@ async function setupFriendButton(viewedUserId) {
         btn.disabled = true;
 
     });
+
+}
+
+/* =========================
+   CHECK FRIEND STATUS
+========================= */
+
+async function checkFriendship(viewedUserId) {
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data } = await supabase
+        .from("friendships")
+        .select("*")
+        .or(
+        `and(requester_id.eq.${user.id},receiver_id.eq.${viewedUserId}),
+         and(requester_id.eq.${viewedUserId},receiver_id.eq.${user.id})`
+    )
+        .maybeSingle();
+
+    return data;
 
 }
