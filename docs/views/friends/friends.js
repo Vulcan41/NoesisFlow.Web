@@ -5,19 +5,28 @@ export async function initFriends() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    await loadRequests(user.id);
+    await loadFriends(user.id);
+
+}
+
+/* =========================
+   LOAD FRIEND REQUESTS
+========================= */
+
+async function loadRequests(userId) {
+
     const container = document.getElementById("friend-requests");
     if (!container) return;
-
-    /* load pending requests */
 
     const { data: requests, error } = await supabase
         .from("friendships")
         .select(`
-        id,
-        requester_id,
-        profiles!friendships_requester_id_fkey(username)
-    `)
-        .eq("receiver_id", user.id)
+            id,
+            requester_id,
+            profiles!friendships_requester_id_fkey(username)
+        `)
+        .eq("receiver_id", userId)
         .eq("status", "pending");
 
     if (error) {
@@ -37,7 +46,7 @@ export async function initFriends() {
         const row = document.createElement("div");
 
         const text = document.createElement("span");
-        text.textContent = `${req.profiles.username} θέλει να γίνει φίλος`;
+        text.textContent = `${req.profiles?.username ?? "User"} θέλει να γίνει φίλος`;
 
         const acceptBtn = document.createElement("button");
         acceptBtn.textContent = "Αποδοχή";
@@ -45,7 +54,7 @@ export async function initFriends() {
         const declineBtn = document.createElement("button");
         declineBtn.textContent = "Απόρριψη";
 
-        /* accept */
+        /* ACCEPT */
 
         acceptBtn.addEventListener("click", async () => {
 
@@ -58,7 +67,7 @@ export async function initFriends() {
 
         });
 
-        /* decline */
+        /* DECLINE */
 
         declineBtn.addEventListener("click", async () => {
 
@@ -74,6 +83,57 @@ export async function initFriends() {
         row.appendChild(text);
         row.appendChild(acceptBtn);
         row.appendChild(declineBtn);
+
+        container.appendChild(row);
+
+    });
+
+}
+
+/* =========================
+   LOAD FRIENDS LIST
+========================= */
+
+async function loadFriends(userId) {
+
+    const container = document.getElementById("friends-list");
+    if (!container) return;
+
+    const { data, error } = await supabase
+        .from("friendships")
+        .select(`
+            id,
+            requester_id,
+            receiver_id,
+            requester:requester_id(username),
+            receiver:receiver_id(username)
+        `)
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
+
+    if (error) {
+        console.error("Failed to load friends:", error);
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (!data || data.length === 0) {
+        container.textContent = "No friends yet.";
+        return;
+    }
+
+    data.forEach(friend => {
+
+        const isRequester = friend.requester_id === userId;
+
+        const username = isRequester
+        ? friend.receiver?.username
+        : friend.requester?.username;
+
+        const row = document.createElement("div");
+
+        row.textContent = username ?? "User";
 
         container.appendChild(row);
 
