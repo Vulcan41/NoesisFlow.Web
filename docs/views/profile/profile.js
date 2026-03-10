@@ -4,9 +4,10 @@ import { loadView } from "../../core/router.js";
 import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../../state/userStore.js";
 
 
-export function initProfile() {
+export async function initProfile() {
 
     loadProfile();
+    await loadFriendCount();
     setupEditButton();
 
 }
@@ -55,5 +56,33 @@ function setupEditButton() {
         loadView("profileEdit");
 
     });
+
+}
+
+/* =========================
+   LOAD FRIEND COUNT
+========================= */
+
+async function loadFriendCount() {
+
+    const user = userStore.getUser();
+    if (!user) return;
+
+    const { count, error } = await supabase
+        .from("friendships")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${user.id},receiver_id.eq.${user.id}`);
+
+    if (error) {
+        console.error("Failed to load friend count:", error);
+        return;
+    }
+
+    const el = document.getElementById("profile-friends-count");
+
+    if (el) {
+        el.textContent = count ?? 0;
+    }
 
 }
