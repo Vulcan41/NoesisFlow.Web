@@ -12,6 +12,7 @@ export async function initHeader() {
 
     loadHeaderUser();
     await loadCredits();
+    await checkFriendRequests();
 
     setupNavigation();
     setupDropdown();
@@ -285,6 +286,37 @@ function setupSearch() {
         }
 
     });
+
+}
+
+/* =========================================================
+   FRIEND REQUEST INDICATOR
+========================================================= */
+
+async function checkFriendRequests() {
+
+    const dot = document.getElementById("friends-dot");
+    if (!dot) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { count, error } = await supabase
+        .from("friendships")
+        .select("*", { count: "exact", head: true })
+        .eq("receiver_id", user.id)
+        .eq("status", "pending");
+
+    if (error) {
+        console.error("Friend request check failed:", error);
+        return;
+    }
+
+    if (count > 0) {
+        dot.classList.remove("hidden");
+    } else {
+        dot.classList.add("hidden");
+    }
 
 }
 

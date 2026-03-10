@@ -77,36 +77,36 @@ html, body {
 
 }
 
-/* RIGHT SIDE STATS */
+/* =========================
+   PROFILE STATS
+========================= */
 
 #profile-stats {
-
     display: flex;
+    align-items: center;
     gap: 40px;
-
 }
 
 .profile-stat {
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
 }
 
-.stat-label {
+/* NUMBER */
 
-    margin-top: 10px;
-    font-size: 14px;
-    color: #777;
-
-}
-
-.stat-value {
-
-    font-size: 18px;
+.profile-stat-number {
+    font-size: 20px;
     font-weight: 600;
+    color: #000;
+}
 
+/* LABEL */
+
+.profile-stat-label {
+    font-size: 13px;
+    color: #7a7a7a;
+    margin-top: 2px;
 }
 
 /* =============================
@@ -139,6 +139,7 @@ ADD FRIEND BUTTON
     border-color:#5d093f;
 
 }
+
 
 /* =============================
    MIDDLE CONTENT (scroll area)

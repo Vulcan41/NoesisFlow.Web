@@ -75,6 +75,37 @@ body {
     object-fit: cover;
 }
 
+/* =========================
+FRIEND REQUEST DOT
+========================= */
+
+.friends-dot {
+
+    position: absolute;
+
+    top: 3px;
+    right: 3px;
+
+    width: 8px;
+    height: 8px;
+
+    background: #ff3b30;
+    border-radius: 50%;
+
+}
+
+/* hidden state */
+
+.friends-dot.hidden {
+    display: none;
+}
+
+/* ensure button can position dot */
+
+#friends-btn {
+    position: relative;
+}
+
 /* ---------- USER INFO ---------- */
 
 #user-info {
