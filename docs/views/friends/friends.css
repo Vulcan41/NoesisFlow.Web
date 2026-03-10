@@ -3,8 +3,15 @@
 ========================= */
 
 #friends-page {
+
     width: calc(100% - 40px);
     margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+
+    height: calc(100vh - 140px); /* subtract header height */
+
 }
 
 /* =========================
@@ -15,16 +22,23 @@
 #friends-section {
 
     width: 100%;
-    padding: 20px;
+    padding: 0px 20px 0px 20px; /* smaller top spacing */
     box-sizing: border-box;
 
+    display: flex;
+    flex-direction: column;
+
+    flex: 1;
+    min-height: 0; /* critical for scroll containers */
 }
 
-#friend-requests {
+#friend-requests,
+#friends-list {
 
-    max-height: 320px;
+    flex: 1;
+
     overflow-y: auto;
-    overflow-x: hidden;   /* prevents horizontal scrollbar */
+    overflow-x: hidden;
 
 }
 
@@ -53,7 +67,8 @@
     align-items: center;
     justify-content: space-between;
 
-    width: 100%;
+    width: calc(100% - 10px);   /* slightly smaller */
+
     box-sizing: border-box;
 
     padding: 10px 14px;
@@ -62,7 +77,7 @@
     border: 1px solid #e6e6e6;
     border-radius: 8px;
 
-    margin-bottom: 10px;
+    margin: 0 auto 10px auto;   /* center the card */
 
 }
 
@@ -113,6 +128,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
+
+    position: relative;
 
 }
 
@@ -201,10 +218,6 @@
    PROFILE TOOLTIP
 ========================= */
 
-.request-user {
-    position: relative;
-}
-
 /* tooltip box */
 
 .request-tooltip {
@@ -245,7 +258,7 @@
 
 #friend-requests > div:hover {
 
-    transform: translateX(5px);
+    transform: translateX(-5px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 
 }
@@ -258,5 +271,105 @@
 
 .request-dot {
     margin-right: 8px;
+}
+
+/* =========================
+   TABS
+========================= */
+
+#friends-tabs {
+
+    position: relative;
+    display: flex;
+    gap: 20px;
+
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 20px;
+
+    overflow: hidden;
+
+}
+
+/* TAB BUTTON */
+
+.friends-tab {
+
+    background: none;
+    border: none;
+
+    padding: 10px 0;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    color: #777;
+
+    transition: color 0.2s ease;
+
+}
+
+/* ACTIVE TAB */
+
+.friends-tab.active {
+    color: #000;
+}
+
+/* =========================
+   SLIDING INDICATOR
+========================= */
+
+#tab-indicator {
+
+    position: absolute;
+    bottom: -1px;
+
+    height: 4px;
+    width: 0;
+
+    background: #095a5d;
+
+    transition: all 0.25s ease;
+
+}
+
+/* =========================
+   TAB PANELS
+========================= */
+
+.friends-panel {
+
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   TAB BADGES
+========================= */
+
+.tab-badge {
+
+    margin-left: 6px;
+    padding: 2px 6px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    background: #095a5d;
+    color: white;
+
+    border-radius: 999px;
+
+    min-width: 18px;
+    text-align: center;
+
 }
 

@@ -27,6 +27,8 @@ function formatRelativeTime(dateString) {
 
 export async function initFriends() {
 
+    setupTabs();
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -71,10 +73,10 @@ async function loadRequests(userId) {
         return;
     }
 
-    const requestsTitle = document.getElementById("requests-title");
+    const tabRequests = document.getElementById("tab-requests");
 
-    if (requestsTitle) {
-        requestsTitle.textContent = `Αιτήματα (${requests?.length || 0})`;
+    if (tabRequests) {
+        tabRequests.textContent = `Αιτήματα (${requests?.length || 0})`;
     }
 
     container.innerHTML = "";
@@ -258,10 +260,10 @@ async function loadFriends(userId) {
         return;
     }
 
-    const friendsTitle = document.getElementById("friends-title");
+    const tabFriends = document.getElementById("tab-friends");
 
-    if (friendsTitle) {
-        friendsTitle.textContent = `Επαφές (${data?.length || 0})`;
+    if (tabFriends) {
+        tabFriends.textContent = `Επαφές (${data?.length || 0})`;
     }
 
     container.innerHTML = "";
@@ -308,6 +310,57 @@ async function loadFriends(userId) {
         row.appendChild(removeBtn);
 
         container.appendChild(row);
+
+    });
+
+}
+
+function setupTabs() {
+
+    const tabRequests = document.getElementById("tab-requests");
+    const tabFriends = document.getElementById("tab-friends");
+
+    const requestsSection = document.getElementById("requests-section");
+    const friendsSection = document.getElementById("friends-section");
+
+    const indicator = document.getElementById("tab-indicator");
+
+    if (!tabRequests || !tabFriends || !indicator) return;
+
+    function moveIndicator(tab) {
+
+        indicator.style.width = tab.offsetWidth + "px";
+        indicator.style.left = tab.offsetLeft + "px";
+
+    }
+
+    /* correct initial position */
+
+    requestAnimationFrame(() => {
+        moveIndicator(tabRequests);
+    });
+
+    tabRequests.addEventListener("click", () => {
+
+        tabRequests.classList.add("active");
+        tabFriends.classList.remove("active");
+
+        requestsSection.classList.remove("hidden");
+        friendsSection.classList.add("hidden");
+
+        moveIndicator(tabRequests);
+
+    });
+
+    tabFriends.addEventListener("click", () => {
+
+        tabFriends.classList.add("active");
+        tabRequests.classList.remove("active");
+
+        friendsSection.classList.remove("hidden");
+        requestsSection.classList.add("hidden");
+
+        moveIndicator(tabFriends);
 
     });
 

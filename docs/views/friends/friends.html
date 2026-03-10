@@ -1,17 +1,25 @@
 <div id="friends-page">
 
-    <div id="requests-section">
+    <div id="friends-tabs">
 
-        <h2 id="requests-title">Αιτήματα</h2>
-        <div id="friend-requests"></div>
+        <button id="tab-requests" class="friends-tab active">
+            Αιτήματα
+        </button>
+
+        <button id="tab-friends" class="friends-tab">
+            Επαφές
+        </button>
+
+        <div id="tab-indicator"></div>
 
     </div>
 
-    <div id="friends-section">
+    <div id="requests-section" class="friends-panel">
+        <div id="friend-requests"></div>
+    </div>
 
-        <h2 id="friends-title">Επαφές</h2>
+    <div id="friends-section" class="friends-panel hidden">
         <div id="friends-list"></div>
-
     </div>
 
 </div>
