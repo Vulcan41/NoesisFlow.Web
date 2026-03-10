@@ -5,6 +5,12 @@ export async function initFriends() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const requestsContainer = document.getElementById("friend-requests");
+    const friendsContainer = document.getElementById("friends-list");
+
+    if (requestsContainer) requestsContainer.innerHTML = "";
+    if (friendsContainer) friendsContainer.innerHTML = "";
+
     await loadRequests(user.id);
     await loadFriends(user.id);
 
@@ -63,7 +69,7 @@ async function loadRequests(userId) {
                 .update({ status: "accepted" })
                 .eq("id", req.id);
 
-            row.remove();
+            await initFriends();
 
         });
 
@@ -76,7 +82,7 @@ async function loadRequests(userId) {
                 .delete()
                 .eq("id", req.id);
 
-            row.remove();
+            await initFriends();
 
         });
 
@@ -154,7 +160,7 @@ async function loadFriends(userId) {
                 return;
             }
 
-            row.remove();
+            await initFriends();
 
         });
 
