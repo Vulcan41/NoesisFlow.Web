@@ -152,9 +152,36 @@ export async function initNotifications() {
             ${timeString}
         </span>` : ""}`;
 
+        /* ACTION BUTTON */
+
+        const hideBtn = document.createElement("button");
+        hideBtn.className = "notification-hide";
+        hideBtn.textContent = "Απόκρυψη";
+
+        /* DELETE NOTIFICATION */
+
+        hideBtn.addEventListener("click", async () => {
+
+            const { error } = await supabase
+                .from("notifications")
+                .delete()
+                .eq("id", n.id);
+
+            if (error) {
+                console.error("Failed to delete notification:", error);
+                return;
+            }
+
+            row.remove();
+
+        });
+
+        /* STRUCTURE */
+
         row.appendChild(userBlock);
         row.appendChild(divider);
         row.appendChild(text);
+        row.appendChild(hideBtn);
 
         container.appendChild(row);
 

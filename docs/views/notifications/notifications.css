@@ -194,4 +194,25 @@
 
 }
 
+/* =========================
+   HIDE NOTIFICATION BUTTON
+========================= */
+
+.notification-hide {
+
+    border: none;
+    background: transparent;
+
+    font-size: 12px;
+    color: #777;
+
+    cursor: pointer;
+    margin-left: 10px;
+
+}
+
+.notification-hide:hover {
+    color: #000;
+}
+
 
