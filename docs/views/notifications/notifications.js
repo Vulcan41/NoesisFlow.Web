@@ -2,6 +2,30 @@ import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 
+function formatRelativeTime(dateString) {
+
+    const now = new Date();
+    const past = new Date(dateString);
+
+    const diff = Math.floor((now - past) / 1000);
+
+    if (diff < 60) return "μόλις τώρα";
+
+    const minutes = Math.floor(diff / 60);
+    if (minutes === 1) return "1 λεπτό πριν";
+    if (minutes < 60) return `${minutes} λεπτά πριν`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return "1 ώρα πριν";
+    if (hours < 24) return `${hours} ώρες πριν`;
+
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "χθες";
+
+    return `${days} ημέρες πριν`;
+
+}
+
 export async function initNotifications() {
 
     const container = document.getElementById("notifications-list");
@@ -105,8 +129,17 @@ export async function initNotifications() {
         n.sender?.username ||
         "User";
 
+        const timeString = n.created_at
+        ? formatRelativeTime(n.created_at)
+        : "";
+
         text.innerHTML =
-        `Ο χρήστης <strong>${displayName}</strong> αποδέχθηκε το αίτημα σύνδεσης`;
+        `Ο χρήστης <strong>${displayName}</strong> αποδέχθηκε το αίτημα σύνδεσης
+        ${timeString ? `
+        <span class="notification-time">
+        <span class="notification-dot">•</span>
+        ${timeString}
+        </span>` : ""}`;
 
         row.appendChild(userBlock);
         row.appendChild(divider);
