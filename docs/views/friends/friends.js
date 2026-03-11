@@ -229,10 +229,6 @@ async function loadRequests(userId) {
 
 }
 
-/* =========================
-   LOAD FRIENDS LIST
-========================= */
-
 async function loadFriends(userId) {
 
     const container = document.getElementById("friends-list");
@@ -245,11 +241,13 @@ async function loadFriends(userId) {
             requester_id,
             receiver_id,
             requester:requester_id(
+                id,
                 username,
                 full_name,
                 avatar_url
             ),
             receiver:receiver_id(
+                id,
                 username,
                 full_name,
                 avatar_url
@@ -296,13 +294,17 @@ async function loadFriends(userId) {
         const username = profile?.username;
         const fullName = profile?.full_name;
         const avatarUrl = profile?.avatar_url;
+        const friendId = profile?.id;
 
         const row = document.createElement("div");
 
-        /* USER INFO */
+        /* =========================
+           USER INFO
+        ========================= */
 
         const userInfo = document.createElement("div");
         userInfo.className = "friend-user";
+        userInfo.style.cursor = "pointer";
 
         const avatar = document.createElement("img");
         avatar.className = "friend-avatar";
@@ -324,13 +326,54 @@ async function loadFriends(userId) {
         userInfo.appendChild(avatar);
         userInfo.appendChild(nameContainer);
 
-        /* REMOVE BUTTON */
+        /* TOOLTIP */
+
+        const tooltip = document.createElement("div");
+        tooltip.className = "request-tooltip";
+        tooltip.textContent = "Προβολή προφίλ";
+
+        userInfo.appendChild(tooltip);
+
+        userInfo.addEventListener("click", () => {
+            loadView("profileOther", friendId);
+        });
+
+        userInfo.addEventListener("mouseenter", () => {
+            tooltip.classList.add("tooltip-visible");
+        });
+
+        userInfo.addEventListener("mouseleave", () => {
+            tooltip.classList.remove("tooltip-visible");
+        });
+
+        /* =========================
+           DIVIDER
+        ========================= */
+
+        const divider = document.createElement("div");
+        divider.className = "request-divider";
+
+        /* =========================
+           MUTUAL FRIENDS TEXT
+        ========================= */
+
+        const mutualText = document.createElement("div");
+        mutualText.className = "request-text";
+        mutualText.textContent = "Υπολογισμός κοινών επαφών...";
+
+        loadMutualFriends(friendId, mutualText);
+
+        /* =========================
+           REMOVE BUTTON
+        ========================= */
 
         const removeBtn = document.createElement("button");
         removeBtn.className = "friend-remove";
         removeBtn.textContent = "Αφαίρεση";
 
-        removeBtn.addEventListener("click", async () => {
+        removeBtn.addEventListener("click", async (e) => {
+
+            e.stopPropagation();
 
             const { error } = await supabase
                 .from("friendships")
@@ -347,14 +390,65 @@ async function loadFriends(userId) {
 
         });
 
-        /* STRUCTURE */
+        /* =========================
+           STRUCTURE
+        ========================= */
 
         row.appendChild(userInfo);
+        row.appendChild(divider);
+        row.appendChild(mutualText);
         row.appendChild(removeBtn);
 
         container.appendChild(row);
 
     });
+
+}
+
+async function loadMutualFriends(friendId, textElement) {
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const currentUserId = user.id;
+
+    /* current user's friends */
+
+    const { data: myFriends } = await supabase
+        .from("friendships")
+        .select("requester_id,receiver_id")
+        .eq("status","accepted")
+        .or(`requester_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`);
+
+    const myIds = myFriends.map(f =>
+    f.requester_id === currentUserId ? f.receiver_id : f.requester_id
+    );
+
+    /* friend's friends */
+
+    const { data: theirFriends } = await supabase
+        .from("friendships")
+        .select("requester_id,receiver_id")
+        .eq("status","accepted")
+        .or(`requester_id.eq.${friendId},receiver_id.eq.${friendId}`);
+
+    const theirIds = theirFriends.map(f =>
+    f.requester_id === friendId ? f.receiver_id : f.requester_id
+    );
+
+    const mutual = myIds.filter(id => theirIds.includes(id));
+
+    const count = mutual.length;
+
+    if (count === 0) {
+        textElement.textContent = "Δεν υπάρχουν κοινές επαφές";
+    }
+    else if (count === 1) {
+        textElement.textContent = "1 κοινή επαφή";
+    }
+    else {
+        textElement.textContent = `${count} κοινές επαφές`;
+    }
 
 }
 
