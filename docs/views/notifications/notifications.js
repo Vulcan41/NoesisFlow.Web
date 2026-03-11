@@ -2,6 +2,8 @@ import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 
+let renderToken = 0;
+
 function formatRelativeTime(dateString) {
 
     const now = new Date();
@@ -23,17 +25,16 @@ function formatRelativeTime(dateString) {
     if (days === 1) return "χθες";
 
     return `${days} ημέρες πριν`;
-
 }
 
 export async function initNotifications() {
+
+    const currentToken = ++renderToken;
 
     const container = document.getElementById("notifications-list");
     const info = document.getElementById("notifications-info");
 
     if (!container) return;
-
-    container.innerHTML = "";
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -53,20 +54,30 @@ export async function initNotifications() {
         .eq("receiver_id", user.id)
         .order("created_at", { ascending: false });
 
+    if (currentToken !== renderToken) return;
+
+    container.innerHTML = "";
+
     if (error) {
         console.error("Notifications load failed:", error);
         return;
     }
 
     if (!data || data.length === 0) {
-        info.textContent = "Δεν υπάρχουν ειδοποιήσεις";
+
+        if (info) {
+            info.textContent = "Δεν υπάρχουν ειδοποιήσεις";
+        }
+
         return;
     }
 
-    info.textContent =
-    data.length === 1
-    ? "1 ειδοποίηση"
-    : `${data.length} ειδοποιήσεις`;
+    if (info) {
+        info.textContent =
+        data.length === 1
+        ? "1 ειδοποίηση"
+        : `${data.length} ειδοποιήσεις`;
+    }
 
     data.forEach(n => {
 
@@ -137,8 +148,8 @@ export async function initNotifications() {
         `Ο χρήστης <strong>${displayName}</strong> αποδέχθηκε το αίτημα σύνδεσης
         ${timeString ? `
         <span class="notification-time">
-        <span class="notification-dot">•</span>
-        ${timeString}
+            <span class="notification-dot">•</span>
+            ${timeString}
         </span>` : ""}`;
 
         row.appendChild(userBlock);
