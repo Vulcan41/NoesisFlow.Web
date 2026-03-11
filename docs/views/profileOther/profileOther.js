@@ -21,6 +21,7 @@ export async function initProfileOther(userId) {
     }
 
     renderProfile(profile);
+
     await loadFriendCount(userId);
     await loadMutualFriends(userId);
 
@@ -28,26 +29,26 @@ export async function initProfileOther(userId) {
 
     setupFriendButton(userId, friendship);
 
-    /* MESSAGE BUTTON */
+    /* =========================
+       MESSAGE BUTTON
+    ========================= */
 
-    setTimeout(() => {
+    const messageBtn = document.getElementById("message-user-btn");
 
-        const messageBtn = document.getElementById("message-user-btn");
+    if (!messageBtn) {
+        console.log("message button not found");
+        return;
+    }
 
-        if (!messageBtn) {
-            console.log("message button not found");
-            return;
-        }
+    console.log("message button found");
 
-        messageBtn.addEventListener("click", () => {
+    messageBtn.addEventListener("click", () => {
 
-            console.log("Message button clicked");
+        console.log("Message button clicked");
 
-            messageUser(userId);
+        messageUser(userId);
 
-        });
-
-    }, 0);
+    });
 
 }
 
@@ -279,17 +280,28 @@ async function messageUser(targetUserId) {
     const currentUserId = user.id;
 
     /* =========================
+       NORMALIZE USER ORDER
+       (ensures A-B = B-A)
+    ========================= */
+
+    const user1 = currentUserId < targetUserId ? currentUserId : targetUserId;
+    const user2 = currentUserId < targetUserId ? targetUserId : currentUserId;
+
+    /* =========================
        CHECK IF CONVERSATION EXISTS
     ========================= */
 
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
         .from("conversations")
         .select("id")
-        .or(
-        `and(user1_id.eq.${currentUserId},user2_id.eq.${targetUserId}),
-         and(user1_id.eq.${targetUserId},user2_id.eq.${currentUserId})`
-    )
+        .eq("user1_id", user1)
+        .eq("user2_id", user2)
         .maybeSingle();
+
+    if (checkError) {
+        console.error("Conversation check failed:", checkError);
+        return;
+    }
 
     let conversationId;
 
@@ -299,17 +311,17 @@ async function messageUser(targetUserId) {
 
     if (!existing) {
 
-        const { data: newConv, error } = await supabase
+        const { data: newConv, error: insertError } = await supabase
             .from("conversations")
             .insert({
-            user1_id: currentUserId,
-            user2_id: targetUserId
+            user1_id: user1,
+            user2_id: user2
         })
             .select()
             .single();
 
-        if (error) {
-            console.error(error);
+        if (insertError) {
+            console.error("Conversation creation failed:", insertError);
             return;
         }
 
