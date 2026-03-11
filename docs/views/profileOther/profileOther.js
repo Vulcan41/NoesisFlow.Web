@@ -21,6 +21,7 @@ export async function initProfileOther(userId) {
 
     renderProfile(profile);
     await loadFriendCount(userId);
+    await loadMutualFriends(userId);
 
     const friendship = await checkFriendship(userId);
 
@@ -82,8 +83,55 @@ async function loadFriendCount(userId) {
 }
 
 /* =========================
-   ADD FRIEND BUTTON
+   LOAD MUTUAL FRIEND COUNT
 ========================= */
+
+async function loadMutualFriends(viewedUserId) {
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const currentUserId = user.id;
+
+    /* get current user's friends */
+
+    const { data: myFriends } = await supabase
+        .from("friendships")
+        .select("requester_id, receiver_id")
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`);
+
+    if (!myFriends) return;
+
+    const myFriendIds = myFriends.map(f =>
+    f.requester_id === currentUserId ? f.receiver_id : f.requester_id
+    );
+
+    /* get viewed user's friends */
+
+    const { data: theirFriends } = await supabase
+        .from("friendships")
+        .select("requester_id, receiver_id")
+        .eq("status", "accepted")
+        .or(`requester_id.eq.${viewedUserId},receiver_id.eq.${viewedUserId}`);
+
+    if (!theirFriends) return;
+
+    const theirFriendIds = theirFriends.map(f =>
+    f.requester_id === viewedUserId ? f.receiver_id : f.requester_id
+    );
+
+    /* find intersection */
+
+    const mutual = myFriendIds.filter(id => theirFriendIds.includes(id));
+
+    const el = document.getElementById("profile-mutual-friends");
+
+    if (el) {
+        el.textContent = `${mutual.length} κοινές επαφές`;
+    }
+
+}
 
 /* =========================
    ADD FRIEND BUTTON
