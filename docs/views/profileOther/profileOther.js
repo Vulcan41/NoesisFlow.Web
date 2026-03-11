@@ -1,4 +1,5 @@
 import { supabase } from "../../core/supabase.js";
+import { loadView } from "../../core/router.js";
 import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../../state/userStore.js";
 
 export async function initProfileOther(userId) {
@@ -26,6 +27,16 @@ export async function initProfileOther(userId) {
     const friendship = await checkFriendship(userId);
 
     setupFriendButton(userId, friendship);
+
+    /* MESSAGE BUTTON */
+
+    const messageBtn = document.getElementById("message-user-btn");
+
+    if (messageBtn) {
+        messageBtn.onclick = () => {
+            messageUser(userId);
+        };
+    }
 
 }
 
@@ -246,5 +257,63 @@ async function checkFriendship(viewedUserId) {
     if (received) return received;
 
     return null;
+
+}
+
+async function messageUser(targetUserId) {
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const currentUserId = user.id;
+
+    /* =========================
+       CHECK IF CONVERSATION EXISTS
+    ========================= */
+
+    const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(
+        `and(user1_id.eq.${currentUserId},user2_id.eq.${targetUserId}),
+         and(user1_id.eq.${targetUserId},user2_id.eq.${currentUserId})`
+    )
+        .maybeSingle();
+
+    let conversationId;
+
+    /* =========================
+       CREATE IF NOT EXISTS
+    ========================= */
+
+    if (!existing) {
+
+        const { data: newConv, error } = await supabase
+            .from("conversations")
+            .insert({
+            user1_id: currentUserId,
+            user2_id: targetUserId
+        })
+            .select()
+            .single();
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        conversationId = newConv.id;
+
+    } else {
+
+        conversationId = existing.id;
+
+    }
+
+    /* =========================
+       OPEN MESSAGES VIEW
+    ========================= */
+
+    loadView("messages", conversationId);
 
 }
