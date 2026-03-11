@@ -353,7 +353,8 @@ async function checkNotifications() {
     const { count, error } = await supabase
         .from("notifications")
         .select("*", { count: "exact", head: true })
-        .eq("receiver_id", user.id);
+        .eq("receiver_id", user.id)
+        .gte("created_at", new Date(Date.now() - 86400000).toISOString());
 
     if (error) {
         console.error("Notification check failed:", error);

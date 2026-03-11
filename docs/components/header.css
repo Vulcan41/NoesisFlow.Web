@@ -97,9 +97,36 @@ FRIEND REQUEST DOT
     display: none;
 }
 
+
 /* ensure button can position dot */
 
 #friends-btn {
+    position: relative;
+}
+
+/* =========================
+NOTIFICATION DOT
+========================= */
+
+.header-dot {
+
+    position: absolute;
+    top: 3px;
+    right: 3px;
+
+    width: 8px;
+    height: 8px;
+
+    background: #d51919;
+    border-radius: 50%;
+
+}
+
+.header-dot.hidden {
+    display: none;
+}
+
+#notifications-btn {
     position: relative;
 }
 
