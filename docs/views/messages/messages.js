@@ -5,6 +5,7 @@ import { DEFAULT_AVATAR } from "../../state/userStore.js";
 let currentConversationId = null;
 let currentUserId = null;
 let currentFriendId = null;
+let messagesInitialized = false;
 
 
 /* =========================
@@ -12,6 +13,9 @@ let currentFriendId = null;
 ========================= */
 
 export async function initMessages() {
+
+    if (messagesInitialized) return;
+    messagesInitialized = true;
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
