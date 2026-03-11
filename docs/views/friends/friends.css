@@ -336,26 +336,6 @@
 
 }
 
-#remove-friend-dialog {
-    background: white;
-    padding: 25px 24px;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    min-width: 280px;
-    text-align: center;
-}
-
-#remove-friend-modal {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-}
-
-
-
 /* =========================
    FRIEND HOVER SLIDE
 ========================= */
@@ -457,11 +437,18 @@
     align-items: center;
     justify-content: center;
 
-    pointer-events: none;
+    pointer-events: auto;
+
+    opacity: 0;
+    transition: opacity 0.2s ease;
 
 }
 
-/* dialog */
+#remove-friend-modal:not(.modal-hidden) {
+
+    opacity: 1;
+
+}
 
 #remove-friend-dialog {
 
@@ -479,6 +466,15 @@
 
     pointer-events: auto;
 
+    transform: scale(0.96);
+    transition: transform 0.18s ease;
+
+}
+
+#remove-friend-modal:not(.modal-hidden) #remove-friend-dialog {
+
+    transform: scale(1);
+
 }
 
 #remove-friend-dialog p {
@@ -492,8 +488,6 @@
     color: #333;
 
 }
-
-/* buttons */
 
 .remove-friend-actions {
 
@@ -534,28 +528,20 @@
 .remove-friend-actions button:hover {
 
     background: #f6f6f6;
-
     border-color: #bbb;
 
 }
 
-/* cancel button */
-
 #cancel-remove-friend {
 
     background: #095a5d;
-
     color: white;
-
     border-color: #095a5d;
 
 }
 
 #cancel-remove-friend:hover {
 
-    background: #095a5d;
+    background: #127175;
 
 }
-
-
-

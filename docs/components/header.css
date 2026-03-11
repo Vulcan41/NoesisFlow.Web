@@ -357,7 +357,7 @@ NOTIFICATION DOT
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;   /* page still feels normal */
+    pointer-events: auto;
 }
 
 /* hidden */

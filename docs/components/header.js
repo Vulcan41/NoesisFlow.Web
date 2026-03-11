@@ -177,19 +177,47 @@ function setupDropdown() {
 function setupLogoutModal() {
 
     const modal = document.getElementById("logout-modal");
+    const dialog = document.getElementById("logout-dialog");
+
     const cancelBtn = document.getElementById("cancel-logout");
     const confirmBtn = document.getElementById("confirm-logout");
 
+    if (!modal || !dialog) return;
+
+    /* CANCEL BUTTON */
+
     cancelBtn?.addEventListener("click", () => {
 
-        modal?.classList.add("modal-hidden");
+        modal.classList.add("modal-hidden");
 
     });
+
+    /* CONFIRM BUTTON */
 
     confirmBtn?.addEventListener("click", async () => {
 
         await supabase.auth.signOut();
         window.location.href = "index.html";
+
+    });
+
+    /* CLICK OUTSIDE */
+
+    modal.addEventListener("click", (e) => {
+
+        if (e.target === modal) {
+            modal.classList.add("modal-hidden");
+        }
+
+    });
+
+    /* ESC KEY */
+
+    document.addEventListener("keydown", (e) => {
+
+        if (e.key === "Escape" && !modal.classList.contains("modal-hidden")) {
+            modal.classList.add("modal-hidden");
+        }
 
     });
 

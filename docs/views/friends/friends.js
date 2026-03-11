@@ -388,6 +388,26 @@ async function loadFriends(userId) {
                 modal.classList.add("modal-hidden");
             };
 
+            /* CLICK OUTSIDE */
+
+            modal.onclick = (event) => {
+
+                if (event.target === modal) {
+                    modal.classList.add("modal-hidden");
+                }
+
+            };
+
+            /* ESC KEY CLOSE */
+
+            document.onkeydown = (event) => {
+
+                if (event.key === "Escape") {
+                    modal.classList.add("modal-hidden");
+                }
+
+            };
+
             /* CONFIRM */
 
             confirmBtn.onclick = async () => {
