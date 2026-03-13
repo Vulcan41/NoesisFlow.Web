@@ -397,7 +397,7 @@ async function loadFriends(userId) {
 
                     const { error } = await supabase
                         .from("friendships")
-                        .delete()
+                        .update({ status: "removed" })
                         .eq("id", friend.id);
 
                     if (error) {

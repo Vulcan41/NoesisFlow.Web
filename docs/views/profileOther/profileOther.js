@@ -151,36 +151,79 @@ async function setupFriendButton(viewedUserId, friendship) {
     if (!btn) return;
 
     btn.classList.remove("pending", "accepted");
+    btn.disabled = false;
+    btn.replaceWith(btn.cloneNode(true));
+
+    const freshBtn = document.getElementById("add-friend-btn");
+    if (!freshBtn) return;
 
     if (friendship) {
 
         if (friendship.status === "pending") {
 
-            btn.textContent = "Αναμονή Επιβεβαίωσης";
-            btn.classList.add("pending");
-
-            btn.disabled = true;
+            freshBtn.textContent = "Αναμονή Επιβεβαίωσης";
+            freshBtn.classList.add("pending");
+            freshBtn.disabled = true;
             return;
 
         }
 
         if (friendship.status === "accepted") {
 
-            btn.textContent = "Ανήκει στις επαφές σας";
-            btn.classList.add("accepted");
-
-            btn.disabled = true;
+            freshBtn.textContent = "Ανήκει στις επαφές σας";
+            freshBtn.classList.add("accepted");
+            freshBtn.disabled = true;
             return;
 
         }
 
+        if (friendship.status === "removed") {
+
+            freshBtn.textContent = "Προσθήκη Φίλου";
+
+            freshBtn.addEventListener("click", async () => {
+
+                const { data: { user } } = await supabase.auth.getUser();
+
+                if (!user) {
+                    alert("Not logged in");
+                    return;
+                }
+
+                const requesterId = user.id;
+                const receiverId = viewedUserId;
+
+                const { error } = await supabase
+                    .from("friendships")
+                    .update({
+                    requester_id: requesterId,
+                    receiver_id: receiverId,
+                    status: "pending"
+                })
+                    .eq("id", friendship.id);
+
+                if (error) {
+                    console.error("Friend request failed:", error);
+                    alert("Friend request failed");
+                    return;
+                }
+
+                freshBtn.textContent = "Αίτημα στάλθηκε";
+                freshBtn.classList.add("pending");
+                freshBtn.disabled = true;
+
+            });
+
+            return;
+        }
+
     }
 
-    /* NOT FRIENDS */
+    /* NO FRIENDSHIP ROW EXISTS */
 
-    btn.textContent = "Προσθήκη Φίλου";
+    freshBtn.textContent = "Προσθήκη Φίλου";
 
-    btn.addEventListener("click", async () => {
+    freshBtn.addEventListener("click", async () => {
 
         const { data: { user } } = await supabase.auth.getUser();
 
@@ -206,9 +249,9 @@ async function setupFriendButton(viewedUserId, friendship) {
             return;
         }
 
-        btn.textContent = "Αίτημα στάλθηκε";
-        btn.classList.add("pending");
-        btn.disabled = true;
+        freshBtn.textContent = "Αίτημα στάλθηκε";
+        freshBtn.classList.add("pending");
+        freshBtn.disabled = true;
 
     });
 
