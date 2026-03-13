@@ -354,21 +354,25 @@ function renderChatSkeleton(chatPanel, conversation) {
             <div id="chat-messages-area" class="chat-messages-area"></div>
 
             <div class="chat-input-area">
-                <input id="chat-input"
-                       type="text"
-                       placeholder="Γράψτε μήνυμα..."
-                       ${disabled ? "disabled" : ""}/>
-                <button id="chat-send-btn"
-                        ${disabled ? "disabled" : ""}>
-                        Αποστολή
-                </button>
-            </div>
 
-            ${disabled
-                ? `<div class="chat-disabled-note">
-                   Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
-                   </div>`
-                : ""}
+    <input id="chat-input"
+           type="text"
+           placeholder="Γράψτε μήνυμα..."
+           ${disabled ? "disabled" : ""}/>
+
+    <button id="chat-send-btn"
+            ${disabled ? "disabled" : ""}>
+            Αποστολή
+    </button>
+
+    ${disabled
+        ? `<div class="chat-disabled-note">
+           Η συνομιλία είναι ανενεργή γιατί δεν είστε πλέον φίλοι.
+           </div>`
+        : ""}
+
+</div>
+
         </div>
     `;
 
