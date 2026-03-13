@@ -310,7 +310,7 @@ function bindChatInput(currentUserId) {
 
         const conversationId = activeConversationId;
 
-        const { error } = await supabase
+        const { error: insertError } = await supabase
             .from("messages")
             .insert({
             conversation_id: conversationId,
@@ -318,17 +318,21 @@ function bindChatInput(currentUserId) {
             content
         });
 
-        if (error) {
-            console.error(error);
+        if (insertError) {
+            console.error("Message insert failed:", insertError);
             return;
         }
 
-        await supabase
+        const { error: updateError } = await supabase
             .from("conversations")
             .update({
             last_message_at: new Date().toISOString()
         })
             .eq("id", conversationId);
+
+        if (updateError) {
+            console.error("Conversation timestamp update failed:", updateError);
+        }
 
         input.value = "";
 
