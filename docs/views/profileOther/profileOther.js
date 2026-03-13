@@ -1,5 +1,4 @@
 import { supabase } from "../../core/supabase.js";
-import { loadView } from "../../core/router.js";
 import { DEFAULT_AVATAR, DEFAULT_FULLNAME, DEFAULT_USERNAME, DEFAULT_BIO } from "../../state/userStore.js";
 
 export async function initProfileOther(userId) {
@@ -21,34 +20,12 @@ export async function initProfileOther(userId) {
     }
 
     renderProfile(profile);
-
     await loadFriendCount(userId);
     await loadMutualFriends(userId);
 
     const friendship = await checkFriendship(userId);
 
     setupFriendButton(userId, friendship);
-
-    /* =========================
-       MESSAGE BUTTON
-    ========================= */
-
-    const messageBtn = document.getElementById("message-user-btn");
-
-    if (!messageBtn) {
-        console.log("message button not found");
-        return;
-    }
-
-    console.log("message button found");
-
-    messageBtn.addEventListener("click", () => {
-
-        console.log("Message button clicked");
-
-        messageUser(userId);
-
-    });
 
 }
 
@@ -269,77 +246,5 @@ async function checkFriendship(viewedUserId) {
     if (received) return received;
 
     return null;
-
-}
-
-async function messageUser(targetUserId) {
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const currentUserId = user.id;
-
-    /* =========================
-       NORMALIZE USER ORDER
-       (ensures A-B = B-A)
-    ========================= */
-
-    function normalizeUsers(a, b) {
-        return a < b ? [a, b] : [b, a];
-    }
-
-    const [user1, user2] = normalizeUsers(currentUserId, targetUserId);
-
-    /* =========================
-       CHECK IF CONVERSATION EXISTS
-    ========================= */
-
-    const { data: existing, error: checkError } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("user1_id", user1)
-        .eq("user2_id", user2)
-        .maybeSingle();
-
-    if (checkError) {
-        console.error("Conversation check failed:", checkError);
-        return;
-    }
-
-    let conversationId;
-
-    /* =========================
-       CREATE IF NOT EXISTS
-    ========================= */
-
-    if (!existing) {
-
-        const { data: newConv, error: insertError } = await supabase
-            .from("conversations")
-            .insert({
-            user1_id: user1,
-            user2_id: user2
-        })
-            .select()
-            .single();
-
-        if (insertError) {
-            console.error("Conversation creation failed:", insertError);
-            return;
-        }
-
-        conversationId = newConv.id;
-
-    } else {
-
-        conversationId = existing.id;
-
-    }
-
-    /* =========================
-       OPEN MESSAGES VIEW
-    ========================= */
-
-    loadView("messages", conversationId);
 
 }

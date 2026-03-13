@@ -369,65 +369,24 @@ async function loadFriends(userId) {
 
         const removeBtn = document.createElement("button");
         removeBtn.className = "friend-remove";
-        removeBtn.textContent = "×";
-        removeBtn.setAttribute("data-tooltip", "Αφαίρεση");
+        removeBtn.textContent = "Αφαίρεση";
 
-        removeBtn.addEventListener("click", (e) => {
+        removeBtn.addEventListener("click", async (e) => {
 
             e.stopPropagation();
 
-            const modal = document.getElementById("remove-friend-modal");
-            const cancelBtn = document.getElementById("cancel-remove-friend");
-            const confirmBtn = document.getElementById("confirm-remove-friend");
+            const { error } = await supabase
+                .from("friendships")
+                .delete()
+                .eq("id", friend.id);
 
-            modal.classList.remove("modal-hidden");
+            if (error) {
+                console.error("Remove friend failed:", error);
+                alert("Failed to remove friend");
+                return;
+            }
 
-            /* CANCEL */
-
-            cancelBtn.onclick = () => {
-                modal.classList.add("modal-hidden");
-            };
-
-            /* CLICK OUTSIDE */
-
-            modal.onclick = (event) => {
-
-                if (event.target === modal) {
-                    modal.classList.add("modal-hidden");
-                }
-
-            };
-
-            /* ESC KEY CLOSE */
-
-            document.onkeydown = (event) => {
-
-                if (event.key === "Escape") {
-                    modal.classList.add("modal-hidden");
-                }
-
-            };
-
-            /* CONFIRM */
-
-            confirmBtn.onclick = async () => {
-
-                const { error } = await supabase
-                    .from("friendships")
-                    .delete()
-                    .eq("id", friend.id);
-
-                if (error) {
-                    console.error("Remove friend failed:", error);
-                    alert("Failed to remove friend");
-                    return;
-                }
-
-                modal.classList.add("modal-hidden");
-
-                await initFriends();
-
-            };
+            await initFriends();
 
         });
 
