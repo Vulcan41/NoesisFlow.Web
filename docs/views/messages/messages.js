@@ -1,5 +1,6 @@
 import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
+import { loadView } from "../../core/router.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -89,6 +90,7 @@ async function loadConversations() {
             id,
             created_at,
             last_message_at,
+            last_read_at,
             friendship:friendship_id (
                 id,
                 status,
@@ -112,7 +114,6 @@ async function loadConversations() {
         .order("created_at", { ascending: false });
 
     if (localLoadToken !== conversationsLoadToken) return;
-
     if (!container.isConnected || !info.isConnected) return;
 
     container.innerHTML = "";
@@ -157,19 +158,27 @@ async function loadConversations() {
         const avatar = document.createElement("img");
         avatar.className = "conversation-avatar";
         avatar.src = otherUser?.avatar_url || DEFAULT_AVATAR;
-        avatar.onerror = () => {
-            avatar.src = DEFAULT_AVATAR;
-        };
+        avatar.onerror = () => avatar.src = DEFAULT_AVATAR;
 
         const text = document.createElement("div");
         text.className = "conversation-text";
 
         const name = document.createElement("div");
         name.className = "conversation-name";
-        name.textContent =
+
+        const nameText = document.createElement("span");
+        nameText.className = "conversation-name-text";
+        nameText.textContent =
         otherUser?.full_name ||
         otherUser?.username ||
         "User";
+
+        const newBadge = document.createElement("span");
+        newBadge.className = "conversation-new-badge";
+        newBadge.textContent = "Νέο";
+
+        name.appendChild(nameText);
+        name.appendChild(newBadge);
 
         const username = document.createElement("div");
         username.className = "conversation-username";
@@ -181,10 +190,35 @@ async function loadConversations() {
         const latestMessage = latestMessagesMap.get(conversation.id);
 
         if (latestMessage) {
-            const prefix = latestMessage.sender_id === currentUserId ? "Εσείς: " : "";
+
+            const prefix =
+            latestMessage.sender_id === currentUserId ? "Εσείς: " : "";
+
             meta.textContent = prefix + latestMessage.content;
+
+            const lastReadAt = conversation.last_read_at;
+
+            const isUnread =
+            latestMessage.sender_id !== currentUserId &&
+            (!lastReadAt ||
+            new Date(latestMessage.created_at) > new Date(lastReadAt));
+
+            if (isUnread) {
+                meta.classList.add("unread");
+                row.classList.add("unread-conversation");
+                newBadge.style.display = "inline-block";
+            } else {
+                meta.classList.remove("unread");
+                row.classList.remove("unread-conversation");
+                newBadge.style.display = "none";
+            }
+
         } else {
+
             meta.textContent = "Δεν υπάρχουν μηνύματα ακόμη";
+            meta.classList.remove("unread");
+            row.classList.remove("unread-conversation");
+
         }
 
         applyFadeIfOverflow(meta);
@@ -201,11 +235,21 @@ async function loadConversations() {
         }
 
         row.addEventListener("click", async () => {
+
             document
                 .querySelectorAll("#conversations-list > div")
                 .forEach(el => el.classList.remove("selected-conversation"));
 
             row.classList.add("selected-conversation");
+
+            /* instantly mark as read visually */
+
+            const metaEl = row.querySelector(".conversation-meta");
+            if (metaEl) metaEl.classList.remove("unread");
+
+            row.classList.remove("unread-conversation");
+            const badge = row.querySelector(".conversation-new-badge");
+            if (badge) badge.style.display = "none";
 
             activeConversationId = conversation.id;
 
@@ -218,10 +262,15 @@ async function loadConversations() {
 
             activeConversationData = {
                 conversationId: conversation.id,
+                userId: otherUser?.id,
                 status: friendship.status,
-                fullName: otherUser?.full_name || otherUser?.username || "User",
+                fullName:
+                otherUser?.full_name ||
+                otherUser?.username ||
+                "User",
                 username: otherUser?.username || "user",
-                avatarUrl: otherUser?.avatar_url || DEFAULT_AVATAR
+                avatarUrl:
+                otherUser?.avatar_url || DEFAULT_AVATAR
             };
 
             renderChatSkeleton(chatPanel, activeConversationData);
@@ -229,6 +278,7 @@ async function loadConversations() {
             await loadMessages(conversation.id, true);
             bindChatInput(currentUserId);
             subscribeToActiveConversation();
+
         });
 
         container.appendChild(row);
@@ -275,12 +325,16 @@ function renderChatSkeleton(chatPanel, conversation) {
         <div class="chat-layout">
 
             <div class="chat-header">
-                <img class="chat-header-avatar"
-                     src="${conversation.avatarUrl}" />
+                <div class="chat-user-link">
+                    <img class="chat-header-avatar"
+                         src="${conversation.avatarUrl}" />
 
-                <div class="chat-header-text">
-                    <div class="chat-header-name">${conversation.fullName}</div>
-                    <div class="chat-header-username">@${conversation.username}</div>
+                    <div class="chat-header-text">
+                        <div class="chat-header-name">${conversation.fullName}</div>
+                        <div class="chat-header-username">@${conversation.username}</div>
+                    </div>
+
+                    <div class="chat-user-tooltip">Προβολή προφίλ</div>
                 </div>
             </div>
 
@@ -304,6 +358,32 @@ function renderChatSkeleton(chatPanel, conversation) {
                 : ""}
         </div>
     `;
+
+    const avatar = chatPanel.querySelector(".chat-header-avatar");
+    if (avatar) {
+        avatar.onerror = () => {
+            avatar.src = DEFAULT_AVATAR;
+        };
+    }
+
+    const userLink = chatPanel.querySelector(".chat-user-link");
+    const tooltip = chatPanel.querySelector(".chat-user-tooltip");
+
+    if (userLink && tooltip) {
+        userLink.addEventListener("mouseenter", () => {
+            tooltip.classList.add("tooltip-visible");
+        });
+
+        userLink.addEventListener("mouseleave", () => {
+            tooltip.classList.remove("tooltip-visible");
+        });
+    }
+
+    if (userLink && conversation.userId) {
+        userLink.addEventListener("click", () => {
+            loadView("profileOther", conversation.userId);
+        });
+    }
 }
 
 /* =========================
