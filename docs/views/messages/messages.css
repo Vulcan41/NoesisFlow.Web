@@ -459,36 +459,53 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    width: calc(100% - 10px);
+
+    width: 100%;
     box-sizing: border-box;
-    padding: 10px 14px;
-    margin: 0 auto 0 auto;
+
+    padding: 10px 12px;
+    margin: 0;
+
     background: #ffffff;
-    border: 1px solid #e6e6e6;
-    border-radius: 8px;
+    border: none;
+    border-bottom: 1px solid #ececec;
+    border-radius: 0;
+
     cursor: pointer;
+
     transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
     background 0.18s ease,
+    box-shadow 0.18s ease,
     border-color 0.18s ease;
 
 }
 
+#conversations-list > div:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+#conversations-list > div:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
 #conversations-list > div:hover {
-
-    transform: translateX(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    background: #f8f9fa80;
-
+    background: #f7fafc;
 }
 
 #conversations-list > div.selected-conversation {
 
-    background: #fbfdff;
-    border-color: #246e9d;
-    border-width: 1px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    background: linear-gradient(
+    to left,
+    rgba(36,110,157,0.10) 0%,
+    rgba(36,110,157,0.06) 35%,
+    rgba(36,110,157,0.02) 60%,
+    rgba(36,110,157,0.00) 100%
+    );
+    border-bottom-color: #d8e7f3;
+    box-shadow: inset 0 0 0 1px #246e9d;
 
 }
 
@@ -559,7 +576,7 @@
 
     font-size: 12px;
     color: #6b6b6b;
-    margin-top: 6px;
+    margin-top: 4px;
     white-space: nowrap;
     overflow: hidden;
     min-width: 0;
@@ -588,7 +605,7 @@
     padding: 1px 6px;
     font-size: 10px;
     font-weight: 600;
-    background: #1e6bff;
+    background: #246e9d;
     color: white;
     border-radius: 6px;
 

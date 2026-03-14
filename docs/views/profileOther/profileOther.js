@@ -27,7 +27,6 @@ export async function initProfileOther(userId) {
     const friendship = await checkFriendship(userId);
 
     setupFriendButton(userId, friendship);
-    setupMessageButton(userId, friendship);
 }
 
 /* =========================
@@ -94,8 +93,6 @@ async function loadMutualFriends(viewedUserId) {
 
     const currentUserId = user.id;
 
-    /* get current user's friends */
-
     const { data: myFriends } = await supabase
         .from("friendships")
         .select("requester_id, receiver_id")
@@ -108,8 +105,6 @@ async function loadMutualFriends(viewedUserId) {
     f.requester_id === currentUserId ? f.receiver_id : f.requester_id
     );
 
-    /* get viewed user's friends */
-
     const { data: theirFriends } = await supabase
         .from("friendships")
         .select("requester_id, receiver_id")
@@ -121,8 +116,6 @@ async function loadMutualFriends(viewedUserId) {
     const theirFriendIds = theirFriends.map(f =>
     f.requester_id === viewedUserId ? f.receiver_id : f.requester_id
     );
-
-    /* find intersection */
 
     const mutual = myFriendIds.filter(id => theirFriendIds.includes(id));
 
@@ -142,8 +135,14 @@ async function loadMutualFriends(viewedUserId) {
 
 }
 
+function setFriendButtonLabel(text) {
+    const label = document.getElementById("friend-button-label");
+    if (!label) return;
+    label.textContent = text;
+}
+
 /* =========================
-   ADD FRIEND BUTTON
+   ADD FRIEND / MESSAGE BUTTON
 ========================= */
 
 async function setupFriendButton(viewedUserId, friendship) {
@@ -151,111 +150,126 @@ async function setupFriendButton(viewedUserId, friendship) {
     const btn = document.getElementById("add-friend-btn");
     if (!btn) return;
 
-    btn.classList.remove("pending", "accepted");
-    btn.disabled = false;
-    btn.replaceWith(btn.cloneNode(true));
+    if (friendship && friendship.status === "pending") {
+        renderFriendButton({
+            icon: "assets/pending.png",
+            tooltip: "Αναμονή",
+            disabled: true,
+            stateClass: "pending"
+        });
+        return;
+    }
 
-    const freshBtn = document.getElementById("add-friend-btn");
-    if (!freshBtn) return;
+    if (friendship && friendship.status === "accepted") {
+        renderFriendButton({
+            icon: "assets/send_2.png",
+            tooltip: "Μήνυμα",
+            stateClass: "accepted",
+            onClick: () => {
+                loadView("messages", viewedUserId);
+            }
+        });
+        return;
+    }
 
-    if (friendship) {
-
-        if (friendship.status === "pending") {
-
-            freshBtn.textContent = "Αναμονή Επιβεβαίωσης";
-            freshBtn.classList.add("pending");
-            freshBtn.disabled = true;
-            return;
-
-        }
-
-        if (friendship.status === "accepted") {
-
-            freshBtn.textContent = "Ανήκει στις επαφές σας";
-            freshBtn.classList.add("accepted");
-            freshBtn.disabled = true;
-            return;
-
-        }
-
-        if (friendship.status === "removed") {
-
-            freshBtn.textContent = "Προσθήκη Φίλου";
-
-            freshBtn.addEventListener("click", async () => {
-
+    if (friendship && friendship.status === "removed") {
+        renderFriendButton({
+            icon: "assets/add_friend.png",
+            tooltip: "Προσθήκη",
+            stateClass: "default",
+            onClick: async () => {
                 const { data: { user } } = await supabase.auth.getUser();
-
-                if (!user) {
-                    alert("Not logged in");
-                    return;
-                }
-
-                const requesterId = user.id;
-                const receiverId = viewedUserId;
+                if (!user) return;
 
                 const { error } = await supabase
                     .from("friendships")
                     .update({
-                    requester_id: requesterId,
-                    receiver_id: receiverId,
+                    requester_id: user.id,
+                    receiver_id: viewedUserId,
                     status: "pending"
                 })
                     .eq("id", friendship.id);
 
                 if (error) {
                     console.error("Friend request failed:", error);
-                    alert("Friend request failed");
                     return;
                 }
 
-                freshBtn.textContent = "Αίτημα στάλθηκε";
-                freshBtn.classList.add("pending");
-                freshBtn.disabled = true;
-
-            });
-
-            return;
-        }
-
+                renderFriendButton({
+                    icon: "assets/pending.png",
+                    tooltip: "Αναμονή",
+                    disabled: true,
+                    stateClass: "pending"
+                });
+            }
+        });
+        return;
     }
 
-    /* NO FRIENDSHIP ROW EXISTS */
+    renderFriendButton({
+        icon: "assets/add_friend.png",
+        tooltip: "Προσθήκη",
+        stateClass: "default",
+        onClick: async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
 
-    freshBtn.textContent = "Προσθήκη Φίλου";
+            const { error } = await supabase
+                .from("friendships")
+                .insert({
+                requester_id: user.id,
+                receiver_id: viewedUserId,
+                status: "pending"
+            });
 
-    freshBtn.addEventListener("click", async () => {
+            if (error) {
+                console.error("Friend request failed:", error);
+                return;
+            }
 
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
-            alert("Not logged in");
-            return;
+            renderFriendButton({
+                icon: "assets/pending.png",
+                tooltip: "Αναμονή",
+                disabled: true,
+                stateClass: "pending"
+            });
         }
-
-        const requesterId = user.id;
-        const receiverId = viewedUserId;
-
-        const { error } = await supabase
-            .from("friendships")
-            .insert({
-            requester_id: requesterId,
-            receiver_id: receiverId,
-            status: "pending"
-        });
-
-        if (error) {
-            console.error("Friend request failed:", error);
-            alert("Friend request failed");
-            return;
-        }
-
-        freshBtn.textContent = "Αίτημα στάλθηκε";
-        freshBtn.classList.add("pending");
-        freshBtn.disabled = true;
-
     });
+}
 
+/* =================================
+   3 STATE BUTTON HELPER FUNCTIONS
+================================= */
+
+
+function setFriendButtonTooltip(text) {
+    const tooltip = document.getElementById("friend-button-tooltip");
+    if (!tooltip) return;
+    tooltip.textContent = text;
+}
+
+function renderFriendButton({
+    icon,
+    tooltip,
+    disabled = false,
+    stateClass,
+    onClick = null
+}) {
+    const btn = document.getElementById("add-friend-btn");
+    if (!btn) return null;
+
+    btn.className = stateClass;
+    btn.disabled = disabled;
+    btn.innerHTML = `<img src="${icon}" alt="${tooltip}">`;
+    btn.onclick = null;
+
+    if (!disabled && typeof onClick === "function") {
+        btn.onclick = onClick;
+    }
+
+    setFriendButtonTooltip(tooltip);
+
+    return btn;
 }
 
 /* =========================
@@ -267,8 +281,6 @@ async function checkFriendship(viewedUserId) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
-    /* check if YOU sent request */
-
     const { data: sent } = await supabase
         .from("friendships")
         .select("*")
@@ -277,8 +289,6 @@ async function checkFriendship(viewedUserId) {
         .maybeSingle();
 
     if (sent) return sent;
-
-    /* check if THEY sent request */
 
     const { data: received } = await supabase
         .from("friendships")
@@ -292,35 +302,3 @@ async function checkFriendship(viewedUserId) {
     return null;
 
 }
-
-/* =========================
-   SEND MESSAGES
-========================= */
-
-function setupMessageButton(viewedUserId, friendship) {
-
-    const btn = document.getElementById("message-user-btn");
-    if (!btn) return;
-
-    /* reset state */
-
-    btn.classList.add("hidden");
-
-    btn.replaceWith(btn.cloneNode(true));
-    const freshBtn = document.getElementById("message-user-btn");
-
-    /* show ONLY if accepted */
-
-    if (!friendship || friendship.status !== "accepted") {
-        freshBtn.classList.add("hidden");
-        return;
-    }
-
-    freshBtn.classList.remove("hidden");
-
-    freshBtn.addEventListener("click", () => {
-        loadView("messages", viewedUserId);
-    });
-
-}
-

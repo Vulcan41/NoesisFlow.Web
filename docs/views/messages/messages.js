@@ -232,7 +232,6 @@ async function loadConversations(targetUserId = null) {
         applyFadeIfOverflow(meta);
 
         text.appendChild(name);
-        text.appendChild(username);
         text.appendChild(meta);
 
         row.appendChild(avatar);
