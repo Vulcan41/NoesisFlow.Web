@@ -128,7 +128,7 @@ async function signUp(e) {
 
     /* AVATAR UPLOAD */
 
-    let avatarUrl = "/assets/user_icon_2.jpg";
+    let avatarUrl = "/assets/avatar.png";
 
     const file = avatarInput?.files?.[0];
 
