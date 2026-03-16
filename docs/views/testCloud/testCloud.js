@@ -1,4 +1,4 @@
-import { uploadFile, listMyFiles, getDownloadUrl } from "../../services/storage/storageApi.js";
+import { uploadFile, listMyFiles, getDownloadUrl, deleteFile } from "../../services/storage/storageApi.js";
 
 export async function initTestCloud() {
     const fileInput = document.getElementById("fileInput");
@@ -42,11 +42,17 @@ export async function initTestCloud() {
         }
 
         for (const file of files) {
-            const div = document.createElement("div");
-            div.style.cursor = "pointer";
-            div.textContent = `${file.filename} (${file.size_bytes} bytes)`;
 
-            div.addEventListener("click", async () => {
+            const div = document.createElement("div");
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+
+            const name = document.createElement("span");
+            name.style.cursor = "pointer";
+            name.textContent = `${file.filename} (${file.size_bytes} bytes)`;
+
+            name.addEventListener("click", async () => {
                 try {
                     const downloadUrl = await getDownloadUrl(file.id);
                     window.open(downloadUrl, "_blank");
@@ -55,6 +61,30 @@ export async function initTestCloud() {
                     alert("Failed to open file.");
                 }
             });
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+
+            deleteBtn.addEventListener("click", async () => {
+
+                if (!confirm("Delete this file?")) return;
+
+                try {
+
+                    await deleteFile(file.id);
+                    await refreshFiles();
+
+                } catch (err) {
+
+                    console.error(err);
+                    alert("Failed to delete file");
+
+                }
+
+            });
+
+            div.appendChild(name);
+            div.appendChild(deleteBtn);
 
             fileList.appendChild(div);
         }
