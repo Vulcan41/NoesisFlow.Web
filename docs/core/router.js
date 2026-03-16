@@ -9,7 +9,8 @@ const routes = {
     debug: "debug",
     profileEdit: "profileEdit",
     profileOther: "profileOther",
-    testCloud: "testCloud"
+    testCloud: "testCloud",
+    cloud: "cloud"
 
 };
 

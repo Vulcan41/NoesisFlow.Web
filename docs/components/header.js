@@ -41,8 +41,9 @@ function setupNavigation() {
     const notificationsBtn = document.getElementById("notifications-btn");
     const settingsBtn = document.getElementById("settings-btn");
     const debugBtn = document.getElementById("debug-btn");
+    const cloudBtn = document.getElementById("cloud-btn");
 
-    homeBtn?.addEventListener("click", () => loadView("testCloud"));
+    homeBtn?.addEventListener("click", () => loadView("basic"));
     friendsBtn?.addEventListener("click", () => {
         loadView("friends");
         const dot = document.getElementById("friends-dot");
@@ -69,6 +70,7 @@ function setupNavigation() {
 
     settingsBtn?.addEventListener("click", () => loadView("settings"));
     debugBtn?.addEventListener("click", () => loadView("debug"));
+    cloudBtn?.addEventListener("click", () => loadView("cloud"));
 
 }
 
