@@ -1,6 +1,6 @@
 import { uploadFile, listMyFiles, getDownloadUrl, deleteFile } from "../../services/storage/storageApi.js";
 
-export async function initTestCloud() {
+export async function initCloud() {
     const fileInput = document.getElementById("fileInput");
     const uploadBtn = document.getElementById("uploadBtn");
     const fileList = document.getElementById("fileList");
