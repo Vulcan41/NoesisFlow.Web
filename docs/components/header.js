@@ -42,7 +42,7 @@ function setupNavigation() {
     const settingsBtn = document.getElementById("settings-btn");
     const debugBtn = document.getElementById("debug-btn");
 
-    homeBtn?.addEventListener("click", () => loadView("basic"));
+    homeBtn?.addEventListener("click", () => loadView("testCloud"));
     friendsBtn?.addEventListener("click", () => {
         loadView("friends");
         const dot = document.getElementById("friends-dot");
