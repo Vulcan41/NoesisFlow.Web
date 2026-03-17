@@ -1,5 +1,6 @@
 import { createCancelButton } from "../../components/cancelButton.js";
-import { openModal } from "../../components/modal.js";
+import { openModal, closeModal } from "../../components/modal.js";
+import { showInfo } from "../../components/info.js";
 import {
 uploadFile,
 listMyFiles,
@@ -11,12 +12,7 @@ export async function initCloud() {
     const fileInput = document.getElementById("fileInput");
     const fileList = document.getElementById("fileList");
     const filesCount = document.getElementById("cloudFilesCount");
-
     const uploadBox = document.querySelector(".cloud-upload-box");
-    const confirmBox = document.getElementById("uploadConfirm");
-    const confirmBtn = document.getElementById("confirmUploadBtn");
-    const cancelBtn = document.getElementById("cancelUploadBtn");
-    const confirmText = confirmBox?.querySelector("span");
 
     let selectedFile = null;
 
@@ -24,64 +20,53 @@ export async function initCloud() {
         fileInput?.click();
     });
 
-    fileInput?.addEventListener("change", () => {
+    fileInput?.addEventListener("change", async () => {
         selectedFile = fileInput.files?.[0] || null;
 
-        if (!confirmBox) return;
+        if (!selectedFile) return;
 
-        if (selectedFile) {
-            if (confirmText) {
-                confirmText.textContent = `Ανέβασμα του "${selectedFile.name}";`;
+        askToUploadFile(selectedFile);
+    });
+
+    async function askToUploadFile(file) {
+        openModal({
+            message: `Θέλεις να ανεβάσεις το αρχείο "${file.name}";`,
+
+            // swap labels
+            cancelText: "Ανέβασμα",
+            confirmText: "Ακύρωση",
+
+            // confirm button now acts as cancel
+            onConfirm: () => {}
+        });
+
+        const confirmBtn = document.getElementById("app-modal-confirm");
+        const cancelBtn = document.getElementById("app-modal-cancel");
+
+        // LEFT button (cancelBtn) → acts as upload
+        cancelBtn.onclick = async () => {
+            try {
+                await uploadFile(file);
+                console.log("Η μεταφόρτωση ολοκληρώθηκε:", file.name);
+
+                fileInput.value = "";
+                selectedFile = null;
+
+                await refreshFiles();
+
+                showInfo({
+                    type: "success",
+                    title: "Μεταφόρτωση",
+                    message: `Το αρχείο ανέβηκε επιτυχώς.`
+                });
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            } finally {
+                closeModal();
             }
-            confirmBox.classList.remove("hidden");
-        } else {
-            confirmBox.classList.add("hidden");
-        }
-    });
-
-    confirmBtn?.addEventListener("click", async () => {
-        if (!selectedFile) {
-            alert("Παρακαλώ επέλεξε πρώτα ένα αρχείο.");
-            return;
-        }
-
-        try {
-            confirmBtn.disabled = true;
-            cancelBtn && (cancelBtn.disabled = true);
-            confirmBtn.textContent = "Μεταφόρτωση...";
-
-            const result = await uploadFile(selectedFile);
-            console.log("Η μεταφόρτωση ολοκληρώθηκε:", result);
-
-            fileInput.value = "";
-            selectedFile = null;
-
-            if (confirmText) {
-                confirmText.textContent = "Ανέβασμα αρχείου;";
-            }
-            confirmBox?.classList.add("hidden");
-
-            await refreshFiles();
-        } catch (err) {
-            console.error(err);
-            alert(err.message);
-        } finally {
-            confirmBtn.disabled = false;
-            cancelBtn && (cancelBtn.disabled = false);
-            confirmBtn.textContent = "Ναι";
-        }
-    });
-
-    cancelBtn?.addEventListener("click", () => {
-        fileInput.value = "";
-        selectedFile = null;
-
-        if (confirmText) {
-            confirmText.textContent = "Ανέβασμα αρχείου;";
-        }
-
-        confirmBox?.classList.add("hidden");
-    });
+        };
+    }
 
     async function refreshFiles() {
         const files = await listMyFiles();
@@ -140,6 +125,7 @@ export async function initCloud() {
 
         const icon = document.createElement("div");
         icon.className = "cloud-file-icon";
+
         const img = document.createElement("img");
         img.src = getFileIcon(file);
         img.alt = "file";
@@ -190,6 +176,12 @@ export async function initCloud() {
                         try {
                             await deleteFile(file.id);
                             await refreshFiles();
+
+                            showInfo({
+                                type: "success",
+                                title: "Διαγραφή",
+                                message: `Το αρχείο διαγράφηκε επιτυχώς.`
+                            });
                         } catch (err) {
                             console.error(err);
                             alert("Αποτυχία διαγραφής αρχείου.");
@@ -284,11 +276,7 @@ export async function initCloud() {
                 fileInput.files = dataTransfer.files;
             }
 
-            if (confirmText) {
-                confirmText.textContent = `Ανέβασμα του "${file.name}";`;
-            }
-
-            confirmBox?.classList.remove("hidden");
+            askToUploadFile(file);
         });
     }
 }
