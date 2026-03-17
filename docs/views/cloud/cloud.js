@@ -8,57 +8,84 @@ deleteFile
 } from "../../services/storage/storageApi.js";
 
 export async function initCloud() {
-
     const fileInput = document.getElementById("fileInput");
-    const uploadBtn = document.getElementById("uploadBtn");
     const fileList = document.getElementById("fileList");
     const filesCount = document.getElementById("cloudFilesCount");
-    const selectText = document.querySelector(".cloud-upload-select");
 
-    selectText?.addEventListener("click", () => {
-        fileInput.click();
+    const uploadBox = document.querySelector(".cloud-upload-box");
+    const confirmBox = document.getElementById("uploadConfirm");
+    const confirmBtn = document.getElementById("confirmUploadBtn");
+    const cancelBtn = document.getElementById("cancelUploadBtn");
+    const confirmText = confirmBox?.querySelector("span");
+
+    let selectedFile = null;
+
+    uploadBox?.addEventListener("click", () => {
+        fileInput?.click();
     });
 
-    uploadBtn.addEventListener("click", async () => {
+    fileInput?.addEventListener("change", () => {
+        selectedFile = fileInput.files?.[0] || null;
 
-        try {
+        if (!confirmBox) return;
 
-            const file = fileInput.files[0];
-
-            if (!file) {
-                alert("Please select a file first.");
-                return;
+        if (selectedFile) {
+            if (confirmText) {
+                confirmText.textContent = `Ανέβασμα του "${selectedFile.name}";`;
             }
+            confirmBox.classList.remove("hidden");
+        } else {
+            confirmBox.classList.add("hidden");
+        }
+    });
 
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = "Uploading...";
-
-            const result = await uploadFile(file);
-            console.log("Upload complete:", result);
-
-            fileInput.value = "";
-
-            await refreshFiles();
-
-        } catch (err) {
-
-            console.error(err);
-            alert(err.message);
-
-        } finally {
-
-            uploadBtn.disabled = false;
-            uploadBtn.textContent = "Upload File";
-
+    confirmBtn?.addEventListener("click", async () => {
+        if (!selectedFile) {
+            alert("Παρακαλώ επέλεξε πρώτα ένα αρχείο.");
+            return;
         }
 
+        try {
+            confirmBtn.disabled = true;
+            cancelBtn && (cancelBtn.disabled = true);
+            confirmBtn.textContent = "Μεταφόρτωση...";
+
+            const result = await uploadFile(selectedFile);
+            console.log("Η μεταφόρτωση ολοκληρώθηκε:", result);
+
+            fileInput.value = "";
+            selectedFile = null;
+
+            if (confirmText) {
+                confirmText.textContent = "Ανέβασμα αρχείου;";
+            }
+            confirmBox?.classList.add("hidden");
+
+            await refreshFiles();
+        } catch (err) {
+            console.error(err);
+            alert(err.message);
+        } finally {
+            confirmBtn.disabled = false;
+            cancelBtn && (cancelBtn.disabled = false);
+            confirmBtn.textContent = "Ναι";
+        }
+    });
+
+    cancelBtn?.addEventListener("click", () => {
+        fileInput.value = "";
+        selectedFile = null;
+
+        if (confirmText) {
+            confirmText.textContent = "Ανέβασμα αρχείου;";
+        }
+
+        confirmBox?.classList.add("hidden");
     });
 
     async function refreshFiles() {
-
         const files = await listMyFiles();
 
-        // ✅ NEW: update storage UI
         updateStorageUsage(files);
 
         fileList.innerHTML = "";
@@ -75,11 +102,9 @@ export async function initCloud() {
         for (const file of files) {
             fileList.appendChild(createFileRow(file));
         }
-
     }
 
     function updateStorageUsage(files) {
-
         const storageText = document.getElementById("cloudStorageText");
         const storagePercent = document.getElementById("cloudStoragePercent");
         const storageRing = document.getElementById("cloudStorageRing");
@@ -107,7 +132,6 @@ export async function initCloud() {
     }
 
     function createFileRow(file) {
-
         const row = document.createElement("div");
         row.className = "cloud-file-row";
 
@@ -132,7 +156,7 @@ export async function initCloud() {
                 window.open(downloadUrl, "_blank");
             } catch (err) {
                 console.error(err);
-                alert("Failed to open file.");
+                alert("Αποτυχία ανοίγματος αρχείου.");
             }
         });
 
@@ -150,31 +174,23 @@ export async function initCloud() {
         actions.className = "cloud-file-actions";
 
         const deleteBtn = createCancelButton({
-            label: "Delete file",
+            label: "Διαγραφή αρχείου",
             text: "×",
             onClick: async () => {
-
                 openModal({
-                    message: `Delete "${file.filename}"?`,
-                    cancelText: "Cancel",
-                    confirmText: "Delete",
+                    message: `Να διαγραφεί το "${file.filename}";`,
+                    cancelText: "Ακύρωση",
+                    confirmText: "Διαγραφή",
                     onConfirm: async () => {
-
                         try {
-
                             await deleteFile(file.id);
                             await refreshFiles();
-
                         } catch (err) {
-
                             console.error(err);
-                            alert("Failed to delete file.");
-
+                            alert("Αποτυχία διαγραφής αρχείου.");
                         }
-
                     }
                 });
-
             }
         });
 
@@ -187,7 +203,7 @@ export async function initCloud() {
     }
 
     function formatFileSize(bytes) {
-        if (bytes == null || isNaN(bytes)) return "Unknown size";
+        if (bytes == null || isNaN(bytes)) return "Άγνωστο μέγεθος";
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -195,7 +211,7 @@ export async function initCloud() {
     }
 
     function formatDate(dateString) {
-        if (!dateString) return "Unknown date";
+        if (!dateString) return "Άγνωστη ημερομηνία";
 
         const date = new Date(dateString);
 
@@ -207,7 +223,6 @@ export async function initCloud() {
     }
 
     function getFileIcon(file) {
-
         const mime = (file.mime_type || "").toLowerCase();
         const name = (file.filename || "").toLowerCase();
 
@@ -238,7 +253,6 @@ export async function initCloud() {
     const dropZone = document.querySelector(".cloud-upload-card");
 
     if (dropZone) {
-
         dropZone.addEventListener("dragover", (e) => {
             e.preventDefault();
             dropZone.classList.add("drag-active");
@@ -248,37 +262,26 @@ export async function initCloud() {
             dropZone.classList.remove("drag-active");
         });
 
-        dropZone.addEventListener("drop", async (e) => {
-
+        dropZone.addEventListener("drop", (e) => {
             e.preventDefault();
             dropZone.classList.remove("drag-active");
 
             const file = e.dataTransfer.files?.[0];
             if (!file) return;
 
-            try {
+            selectedFile = file;
 
-                uploadBtn.disabled = true;
-                uploadBtn.textContent = "Uploading...";
-
-                const result = await uploadFile(file);
-                console.log("Upload complete:", result);
-
-                await refreshFiles();
-
-            } catch (err) {
-
-                console.error(err);
-                alert(err.message);
-
-            } finally {
-
-                uploadBtn.disabled = false;
-                uploadBtn.textContent = "Upload File";
-
+            if (fileInput) {
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
             }
 
-        });
+            if (confirmText) {
+                confirmText.textContent = `Ανέβασμα του "${file.name}";`;
+            }
 
+            confirmBox?.classList.remove("hidden");
+        });
     }
 }

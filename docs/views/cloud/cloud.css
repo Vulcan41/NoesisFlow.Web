@@ -22,7 +22,7 @@
 
 .cloud-top {
     flex: 0 0 140px;
-    min-height: 280px;
+    min-height: 160px;
     display: flex;
     padding-bottom: 0px;
     box-sizing: border-box;
@@ -42,14 +42,16 @@
     width: 100%;
     height: 100%;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24px;
-    border: 1px solid #ececec;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 0;
+    border: none;
     border-radius: 10px 10px 0 0;
-    background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-    padding: 22px 24px;
+    background: transparent;
+    padding: 0;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .cloud-upload-left {
@@ -58,7 +60,6 @@
     gap: 18px;
     min-width: 0;
 }
-
 
 .cloud-upload-text {
     min-width: 0;
@@ -85,21 +86,23 @@
     justify-content: flex-end;
 }
 
-.cloud-upload-icon {
-    width: 70px;
-    height: 70px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0);
+/* =========================
+   TOP ICON (MOVED)
+========================= */
+
+.cloud-data-icon {
+    width: 60px;
+    height: 60px;
+    margin-right: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
-    overflow: hidden;
 }
 
-.cloud-upload-icon img {
-    width: 70px;
-    height: 70px;
+.cloud-data-icon img {
+    width: 60px;
+    height: 60px;
     object-fit: contain;
 }
 
@@ -303,6 +306,19 @@
         justify-content: center;
     }
 
+    .cloud-upload-box {
+        padding: 16px;
+        cursor: pointer;
+    }
+
+    .cloud-upload-box:hover {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .cloud-upload-box:active {
+        transform: scale(0.998);
+    }
+
     .cloud-upload-left {
         flex-direction: column;
         text-align: center;
@@ -318,29 +334,23 @@
     }
 }
 
-
-
-
-
 /* =========================
    CENTERED UPLOAD LAYOUT
 ========================= */
 
 .cloud-upload-card {
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .cloud-upload-left {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    text-align: center;
+    text-align: left;
 }
 
-/* upload text centered */
-
 .cloud-upload-text {
-    text-align: center;
+    text-align: left;
 }
 
 /* clickable "Select" word inside sentence */
@@ -366,17 +376,17 @@
 ========================= */
 
 .cloud-upload-card.drag-active {
-    border-color: #246e9d;
-    background: rgba(36, 110, 157, 0.05);
+    background: transparent;
 }
 
 .cloud-upload-card.drag-active .cloud-upload-subtitle {
     color: #246e9d;
 }
 
-
-
-
+.cloud-upload-card.drag-active .cloud-upload-box {
+    border-color: #246e9d;
+    background: rgba(36, 110, 157, 0.05);
+}
 
 /* =========================
    STORAGE USAGE UI
@@ -471,10 +481,6 @@
     margin-top: 2px;
 }
 
-
-
-
-
 /* =========================
    TOP AREA INTERNAL STRIPS
 ========================= */
@@ -492,10 +498,21 @@
     flex: 0 0 auto;
     height: 140px;
     padding: 16px 20px 14px;
-    border-bottom: 1px solid #ececec;
+    border-bottom: none;
     background: #ffffff;
     display: flex;
     align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cloud-top-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .cloud-top-upload {
@@ -503,13 +520,39 @@
     min-height: 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 20px 24px;
+    justify-content: center;
+    gap: 0px;
+    padding: 20px 20px;
     box-sizing: border-box;
+    background: transparent;
+    border: none;
 }
 
-/* keep upload content centered nicely inside lower strip */
+/* smaller inner transparent dotted box */
+
+.cloud-upload-box {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 40px;
+    background: transparent;
+    border: 2px dotted #c7c7cc;
+    border-radius: 12px;
+    padding: 14px 10px;
+    margin-bottom: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.cloud-upload-box:hover {
+    background: rgba(99, 175, 208, 0.04);
+}
+
+.cloud-upload-box:active {
+    transform: scale(0.998);
+}
 
 .cloud-upload-left {
     flex-direction: row;
@@ -524,18 +567,82 @@
 }
 
 .cloud-upload-actions {
-    justify-content: flex-end;
+    justify-content: center;
+}
+
+.cloud-data-actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
 }
 
 /* storage block now spans nicely across upper strip */
 
 .cloud-storage-usage {
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
     max-width: none;
     margin-top: 0;
+    margin-left: auto;
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* =========================
+   DATA STRIP GRADIENT
+========================= */
+
+.cloud-top-data {
+    position: relative;
+    overflow: hidden;
+}
+
+/* gradient overlay */
+
+.cloud-top-data::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: white;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* keep content above gradient */
+
+.cloud-top-data > * {
+    position: relative;
+    z-index: 1;
 }
 
 
 
 
 
+
+.cloud-upload-confirm {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #444;
+}
+
+.cloud-upload-confirm button {
+    border: none;
+    background: #f1f1f1;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.cloud-upload-confirm button:hover {
+    background: #e5e5e5;
+}
+
+.hidden {
+    display: none;
+}
