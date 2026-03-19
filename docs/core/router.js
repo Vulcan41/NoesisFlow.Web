@@ -10,7 +10,9 @@ const routes = {
     profileEdit: "profileEdit",
     profileOther: "profileOther",
     testCloud: "testCloud",
-    cloud: "cloud"
+    cloud: "cloud",
+    project: "project",
+    projectOther: "projectOther"
 
 };
 

@@ -199,17 +199,42 @@ function setupSearch() {
                 return;
             }
 
-            const { data } = await supabase
-                .from("profiles")
-                .select("id, username, full_name, avatar_url")
-                .or(
-                `username.ilike.${query}%,username.ilike.%${query}%,full_name.ilike.%${query}%`
-            )
-                .limit(10);
+            const [profilesResponse, projectsResponse] = await Promise.all([
+                supabase
+                    .from("profiles")
+                    .select("id, username, full_name, avatar_url")
+                    .or(
+                    `username.ilike.${query}%,username.ilike.%${query}%,full_name.ilike.%${query}%`
+                )
+                    .limit(10),
+
+                supabase
+                    .from("projects")
+                    .select("id, name, description, visibility, owner_id")
+                    .eq("visibility", "public")
+                    .or(
+                    `name.ilike.${query}%,name.ilike.%${query}%,description.ilike.%${query}%`
+                )
+                    .limit(10)
+            ]);
+
+            const { data: profileData, error: profilesError } = profilesResponse;
+            const { data: projectData, error: projectsError } = projectsResponse;
+
+            if (profilesError) {
+                console.error("Profile search failed:", profilesError);
+            }
+
+            if (projectsError) {
+                console.error("Project search failed:", projectsError);
+            }
 
             results.innerHTML = "";
 
-            if (!data || data.length === 0) {
+            const hasProfiles = profileData && profileData.length > 0;
+            const hasProjects = projectData && projectData.length > 0;
+
+            if (!hasProfiles && !hasProjects) {
 
                 const div = document.createElement("div");
                 div.className = "search-result-empty";
@@ -221,50 +246,117 @@ function setupSearch() {
 
             }
 
-            data.forEach(user => {
+            /* =========================
+               PROFILE RESULTS
+            ========================= */
 
-                const div = document.createElement("div");
-                div.className = "search-result";
+            if (hasProfiles) {
 
-                const avatar = document.createElement("img");
-                avatar.className = "search-avatar";
-                avatar.src = user.avatar_url || DEFAULT_AVATAR;
+                const sectionTitle = document.createElement("div");
+                sectionTitle.className = "search-section-title";
+                sectionTitle.textContent = "Users";
+                results.appendChild(sectionTitle);
 
-                const textContainer = document.createElement("div");
-                textContainer.className = "search-text";
+                profileData.forEach(user => {
 
-                const name = document.createElement("div");
-                name.className = "search-name";
-                name.textContent = user.full_name || "User";
+                    const div = document.createElement("div");
+                    div.className = "search-result";
 
-                const username = document.createElement("div");
-                username.className = "search-username";
-                username.textContent = "@" + user.username;
+                    const avatar = document.createElement("img");
+                    avatar.className = "search-avatar";
+                    avatar.src = user.avatar_url || DEFAULT_AVATAR;
 
-                textContainer.appendChild(name);
-                textContainer.appendChild(username);
+                    const textContainer = document.createElement("div");
+                    textContainer.className = "search-text";
 
-                div.appendChild(avatar);
-                div.appendChild(textContainer);
+                    const name = document.createElement("div");
+                    name.className = "search-name";
+                    name.textContent = user.full_name || "User";
 
-                div.addEventListener("click", () => {
+                    const username = document.createElement("div");
+                    username.className = "search-username";
+                    username.textContent = "@" + user.username;
 
-                    results.style.display = "none";
-                    input.value = "";
+                    textContainer.appendChild(name);
+                    textContainer.appendChild(username);
 
-                    const currentUser = userStore.getUser();
+                    div.appendChild(avatar);
+                    div.appendChild(textContainer);
 
-                    if (currentUser && user.id === currentUser.id) {
-                        loadView("profile");
-                    } else {
-                        loadView("profileOther", user.id);
-                    }
+                    div.addEventListener("click", () => {
+
+                        results.style.display = "none";
+                        input.value = "";
+
+                        const currentUser = userStore.getUser();
+
+                        if (currentUser && user.id === currentUser.id) {
+                            loadView("profile");
+                        } else {
+                            loadView("profileOther", user.id);
+                        }
+
+                    });
+
+                    results.appendChild(div);
 
                 });
+            }
 
-                results.appendChild(div);
+            /* =========================
+               PROJECT RESULTS
+            ========================= */
 
-            });
+            if (hasProjects) {
+
+                const sectionTitle = document.createElement("div");
+                sectionTitle.className = "search-section-title";
+                sectionTitle.textContent = "Projects";
+                results.appendChild(sectionTitle);
+
+                projectData.forEach(project => {
+
+                    const div = document.createElement("div");
+                    div.className = "search-result";
+
+                    const badge = document.createElement("div");
+                    badge.className = "search-project-badge";
+                    badge.textContent = (project.name || "P").charAt(0).toUpperCase();
+
+                    const textContainer = document.createElement("div");
+                    textContainer.className = "search-text";
+
+                    const name = document.createElement("div");
+                    name.className = "search-name";
+                    name.textContent = project.name || "Untitled project";
+
+                    const subtitle = document.createElement("div");
+                    subtitle.className = "search-username";
+                    subtitle.textContent = project.description || "Public project";
+
+                    textContainer.appendChild(name);
+                    textContainer.appendChild(subtitle);
+
+                    div.appendChild(badge);
+                    div.appendChild(textContainer);
+
+                    div.addEventListener("click", async () => {
+                        results.style.display = "none";
+                        input.value = "";
+
+                        const currentUser = userStore.getUser();
+
+                        if (currentUser && project.owner_id === currentUser.id) {
+                            loadView("project", project.id);
+                        } else {
+                            loadView("projectOther", project.id);
+                        }
+                    });
+
+                    results.appendChild(div);
+
+                });
+            }
 
             results.style.display = "block";
 
