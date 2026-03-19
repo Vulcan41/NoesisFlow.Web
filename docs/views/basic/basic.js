@@ -1,3 +1,5 @@
+// force redeploy
+
 import { supabase } from "../../core/supabase.js";
 import { loadView } from "../../core/router.js";
 
