@@ -1,83 +1,84 @@
+let currentOnSubmit = null;
+
 export function initSetUpProject({ onSubmit }) {
+    currentOnSubmit = onSubmit;
+
     const modal = document.getElementById("setup-project-modal");
-    const backdrop = document.getElementById("setup-project-backdrop");
+    const form = document.getElementById("setup-project-form");
     const closeBtn = document.getElementById("setup-project-close-btn");
     const cancelBtn = document.getElementById("setup-project-cancel-btn");
-    const submitBtn = document.getElementById("setup-project-submit-btn");
-
+    const backdrop = modal?.querySelector(".setup-project-backdrop");
+    const errorBox = document.getElementById("setup-project-error");
     const nameInput = document.getElementById("setup-project-name");
     const descriptionInput = document.getElementById("setup-project-description");
-    const visibilityInput = document.getElementById("setup-project-visibility");
-    const errorBox = document.getElementById("setup-project-error");
 
-    if (!modal) return;
+    if (!modal || !form || !nameInput) return;
 
-    function clearError() {
-        if (!errorBox) return;
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
+    clearError();
+    form.reset();
+    modal.classList.remove("hidden");
 
-    function showError(message) {
-        if (!errorBox) return;
-        errorBox.textContent = message;
-        errorBox.classList.remove("hidden");
-    }
+    setTimeout(() => {
+        nameInput.focus();
+    }, 0);
 
-    function closeModal() {
+    closeBtn.onclick = closeModal;
+    cancelBtn.onclick = closeModal;
+    backdrop.onclick = closeModal;
+
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+
         clearError();
-        modal.classList.add("hidden");
 
-        if (nameInput) nameInput.value = "";
-        if (descriptionInput) descriptionInput.value = "";
-        if (visibilityInput) visibilityInput.value = "private";
-    }
-
-    async function handleSubmit() {
-        clearError();
+        const visibilityInput = form.querySelector('input[name="setup-project-visibility"]:checked');
 
         const payload = {
-            name: nameInput?.value?.trim() ?? "",
-            description: descriptionInput?.value?.trim() ?? "",
-            visibility: visibilityInput?.value ?? "private"
+            name: nameInput.value.trim(),
+            description: descriptionInput?.value.trim() || "",
+            visibility: visibilityInput?.value || "public"
         };
 
         if (!payload.name) {
-            showError("Το ονομα του project ειναι υποχρεωτικο.");
+            showError("Project name is required.");
             return;
         }
 
-        submitBtn.disabled = true;
-
         try {
-            if (onSubmit) {
-                await onSubmit(payload);
-            }
+            await currentOnSubmit?.(payload);
             closeModal();
         } catch (error) {
-            console.error("Project modal submit error:", error);
-            showError(error?.message || "Αποτυχια δημιουργιας project.");
-        } finally {
-            submitBtn.disabled = false;
+            console.error("Create project failed:", error);
+            showError(error?.message || "Failed to create project.");
         }
-    }
+    };
 
-    backdrop.onclick = closeModal;
-    closeBtn.onclick = closeModal;
-    cancelBtn.onclick = closeModal;
-    submitBtn.onclick = handleSubmit;
-
-    nameInput?.addEventListener("keydown", async (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            await handleSubmit();
+    document.onkeydown = (event) => {
+        if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+            closeModal();
         }
-    });
+    };
+}
 
-    modal.classList.remove("hidden");
-    clearError();
+function closeModal() {
+    const modal = document.getElementById("setup-project-modal");
+    if (!modal) return;
 
-    setTimeout(() => {
-        nameInput?.focus();
-    }, 0);
+    modal.classList.add("hidden");
+}
+
+function showError(message) {
+    const errorBox = document.getElementById("setup-project-error");
+    if (!errorBox) return;
+
+    errorBox.textContent = message;
+    errorBox.classList.remove("hidden");
+}
+
+function clearError() {
+    const errorBox = document.getElementById("setup-project-error");
+    if (!errorBox) return;
+
+    errorBox.textContent = "";
+    errorBox.classList.add("hidden");
 }
