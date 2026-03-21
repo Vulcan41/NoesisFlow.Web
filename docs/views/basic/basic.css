@@ -331,3 +331,24 @@
         height: 88px;
     }
 }
+
+
+
+
+
+
+.basic-empty-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.basic-empty-image {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    display: block;
+}
