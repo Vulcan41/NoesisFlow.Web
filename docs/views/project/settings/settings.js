@@ -17,6 +17,8 @@ export function initSettings(project) {
     setupAvatarInput();
     setupFormSubmit();
     setupDeleteButton();
+
+    console.log("project in settings:", project);
 }
 
 /* =========================
@@ -26,6 +28,9 @@ export function initSettings(project) {
 function fillProjectSettingsForm(project) {
     const nameInput = document.getElementById("project-settings-name");
     const descriptionInput = document.getElementById("project-settings-description");
+    const membersCanViewMembersInput = document.getElementById(
+        "project-settings-members-can-view-members"
+    );
 
     if (nameInput) {
         nameInput.value = project.name ?? "";
@@ -33,6 +38,11 @@ function fillProjectSettingsForm(project) {
 
     if (descriptionInput) {
         descriptionInput.value = project.description ?? "";
+    }
+
+    if (membersCanViewMembersInput) {
+        membersCanViewMembersInput.checked =
+        project.members_can_view_members !== false;
     }
 
     const visibilityValue = project.visibility || "public";
@@ -117,6 +127,8 @@ function setupFormSubmit() {
             const visibility =
             document.querySelector('input[name="project-settings-visibility"]:checked')?.value ||
             "public";
+            const membersCanViewMembers =
+            document.getElementById("project-settings-members-can-view-members")?.checked ?? true;
 
             if (!name) {
                 showError("Project name is required.");
@@ -136,7 +148,8 @@ function setupFormSubmit() {
                 name,
                 description: description || null,
                 visibility,
-                avatar_url: avatarUrl
+                avatar_url: avatarUrl,
+                members_can_view_members: membersCanViewMembers
             })
                 .eq("id", currentProject.id);
 
@@ -149,7 +162,8 @@ function setupFormSubmit() {
                 name,
                 description,
                 visibility,
-                avatar_url: avatarUrl
+                avatar_url: avatarUrl,
+                members_can_view_members: membersCanViewMembers
             };
 
             window.dispatchEvent(
@@ -158,7 +172,8 @@ function setupFormSubmit() {
                         name,
                         description,
                         visibility,
-                        avatar_url: avatarUrl
+                        avatar_url: avatarUrl,
+                        members_can_view_members: membersCanViewMembers
                     }
                 })
             );

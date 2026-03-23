@@ -532,3 +532,59 @@
     line-height: 1.5;
     color: #6a6a6a;
 }
+
+.project-settings-switch-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.project-settings-switch-input {
+    display: none;
+}
+
+.project-settings-switch-ui {
+    width: 46px;
+    height: 26px;
+    border-radius: 999px;
+    background: #d7dbe2;
+    position: relative;
+    transition: background 0.18s ease;
+    flex-shrink: 0;
+}
+
+.project-settings-switch-ui::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    transition: transform 0.18s ease;
+}
+
+.project-settings-switch-input:checked + .project-settings-switch-ui {
+    background: #111111;
+}
+
+.project-settings-switch-input:checked + .project-settings-switch-ui::after {
+    transform: translateX(20px);
+}
+
+.project-settings-switch-text {
+    font-size: 14px;
+    color: #171717;
+    line-height: 1.4;
+}
+
+.project-settings-field-hint {
+    margin: 8px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #7a7a84;
+}
