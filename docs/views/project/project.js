@@ -25,7 +25,6 @@ export async function initProject(projectId) {
     renderSidebar();
     await loadOwnerInfo();
     setupSidebar();
-    setupDeleteProject();
     setupProjectUpdateListener();
     loadSection("overview");
 }
@@ -49,40 +48,6 @@ async function handleProjectUpdated(event) {
 
     renderSidebar();
     await loadOwnerInfo();
-}
-
-/* =========================
-   DELETE PROJECT
-========================= */
-
-function setupDeleteProject() {
-    const deleteBtn = document.getElementById("project-delete-btn");
-    if (!deleteBtn || !currentProject?.id) return;
-
-    deleteBtn.onclick = () => {
-        openModal({
-            message: "Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το project;",
-            cancelText: "Ακύρωση",
-            confirmText: "Διαγραφή",
-            onConfirm: async () => {
-                const { error } = await supabase
-                    .from("projects")
-                    .delete()
-                    .eq("id", currentProject.id);
-
-                if (error) {
-                    console.error("Project delete failed:", error);
-                    return;
-                }
-
-                if (typeof projectStore.clear === "function") {
-                    projectStore.clear();
-                }
-
-                loadView("basic");
-            }
-        });
-    };
 }
 
 /* =========================

@@ -1,212 +1,312 @@
 import { supabase } from "../../../core/supabase.js";
+import { loadView } from "../../../core/router.js";
+
+const PROJECT_AVATAR_BUCKET = "project-avatars";
 
 let currentProject = null;
 let selectedAvatarFile = null;
+let objectPreviewUrl = null;
 
 export function initSettings(project) {
-    if (!project?.id) {
-        console.error("No project passed to settings view.");
-        return;
-    }
+    if (!project) return;
 
     currentProject = project;
     selectedAvatarFile = null;
 
-    setupForm();
-    fillForm();
+    fillProjectSettingsForm(project);
+    setupAvatarInput();
+    setupFormSubmit();
+    setupDeleteButton();
 }
 
-function setupForm() {
-    const form = document.getElementById("project-settings-form");
-    const avatarBtn = document.getElementById("project-settings-avatar-btn");
-    const avatarInput = document.getElementById("project-settings-avatar-input");
+/* =========================
+   INITIAL LOAD
+========================= */
 
-    if (avatarBtn && avatarInput) {
-        avatarBtn.onclick = () => avatarInput.click();
-
-        avatarInput.onchange = () => {
-            const file = avatarInput.files?.[0];
-            if (!file) return;
-
-            selectedAvatarFile = file;
-            renderAvatarPreview(file);
-        };
-    }
-
-    if (form) {
-        form.onsubmit = async (event) => {
-            event.preventDefault();
-            await saveSettings();
-        };
-    }
-}
-
-function fillForm() {
+function fillProjectSettingsForm(project) {
     const nameInput = document.getElementById("project-settings-name");
     const descriptionInput = document.getElementById("project-settings-description");
 
     if (nameInput) {
-        nameInput.value = currentProject.name || "";
+        nameInput.value = project.name ?? "";
     }
 
     if (descriptionInput) {
-        descriptionInput.value = currentProject.description || "";
+        descriptionInput.value = project.description ?? "";
     }
 
-    renderAvatarPreview(currentProject.avatar_url || null);
-    resetMessages();
+    const visibilityValue = project.visibility || "public";
+    const visibilityInput = document.querySelector(
+        `input[name="project-settings-visibility"][value="${visibilityValue}"]`
+    );
+
+    if (visibilityInput) {
+        visibilityInput.checked = true;
+    }
+
+    renderAvatarPreview(project.avatar_url, project.name);
+    clearFeedback();
 }
 
-function renderAvatarPreview(source) {
+/* =========================
+   AVATAR
+========================= */
+
+function setupAvatarInput() {
+    const fileInput = document.getElementById("project-settings-avatar-input");
+    const uploadLabel = document.getElementById("project-avatar-upload");
+
+    if (!fileInput || !uploadLabel) return;
+
+    fileInput.onchange = () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+
+        selectedAvatarFile = file;
+
+        if (objectPreviewUrl) {
+            URL.revokeObjectURL(objectPreviewUrl);
+        }
+
+        objectPreviewUrl = URL.createObjectURL(file);
+        renderAvatarPreview(objectPreviewUrl, getProjectNameInputValue());
+    };
+}
+
+function renderAvatarPreview(imageUrl, projectName) {
     const preview = document.getElementById("project-settings-avatar-preview");
     if (!preview) return;
 
-    if (source instanceof File) {
-        const reader = new FileReader();
+    const safeLetter = escapeHtml((projectName || "P").charAt(0).toUpperCase());
 
-        reader.onload = () => {
-            preview.innerHTML = `<img src="${reader.result}" alt="Project avatar preview" />`;
-        };
-
-        reader.readAsDataURL(source);
-        return;
-    }
-
-    if (typeof source === "string" && source.trim() !== "") {
+    if (imageUrl) {
         preview.innerHTML = `
-            <img src="${escapeHtml(source)}" alt="Project avatar preview" />
+            <img
+                src="${escapeHtml(imageUrl)}"
+                alt="${escapeHtml(projectName || "project")} avatar"
+            />
         `;
         return;
     }
 
     preview.innerHTML = `
-        <span class="project-settings-avatar-fallback">
-            ${escapeHtml((currentProject.name || "P").charAt(0).toUpperCase())}
-        </span>
+        <span class="project-settings-avatar-fallback">${safeLetter}</span>
     `;
 }
 
-async function saveSettings() {
-    const nameInput = document.getElementById("project-settings-name");
-    const descriptionInput = document.getElementById("project-settings-description");
+/* =========================
+   SAVE
+========================= */
 
-    const name = nameInput?.value.trim() || "";
-    const description = descriptionInput?.value.trim() || "";
+function setupFormSubmit() {
+    const form = document.getElementById("project-settings-form");
+    if (!form) return;
 
-    if (!name) {
-        showError("Το όνομα του project είναι υποχρεωτικό.");
-        return;
-    }
+    form.onsubmit = async (event) => {
+        event.preventDefault();
 
-    try {
-        resetMessages();
+        if (!currentProject?.id) return;
 
-        let nextAvatarUrl = currentProject.avatar_url || null;
+        clearFeedback();
+        setSubmitting(true);
 
-        if (selectedAvatarFile) {
-            const ext = selectedAvatarFile.name.split(".").pop()?.toLowerCase() || "png";
-            const filePath = `${currentProject.id}/avatar.${ext}`;
+        try {
+            const name = getProjectNameInputValue();
+            const description =
+            document.getElementById("project-settings-description")?.value.trim() || "";
+            const visibility =
+            document.querySelector('input[name="project-settings-visibility"]:checked')?.value ||
+            "public";
 
-            const { error: uploadError } = await supabase.storage
-                .from("project-avatars")
-                .upload(filePath, selectedAvatarFile, {
-                upsert: true
-            });
-
-            if (uploadError) throw uploadError;
-
-            const { data: publicData } = supabase.storage
-                .from("project-avatars")
-                .getPublicUrl(filePath);
-
-            const publicUrl = publicData?.publicUrl;
-            if (!publicUrl) {
-                throw new Error("Could not get project avatar URL.");
+            if (!name) {
+                showError("Project name is required.");
+                setSubmitting(false);
+                return;
             }
 
-            nextAvatarUrl = `${publicUrl}?t=${Date.now()}`;
-        }
+            let avatarUrl = currentProject.avatar_url ?? null;
 
-        const { error: updateError } = await supabase
-            .from("projects")
-            .update({
-            name,
-            description: description || null,
-            avatar_url: nextAvatarUrl
-        })
-            .eq("id", currentProject.id);
+            if (selectedAvatarFile) {
+                avatarUrl = await uploadProjectAvatar(currentProject.id, selectedAvatarFile);
+            }
 
-        if (updateError) throw updateError;
-
-        currentProject = {
-            ...currentProject,
-            name,
-            description: description || null,
-            avatar_url: nextAvatarUrl
-        };
-
-        window.dispatchEvent(
-            new CustomEvent("project-updated", {
-                detail: currentProject
+            const { error } = await supabase
+                .from("projects")
+                .update({
+                name,
+                description: description || null,
+                visibility,
+                avatar_url: avatarUrl
             })
+                .eq("id", currentProject.id);
+
+            if (error) {
+                throw error;
+            }
+
+            currentProject = {
+                ...currentProject,
+                name,
+                description,
+                visibility,
+                avatar_url: avatarUrl
+            };
+
+            window.dispatchEvent(
+                new CustomEvent("project-updated", {
+                    detail: {
+                        name,
+                        description,
+                        visibility,
+                        avatar_url: avatarUrl
+                    }
+                })
+            );
+
+            showSuccess("Project updated successfully.");
+        } catch (error) {
+            console.error("Project update failed:", error);
+            showError(error?.message || "Failed to update project.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+}
+
+async function uploadProjectAvatar(projectId, file) {
+    const extension = file.name.includes(".")
+    ? file.name.split(".").pop().toLowerCase()
+    : "jpg";
+
+    const filePath = `${projectId}/${Date.now()}.${extension}`;
+
+    const { error: uploadError } = await supabase
+        .storage
+        .from(PROJECT_AVATAR_BUCKET)
+        .upload(filePath, file, {
+        upsert: true
+    });
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+    const { data } = supabase
+        .storage
+        .from(PROJECT_AVATAR_BUCKET)
+        .getPublicUrl(filePath);
+
+    return data?.publicUrl ?? null;
+}
+
+/* =========================
+   DELETE
+========================= */
+
+function setupDeleteButton() {
+    const button = document.getElementById("project-settings-delete-btn");
+    if (!button) return;
+
+    button.onclick = async () => {
+        if (!currentProject?.id) return;
+
+        const confirmed = window.confirm(
+            `Delete project "${currentProject.name}"? This cannot be undone.`
         );
 
-        fillForm();
-        showSuccess("Οι αλλαγές αποθηκεύτηκαν.");
-    } catch (error) {
-        console.error("Project settings save failed:", error);
-        showError("Αποτυχία αποθήκευσης αλλαγών.");
+        if (!confirmed) return;
+
+        clearFeedback();
+        button.disabled = true;
+
+        try {
+            const { error } = await supabase
+                .from("projects")
+                .delete()
+                .eq("id", currentProject.id);
+
+            if (error) {
+                throw error;
+            }
+
+            loadView("basic");
+        } catch (error) {
+            console.error("Project delete failed:", error);
+            showError(error?.message || "Failed to delete project.");
+            button.disabled = false;
+        }
+    };
+}
+
+/* =========================
+   HELPERS
+========================= */
+
+function getProjectNameInputValue() {
+    return document.getElementById("project-settings-name")?.value.trim() || "";
+}
+
+function setSubmitting(isSubmitting) {
+    const submitBtn = document.getElementById("project-settings-submit-btn");
+    const deleteBtn = document.getElementById("project-settings-delete-btn");
+    const avatarInput = document.getElementById("project-settings-avatar-input");
+
+    if (submitBtn) {
+        submitBtn.disabled = isSubmitting;
+        submitBtn.textContent = isSubmitting ? "Saving..." : "Αποθήκευση";
+    }
+
+    if (deleteBtn) {
+        deleteBtn.disabled = isSubmitting;
+    }
+
+    if (avatarInput) {
+        avatarInput.disabled = isSubmitting;
     }
 }
 
 function showError(message) {
-    const errorEl = document.getElementById("project-settings-error");
-    const successEl = document.getElementById("project-settings-success");
+    const errorBox = document.getElementById("project-settings-error");
+    const successBox = document.getElementById("project-settings-success");
 
-    if (successEl) {
-        successEl.textContent = "";
-        successEl.classList.add("hidden");
-        successEl.style.display = "none";
+    if (successBox) {
+        successBox.textContent = "";
+        successBox.classList.add("hidden");
     }
 
-    if (!errorEl) return;
+    if (!errorBox) return;
 
-    errorEl.textContent = message;
-    errorEl.classList.remove("hidden");
-    errorEl.style.display = "block";
+    errorBox.textContent = message;
+    errorBox.classList.remove("hidden");
 }
 
 function showSuccess(message) {
-    const errorEl = document.getElementById("project-settings-error");
-    const successEl = document.getElementById("project-settings-success");
+    const errorBox = document.getElementById("project-settings-error");
+    const successBox = document.getElementById("project-settings-success");
 
-    if (errorEl) {
-        errorEl.textContent = "";
-        errorEl.classList.add("hidden");
-        errorEl.style.display = "none";
+    if (errorBox) {
+        errorBox.textContent = "";
+        errorBox.classList.add("hidden");
     }
 
-    if (!successEl) return;
+    if (!successBox) return;
 
-    successEl.textContent = message;
-    successEl.classList.remove("hidden");
-    successEl.style.display = "block";
+    successBox.textContent = message;
+    successBox.classList.remove("hidden");
 }
 
-function resetMessages() {
-    const errorEl = document.getElementById("project-settings-error");
-    const successEl = document.getElementById("project-settings-success");
+function clearFeedback() {
+    const errorBox = document.getElementById("project-settings-error");
+    const successBox = document.getElementById("project-settings-success");
 
-    if (errorEl) {
-        errorEl.textContent = "";
-        errorEl.classList.add("hidden");
-        errorEl.style.display = "none";
+    if (errorBox) {
+        errorBox.textContent = "";
+        errorBox.classList.add("hidden");
     }
 
-    if (successEl) {
-        successEl.textContent = "";
-        successEl.classList.add("hidden");
-        successEl.style.display = "none";
+    if (successBox) {
+        successBox.textContent = "";
+        successBox.classList.add("hidden");
     }
 }
 

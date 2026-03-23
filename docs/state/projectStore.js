@@ -11,14 +11,23 @@ export const projectStore = {
             data: { user }
         } = await supabase.auth.getUser();
 
-        const { data: project, error: projectError } = await supabase
-            .from("projects")
-            .select("*")
-            .eq("id", projectId)
-            .single();
+        const { data: projectData, error: projectError } = await supabase.rpc(
+            "get_accessible_project",
+            {
+                p_project_id: projectId
+            }
+        );
 
         if (projectError) {
             console.error(projectError);
+            this.project = null;
+            this.membership = null;
+            return null;
+        }
+
+        const project = Array.isArray(projectData) ? projectData[0] ?? null : null;
+
+        if (!project) {
             this.project = null;
             this.membership = null;
             return null;
@@ -71,5 +80,13 @@ export const projectStore = {
     setAvatarUrl(url) {
         if (!this.project) return;
         this.project.avatar_url = url;
+    },
+
+    setProject(project) {
+        if (!project) return;
+        this.project = {
+            ...(this.project || {}),
+            ...project
+        };
     }
 };

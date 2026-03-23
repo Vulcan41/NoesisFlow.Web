@@ -1,81 +1,163 @@
 <section class="project-settings-page">
   <div class="project-settings-shell">
+
     <div class="project-settings-header">
       <div class="project-settings-header-text">
         <p class="project-settings-kicker">Project settings</p>
         <h1 class="project-settings-title">Edit project</h1>
         <p class="project-settings-subtitle">
-          Update the basic project details. You can change the avatar, name and description here.
+          Update the basic project details, avatar, visibility and description of your project.
         </p>
       </div>
     </div>
 
     <form id="project-settings-form" class="project-settings-form">
-      <div class="project-settings-section">
-        <div class="project-settings-section-head">
+
+      <section class="project-settings-zone">
+        <div class="project-settings-zone-header">
           <h2>General</h2>
           <p>Basic information visible across the project.</p>
         </div>
 
-        <div class="project-settings-avatar-section">
-          <label class="project-settings-label">Project avatar</label>
+        <div class="project-settings-zone-content project-settings-zone-content-basic">
 
-          <div class="project-settings-avatar-row">
-            <div id="project-settings-avatar-preview" class="project-settings-avatar-preview">
-              <span class="project-settings-avatar-fallback">P</span>
+          <div class="project-settings-avatar-section">
+
+            <label id="project-avatar-upload">
+
+              <div id="project-avatar-image-wrapper">
+                <div id="project-settings-avatar-preview" class="project-settings-avatar-preview">
+                  <span class="project-settings-avatar-fallback">P</span>
+                </div>
+                <div id="project-avatar-mask"></div>
+              </div>
+
+              <div id="project-avatar-overlay">Change</div>
+
+              <input
+                      id="project-settings-avatar-input"
+                      class="project-settings-avatar-input"
+                      type="file"
+                      accept="image/*"
+              />
+            </label>
+
+            <div class="project-settings-avatar-help">
+              PNG, JPG or WEBP<br>
+              Recommended: square image
             </div>
 
-            <div class="project-settings-avatar-actions">
-              <button
-                      id="project-settings-avatar-btn"
-                      class="project-settings-avatar-btn"
-                      type="button"
-              >
-                Change avatar
-              </button>
-
-              <p class="project-settings-avatar-hint">
-                PNG, JPG or WEBP
-              </p>
-            </div>
           </div>
 
-          <input
-                  id="project-settings-avatar-input"
-                  class="project-settings-avatar-input"
-                  type="file"
-                  accept="image/*"
-          />
+          <div class="project-settings-fields">
+
+            <div class="project-settings-field">
+              <label class="project-settings-label" for="project-settings-name">
+                Project name
+              </label>
+              <input
+                      id="project-settings-name"
+                      class="project-settings-input"
+                      type="text"
+                      maxlength="80"
+                      placeholder="Project name"
+                      required
+              />
+            </div>
+
+            <div class="project-settings-field">
+              <label class="project-settings-label" for="project-settings-description">
+                Description
+              </label>
+              <textarea
+                      id="project-settings-description"
+                      class="project-settings-textarea"
+                      rows="4"
+                      maxlength="280"
+                      placeholder="Short summary of the project..."
+              ></textarea>
+            </div>
+
+            <div class="project-settings-field">
+              <label class="project-settings-label">Visibility</label>
+
+              <div class="project-settings-visibility-grid">
+
+                <label class="project-settings-option project-settings-option-public">
+                  <input
+                          type="radio"
+                          name="project-settings-visibility"
+                          value="public"
+                  />
+                  <span class="project-settings-option-card">
+                    <span class="project-settings-option-top">
+                      <span class="project-settings-option-badge project-settings-option-badge-public">
+                        Public
+                      </span>
+                    </span>
+
+                    <span class="project-settings-option-title">
+                      Public project
+                    </span>
+
+                    <span class="project-settings-option-text">
+                      Visible in search. Other users can request to join.
+                    </span>
+                  </span>
+                </label>
+
+                <label class="project-settings-option project-settings-option-private">
+                  <input
+                          type="radio"
+                          name="project-settings-visibility"
+                          value="private"
+                  />
+                  <span class="project-settings-option-card">
+                    <span class="project-settings-option-top">
+                      <span class="project-settings-option-badge project-settings-option-badge-private">
+                        Private
+                      </span>
+                    </span>
+
+                    <span class="project-settings-option-title">
+                      Private project
+                    </span>
+
+                    <span class="project-settings-option-text">
+                      Hidden from search. Access is controlled by the owner.
+                    </span>
+                  </span>
+                </label>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <section class="project-settings-zone project-settings-zone-danger">
+        <div class="project-settings-zone-header">
+          <h2>Danger zone</h2>
+          <p>This action is permanent and cannot be undone.</p>
         </div>
 
-        <div class="project-settings-field">
-          <label class="project-settings-label" for="project-settings-name">Project name</label>
-          <input
-                  id="project-settings-name"
-                  class="project-settings-input"
-                  type="text"
-                  maxlength="80"
-                  placeholder="Project name"
-                  required
-          />
+        <div class="project-settings-danger-actions">
+          <button
+                  id="project-settings-delete-btn"
+                  class="project-settings-delete-btn"
+                  type="button"
+          >
+            Διαγραφή project
+          </button>
         </div>
-
-        <div class="project-settings-field">
-          <label class="project-settings-label" for="project-settings-description">Description</label>
-          <textarea
-                  id="project-settings-description"
-                  class="project-settings-textarea"
-                  rows="4"
-                  maxlength="280"
-                  placeholder="Short summary of the project..."
-          ></textarea>
-        </div>
-      </div>
+      </section>
 
       <div id="project-settings-error" class="project-settings-error hidden"></div>
       <div id="project-settings-success" class="project-settings-success hidden"></div>
 
-      <div class="project-settings-footer">
+      <div class="project-settings-bottom">
         <button
                 id="project-settings-submit-btn"
                 class="project-settings-submit-btn"
@@ -84,6 +166,7 @@
           Αποθήκευση
         </button>
       </div>
+
     </form>
   </div>
 </section>

@@ -18,6 +18,7 @@ export async function initBasic() {
 
     await loadProjects();
 }
+
 /* =========================
    COMPONENT SETUP
 ========================= */
@@ -71,25 +72,7 @@ async function loadProjects() {
 
     currentUserId = user.id;
 
-    const { data, error } = await supabase
-        .from("project_members")
-        .select(`
-            role,
-            membership_status,
-            projects (
-                id,
-                name,
-                description,
-                visibility,
-                status,
-                created_at,
-                owner_id,
-                members_count,
-                avatar_url
-            )
-        `)
-        .eq("user_id", user.id)
-        .eq("membership_status", "active");
+    const { data, error } = await supabase.rpc("get_dashboard_projects");
 
     if (error) {
         console.error("Error loading projects:", error);
@@ -98,18 +81,9 @@ async function loadProjects() {
         return;
     }
 
-    projects = (data ?? [])
-        .map((row) => {
-        const project = row.projects;
-        if (!project) return null;
-
-        return {
-            ...project,
-            current_user_role: row.role
-        };
-    })
-        .filter(Boolean)
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    projects = (data ?? []).sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
 
     renderProjects();
 }
@@ -224,32 +198,20 @@ function renderProjects() {
         : "basic-project-pill-role-member";
 
         const membersCount = project.members_count ?? 1;
-        const avatarMarkup = project.avatar_url
-        ? `
-                    <img
-                        src="${project.avatar_url}"
-                        alt="${escapeHtml(project.name)} avatar"
-                        class="basic-project-avatar-image"
-                    />
-                `
-        : `
-                    <span class="basic-project-avatar-fallback">
-                        ${escapeHtml(project.name.charAt(0).toUpperCase())}
-                    </span>
-                `;
 
         return `
     <article
         class="basic-project-card basic-project-open"
         data-project-id="${project.id}"
         data-project-owner-id="${project.owner_id}"
+        data-project-role="${escapeHtml(project.current_user_role || "")}"
     >
         <div class="basic-project-card-left">
             <div class="basic-project-avatar">
                 ${
                     project.avatar_url
-                        ? `<img src="${project.avatar_url}" alt="${project.name}" />`
-                        : `<span>${project.name.charAt(0).toUpperCase()}</span>`
+                        ? `<img src="${escapeHtml(project.avatar_url)}" alt="${escapeHtml(project.name)}" />`
+                        : `<span>${escapeHtml(project.name.charAt(0).toUpperCase())}</span>`
                 }
             </div>
         </div>
@@ -257,15 +219,15 @@ function renderProjects() {
         <div class="basic-project-card-right">
 
             <div class="basic-project-main">
-                <h3 class="basic-project-title">${project.name}</h3>
+                <h3 class="basic-project-title">${escapeHtml(project.name)}</h3>
                 <p class="basic-project-subtitle">
-                    ${project.description ?? ""}
+                    ${escapeHtml(project.description ?? "")}
                 </p>
             </div>
 
             <div class="basic-project-meta">
                 <span class="basic-project-pill ${visibilityClass}">
-                    ${project.visibility}
+                    ${escapeHtml(project.visibility)}
                 </span>
 
                 <span class="basic-project-pill ${roleClass}">
@@ -299,12 +261,21 @@ function bindProjectCards() {
 
             const projectId = card.dataset.projectId;
             const ownerId = card.dataset.projectOwnerId;
+            const currentUserRole = card.dataset.projectRole;
 
             if (ownerId === currentUserId) {
                 loadView("project", projectId);
                 return;
             }
 
+            /* The dashboard already loaded this project for the user,
+               so if a role exists we can trust they are an active member. */
+            if (currentUserRole) {
+                loadView("projectMember", projectId);
+                return;
+            }
+
+            /* Fallback safety check only if role is missing */
             const { data, error } = await supabase
                 .from("project_members")
                 .select("membership_status")

@@ -40,7 +40,7 @@ async function loadProject(projectId) {
     }
 
     await renderProject(data);
-    await setupRequestButton(data.id);
+    await setupRequestButton(data.id, data.visibility);
 }
 
 async function renderProject(project) {
@@ -49,9 +49,9 @@ async function renderProject(project) {
     const visibility = document.getElementById("project-other-visibility");
     const status = document.getElementById("project-other-status");
     const owner = document.getElementById("project-other-owner");
-    const created = document.getElementById("project-other-created");
     const meta = document.getElementById("project-other-meta");
     const avatar = document.getElementById("project-other-avatar");
+    const created = document.getElementById("project-other-created");
 
     if (title) {
         title.textContent = project.name ?? "Untitled project";
@@ -104,7 +104,7 @@ async function renderProject(project) {
     }
 }
 
-async function setupRequestButton(projectId) {
+async function setupRequestButton(projectId, projectVisibility) {
     const button = document.getElementById("project-request-btn");
     const message = document.getElementById("project-request-message");
 
@@ -130,79 +130,70 @@ async function setupRequestButton(projectId) {
         return;
     }
 
-    const { data: existingMembership, error: membershipError } = await supabase
-        .from("project_members")
-        .select("id, membership_status")
-        .eq("project_id", projectId)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-    if (membershipError) {
-        console.error("Membership check failed:", membershipError);
+    if (projectVisibility !== "public") {
         button.disabled = true;
-        message.textContent = "Αποτυχία ελέγχου συμμετοχής.";
-        message.classList.remove("hidden");
-        return;
-    }
-
-    if (existingMembership?.membership_status === "pending") {
-        button.disabled = true;
-        button.textContent = "Request pending";
-        message.textContent = "Το αίτημά σας εκκρεμεί.";
-        message.classList.remove("hidden");
-        return;
-    }
-
-    if (existingMembership?.membership_status === "active") {
-        button.disabled = true;
-        button.textContent = "Already a member";
-        message.textContent = "Είστε ήδη μέλος αυτού του project.";
+        button.textContent = "Private project";
+        message.textContent = "Δεν μπορείτε να ζητήσετε συμμετοχή σε private project.";
         message.classList.remove("hidden");
         return;
     }
 
     button.disabled = false;
     button.textContent = "Request to join";
+    message.classList.add("hidden");
+    message.textContent = "";
 
     button.onclick = async () => {
         button.disabled = true;
+        message.classList.add("hidden");
+        message.textContent = "";
 
-        const payload = existingMembership
-        ? { membership_status: "pending" }
-        : {
-            project_id: projectId,
-            user_id: user.id,
-            role: "member",
-            membership_status: "pending"
-        };
-
-        let error;
-
-        if (existingMembership) {
-            const response = await supabase
-                .from("project_members")
-                .update(payload)
-                .eq("id", existingMembership.id);
-
-            error = response.error;
-        } else {
-            const response = await supabase
-                .from("project_members")
-                .insert([payload]);
-
-            error = response.error;
-        }
+        const { data, error } = await supabase.rpc("request_to_join_project", {
+            p_project_id: projectId
+        });
 
         if (error) {
             console.error("Request to join failed:", error);
             button.disabled = false;
-            message.textContent = "Αποτυχία αποστολής αιτήματος.";
+            message.textContent = error.message || "Αποτυχία αποστολής αιτήματος.";
             message.classList.remove("hidden");
             return;
         }
 
-        button.textContent = "Request pending";
-        message.textContent = "Το αίτημά σας στάλθηκε.";
+        if (data === "owner") {
+            button.disabled = true;
+            button.textContent = "Owner";
+            message.textContent = "Είστε ο owner αυτού του project.";
+            message.classList.remove("hidden");
+            return;
+        }
+
+        if (data === "already_member") {
+            button.disabled = true;
+            button.textContent = "Already a member";
+            message.textContent = "Είστε ήδη μέλος αυτού του project.";
+            message.classList.remove("hidden");
+            return;
+        }
+
+        if (data === "already_pending") {
+            button.disabled = true;
+            button.textContent = "Request pending";
+            message.textContent = "Το αίτημά σας εκκρεμεί.";
+            message.classList.remove("hidden");
+            return;
+        }
+
+        if (data === "requested") {
+            button.disabled = true;
+            button.textContent = "Request pending";
+            message.textContent = "Το αίτημά σας στάλθηκε.";
+            message.classList.remove("hidden");
+            return;
+        }
+
+        button.disabled = false;
+        message.textContent = "Απρόβλεπτη απάντηση από τον server.";
         message.classList.remove("hidden");
     };
 }
@@ -231,8 +222,6 @@ function showError(message) {
 
     errorBox.textContent = message;
     errorBox.classList.remove("hidden");
-
-
 }
 
 function escapeHtml(value) {
