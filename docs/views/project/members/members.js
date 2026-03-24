@@ -26,12 +26,58 @@ export async function initMembers(project) {
 
     currentUserId = user.id;
 
+    await ensureInviteFriendModalComponent();
+    setupInviteFriendsButton();
+
     await refreshMembersView();
+}
+
+async function ensureInviteFriendModalComponent() {
+    const existingModal = document.getElementById("invite-friend-modal");
+    if (existingModal) return;
+
+    const htmlPath = "./components/inviteFriendModal/inviteFriendModal.html";
+    const cssPath = "./components/inviteFriendModal/inviteFriendModal.css";
+
+    const res = await fetch(htmlPath);
+    const html = await res.text();
+
+    document.body.insertAdjacentHTML("beforeend", html);
+
+    const existingCss = document.getElementById("invite-friend-modal-component-css");
+    if (!existingCss) {
+        const link = document.createElement("link");
+        link.id = "invite-friend-modal-component-css";
+        link.rel = "stylesheet";
+        link.href = cssPath;
+        document.head.appendChild(link);
+    }
+}
+
+function setupInviteFriendsButton() {
+    const btn = document.getElementById("open-invite-friends-btn");
+    if (!btn) return;
+
+    btn.onclick = async () => {
+        const module = await import("../../../components/inviteFriendModal/inviteFriendModal.js");
+
+        module.initInviteFriendModal({
+            projectId: currentProject.id,
+            currentMembers,
+            currentUserId,
+            onInviteSuccess: async (message) => {
+                showSuccess(message || "Invite sent successfully.");
+                await refreshMembersView();
+            },
+            onInviteError: (message) => {
+                showError(message || "Failed to send invite.");
+            }
+        });
+    };
 }
 
 async function refreshMembersView() {
     await loadMembers(currentProject.id);
-    await loadInviteFriends(currentProject.id);
 }
 
 async function loadMembers(projectId) {
@@ -87,12 +133,6 @@ async function loadMembers(projectId) {
         member.membership_source === "request"
     );
 
-    const pendingInvites = currentMembers.filter(
-        (member) =>
-        member.membership_status === "pending" &&
-        member.membership_source === "invite"
-    );
-
     const activeMembers = currentMembers.filter(
         (member) => member.membership_status === "active"
     );
@@ -108,17 +148,6 @@ async function loadMembers(projectId) {
         `
     : "";
 
-    const pendingInvitesSection = pendingInvites.length
-    ? `
-            <div class="members-group">
-                <div class="members-group-title">Pending invites</div>
-                <div class="members-group-list">
-                    ${pendingInvites.map((member) => renderMemberRow(member, "invite")).join("")}
-                </div>
-            </div>
-        `
-    : "";
-
     const activeMembersSection = `
         <div class="members-group">
             <div class="members-group-title">Members</div>
@@ -128,10 +157,7 @@ async function loadMembers(projectId) {
         </div>
     `;
 
-    list.innerHTML =
-    pendingRequestsSection +
-    pendingInvitesSection +
-    activeMembersSection;
+    list.innerHTML = pendingRequestsSection + activeMembersSection;
 
     bindMemberActions(projectId);
     bindMemberAvatarFallbacks();
@@ -142,7 +168,6 @@ function renderMemberRow(member, sectionType) {
     const username = member.profiles?.username ?? "user";
     const fullName = member.profiles?.full_name || username || "Unknown user";
     const avatarUrl = member.profiles?.avatar_url?.trim() || DEFAULT_AVATAR;
-    const isOwner = member.role === "owner";
 
     return `
         <div class="member-row" data-user-id="${member.user_id}">
@@ -205,153 +230,6 @@ function renderMemberRow(member, sectionType) {
                         `
                         : ""
                 }
-
-                ${
-                    sectionType === "invite"
-                        ? `
-                            <span class="member-pill member-pill-neutral">
-                                invite sent
-                            </span>
-                            ${
-                                !isOwner
-                                    ? `
-                                        <span class="member-pill member-pill-status">
-                                            pending
-                                        </span>
-                                    `
-                                    : ""
-                            }
-                        `
-                        : ""
-                }
-            </div>
-        </div>
-    `;
-}
-
-async function loadInviteFriends(projectId) {
-    const container = document.getElementById("members-invite-list");
-    if (!container) return;
-
-    container.innerHTML = `<div class="member-invite-empty">Loading friends...</div>`;
-
-    const { data: friendships, error: friendshipsError } = await supabase
-        .from("friendships")
-        .select("requester_id, receiver_id, status")
-        .eq("status", "accepted")
-        .or(`requester_id.eq.${currentUserId},receiver_id.eq.${currentUserId}`);
-
-    if (friendshipsError) {
-        console.error("Failed to load friendships:", friendshipsError);
-        container.innerHTML = `
-            <div class="member-invite-empty">
-                Failed to load friends.
-            </div>
-        `;
-        return;
-    }
-
-    const friendIds = (friendships ?? [])
-        .map((row) =>
-    row.requester_id === currentUserId ? row.receiver_id : row.requester_id
-    )
-        .filter(Boolean);
-
-    if (!friendIds.length) {
-        container.innerHTML = `
-            <div class="member-invite-empty">
-                You have no accepted friends to invite yet.
-            </div>
-        `;
-        return;
-    }
-
-    const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("id, username, full_name, avatar_url")
-        .in("id", friendIds);
-
-    if (profilesError) {
-        console.error("Failed to load friend profiles:", profilesError);
-        container.innerHTML = `
-            <div class="member-invite-empty">
-                Failed to load friend profiles.
-            </div>
-        `;
-        return;
-    }
-
-    const membershipByUserId = new Map(
-        currentMembers.map((member) => [member.user_id, member])
-    );
-
-    const inviteableProfiles = (profiles ?? []).filter((profile) => {
-        return !membershipByUserId.has(profile.id);
-    });
-
-    const sortedProfiles = inviteableProfiles.sort((a, b) => {
-        const aName = (a.full_name || a.username || "").toLowerCase();
-        const bName = (b.full_name || b.username || "").toLowerCase();
-        return aName.localeCompare(bName);
-    });
-
-    if (!sortedProfiles.length) {
-        container.innerHTML = `
-            <div class="member-invite-empty">
-                No inviteable friends available.
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = sortedProfiles
-        .map((profile) => renderInviteFriendRow(profile))
-        .join("");
-
-    bindInviteFriendActions(projectId);
-    bindMemberAvatarFallbacks();
-    bindMemberProfileLinks();
-}
-
-function renderInviteFriendRow(profile) {
-    const username = profile.username ?? "user";
-    const fullName = profile.full_name || username || "Unknown user";
-    const avatarUrl = profile.avatar_url?.trim() || DEFAULT_AVATAR;
-
-    const rightMarkup = `
-        <button
-            class="member-invite-btn"
-            type="button"
-            data-user-id="${profile.id}"
-        >
-            Invite
-        </button>
-    `;
-
-    return `
-        <div class="member-invite-row">
-            <div
-                class="member-invite-row-left member-profile-link"
-                data-user-id="${profile.id}"
-            >
-                <div class="member-avatar">
-                    <img
-                        src="${escapeHtml(avatarUrl)}"
-                        alt="${escapeHtml(username)} avatar"
-                        class="member-avatar-image"
-                    />
-                </div>
-
-                <div class="member-info">
-                    <div class="member-name">${escapeHtml(fullName)}</div>
-                    <div class="member-username">@${escapeHtml(username)}</div>
-                </div>
-
-                <div class="member-tooltip">Προβολή προφίλ</div>
-            </div>
-
-            <div class="member-invite-row-right">
-                ${rightMarkup}
             </div>
         </div>
     `;
@@ -407,50 +285,6 @@ function bindMemberActions(projectId) {
 
             if (data === "rejected") {
                 showSuccess("Request rejected.");
-            }
-
-            await refreshMembersView();
-        };
-    });
-}
-
-function bindInviteFriendActions(projectId) {
-    const buttons = document.querySelectorAll(".member-invite-btn");
-
-    buttons.forEach((button) => {
-        button.onclick = async () => {
-            const userId = button.dataset.userId;
-            if (!userId) return;
-
-            clearFeedback();
-            button.disabled = true;
-            button.textContent = "Inviting...";
-
-            const { data, error } = await supabase.rpc("invite_user_to_project", {
-                p_project_id: projectId,
-                p_user_id: userId
-            });
-
-            if (error) {
-                console.error("Invite failed:", error);
-                showError(error.message || "Failed to send invite.");
-                button.disabled = false;
-                button.textContent = "Invite";
-                return;
-            }
-
-            if (data === "invited") {
-                showSuccess("Invite sent successfully.");
-            } else if (data === "already_member") {
-                showSuccess("This friend is already a member.");
-            } else if (data === "already_invited") {
-                showSuccess("This friend has already been invited.");
-            } else if (data === "request_accepted_by_invite") {
-                showSuccess("Friend had a pending request and is now an active member.");
-            } else if (data === "not_friends") {
-                showError("You can only invite accepted friends.");
-            } else if (data === "cannot_invite_self") {
-                showError("You cannot invite yourself.");
             }
 
             await refreshMembersView();

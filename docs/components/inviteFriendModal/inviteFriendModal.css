@@ -1,0 +1,264 @@
+.invite-friend-modal.hidden {
+    display: none !important;
+}
+
+.invite-friend-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+}
+
+.invite-friend-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+}
+
+.invite-friend-panel {
+    position: relative;
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
+    margin: 24px auto;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+}
+
+.invite-friend-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.invite-friend-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 20px;
+}
+
+.invite-friend-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #7a7a84;
+}
+
+.invite-friend-close-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.invite-friend-close-btn:hover {
+    background: #ececec;
+}
+
+.invite-friend-feedback {
+    margin: 14px 20px 0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.invite-friend-feedback.hidden {
+    display: none !important;
+}
+
+.invite-friend-feedback-error {
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #b42318;
+}
+
+.invite-friend-feedback-success {
+    border: 1px solid #cfeedd;
+    background: #ecfdf3;
+    color: #16794b;
+}
+
+
+.invite-friend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.invite-friend-row:last-child {
+    border-bottom: none;
+}
+
+.invite-friend-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.invite-friend-row-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.invite-friend-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.invite-friend-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.invite-friend-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.invite-friend-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #171717;
+    line-height: 1.2;
+}
+
+.invite-friend-username {
+    font-size: 12px;
+    color: #777;
+    line-height: 1.2;
+}
+
+.invite-friend-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    background: #111111;
+    color: #ffffff;
+}
+
+.invite-friend-btn:hover {
+    background: #1e1e1e;
+}
+
+.invite-friend-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.invite-friend-empty {
+    padding: 16px;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    color: #7a7a84;
+    font-size: 13px;
+    background: #fafafa;
+}
+
+.invite-friend-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1;
+    border: 1px solid transparent;
+    background: #f8f8f8;
+    color: #5f6673;
+    border-color: #ececec;
+}
+
+.invite-friend-footer {
+    padding: 16px 20px 20px;
+    border-top: 1px solid #eeeeee;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invite-friend-cancel-btn {
+    border: 1px solid #e6e6e6;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.invite-friend-cancel-btn:hover {
+    background: #f7f7f7;
+}
+
+.invite-friend-body {
+    padding: 18px 20px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.invite-friend-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.invite-friend-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8b8b95;
+}
+
+.invite-friend-list {
+    padding: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.invite-friend-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+@media (max-width: 760px) {
+    .invite-friend-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .invite-friend-row-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

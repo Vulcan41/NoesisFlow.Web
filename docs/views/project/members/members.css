@@ -42,99 +42,41 @@
 }
 
 /* =========================
-   INVITE FRIENDS
+   INVITE HEADER
 ========================= */
 
-.members-invite-shell {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.members-invite-header {
+.members-section-topbar {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    gap: 16px;
 }
 
-.members-invite-header h2 {
+.members-section-header h1 {
     margin: 0 0 6px 0;
-    font-size: 18px;
+    font-size: 24px;
 }
 
-.members-invite-header p {
+.members-section-header p {
     margin: 0;
     color: #7a7a84;
     font-size: 13px;
 }
 
-.members-invite-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    border: 1px solid #e6e6e6;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #ffffff;
-}
-
-.member-invite-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 16px;
-    background: #ffffff;
-    border-bottom: 1px solid #eeeeee;
-}
-
-.member-invite-row:last-child {
-    border-bottom: none;
-}
-
-.member-invite-row-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-}
-
-.member-invite-row-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-.member-invite-btn {
+.members-open-invite-btn {
     border: none;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 12px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
     cursor: pointer;
     font-weight: 600;
     background: #111111;
     color: #ffffff;
+    flex-shrink: 0;
 }
 
-.member-invite-btn:hover {
+.members-open-invite-btn:hover {
     background: #1e1e1e;
-}
-
-.member-invite-btn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-}
-
-.member-invite-empty {
-    padding: 16px;
-    border: 1px dashed #d1d5db;
-    border-radius: 10px;
-    color: #7a7a84;
-    font-size: 13px;
-    background: #fafafa;
 }
 
 /* =========================
@@ -319,13 +261,12 @@
 
 @media (max-width: 760px) {
     .member-row,
-    .member-invite-row {
+    .members-section-topbar {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .member-row-right,
-    .member-invite-row-right {
+    .member-row-right {
         width: 100%;
         justify-content: flex-start;
     }
