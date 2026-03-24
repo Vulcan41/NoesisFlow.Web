@@ -1,6 +1,7 @@
 import { supabase } from "../../../core/supabase.js";
 import { loadView } from "../../../core/router.js";
 import { DEFAULT_AVATAR } from "../../../state/userStore.js";
+import { showInfo } from "../../../components/info.js";
 
 let currentProject = null;
 let currentMembers = [];
@@ -66,11 +67,17 @@ function setupInviteFriendsButton() {
             currentMembers,
             currentUserId,
             onInviteSuccess: async (message) => {
-                showSuccess(message || "Invite sent successfully.");
+                await showInfo({
+                    type: "success",
+                    message: message || "Invite sent successfully."
+                });
                 await refreshMembersView();
             },
-            onInviteError: (message) => {
-                showError(message || "Failed to send invite.");
+            onInviteError: async (message) => {
+                await showInfo({
+                    type: "error",
+                    message: message || "Failed to send invite."
+                });
             }
         });
     };
@@ -244,8 +251,6 @@ function bindMemberActions(projectId) {
             const userId = button.dataset.userId;
             if (!userId) return;
 
-            clearFeedback();
-
             const { data, error } = await supabase.rpc("accept_project_request", {
                 p_project_id: projectId,
                 p_user_id: userId
@@ -253,12 +258,18 @@ function bindMemberActions(projectId) {
 
             if (error) {
                 console.error("Accept request failed:", error);
-                showError(error.message || "Failed to approve request.");
+                await showInfo({
+                    type: "error",
+                    message: error.message || "Failed to approve request."
+                });
                 return;
             }
 
             if (data === "accepted") {
-                showSuccess("Request approved successfully.");
+                await showInfo({
+                    type: "success",
+                    message: "Request approved successfully."
+                });
             }
 
             await refreshMembersView();
@@ -270,8 +281,6 @@ function bindMemberActions(projectId) {
             const userId = button.dataset.userId;
             if (!userId) return;
 
-            clearFeedback();
-
             const { data, error } = await supabase.rpc("reject_project_request", {
                 p_project_id: projectId,
                 p_user_id: userId
@@ -279,12 +288,18 @@ function bindMemberActions(projectId) {
 
             if (error) {
                 console.error("Reject request failed:", error);
-                showError(error.message || "Failed to reject request.");
+                await showInfo({
+                    type: "error",
+                    message: error.message || "Failed to reject request."
+                });
                 return;
             }
 
             if (data === "rejected") {
-                showSuccess("Request rejected.");
+                await showInfo({
+                    type: "success",
+                    message: "Request rejected."
+                });
             }
 
             await refreshMembersView();
@@ -331,51 +346,6 @@ function bindMemberProfileLinks() {
             tooltip?.classList.remove("tooltip-visible");
         });
     });
-}
-
-function showError(message) {
-    const errorBox = document.getElementById("members-feedback-error");
-    const successBox = document.getElementById("members-feedback-success");
-
-    if (successBox) {
-        successBox.textContent = "";
-        successBox.classList.add("hidden");
-    }
-
-    if (!errorBox) return;
-
-    errorBox.textContent = message;
-    errorBox.classList.remove("hidden");
-}
-
-function showSuccess(message) {
-    const errorBox = document.getElementById("members-feedback-error");
-    const successBox = document.getElementById("members-feedback-success");
-
-    if (errorBox) {
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
-
-    if (!successBox) return;
-
-    successBox.textContent = message;
-    successBox.classList.remove("hidden");
-}
-
-function clearFeedback() {
-    const errorBox = document.getElementById("members-feedback-error");
-    const successBox = document.getElementById("members-feedback-success");
-
-    if (errorBox) {
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
-
-    if (successBox) {
-        successBox.textContent = "";
-        successBox.classList.add("hidden");
-    }
 }
 
 function escapeHtml(value) {

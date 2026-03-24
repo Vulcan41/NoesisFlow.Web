@@ -1,5 +1,6 @@
 import { supabase } from "../../core/supabase.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
+import { showInfo } from "../../components/info.js";
 
 let currentConfig = null;
 
@@ -13,7 +14,6 @@ export async function initInviteFriendModal(config) {
 
     if (!modal) return;
 
-    clearFeedback();
     modal.classList.remove("hidden");
 
     closeBtn.onclick = closeModal;
@@ -74,8 +74,11 @@ async function loadInviteModalContent() {
     if (friendshipsError) {
         console.error("Failed to load friendships:", friendshipsError);
         listSection.innerHTML = `
-            <div class="invite-friend-empty">
-                Failed to load friends.
+            <div class="invite-friend-section">
+                <div class="invite-friend-section-title">Invite friends</div>
+                <div class="invite-friend-empty">
+                    Failed to load friends.
+                </div>
             </div>
         `;
         return;
@@ -228,7 +231,6 @@ function bindInviteButtons() {
             const userId = button.dataset.userId;
             if (!userId || !currentConfig) return;
 
-            clearFeedback();
             button.disabled = true;
             button.textContent = "Inviting...";
 
@@ -239,7 +241,10 @@ function bindInviteButtons() {
 
             if (error) {
                 console.error("Invite failed:", error);
-                showError(error.message || "Failed to send invite.");
+                await showInfo({
+                    type: "error",
+                    message: error.message || "Failed to send invite."
+                });
                 button.disabled = false;
                 button.textContent = "Invite";
                 currentConfig.onInviteError?.(error.message || "Failed to send invite.");
@@ -255,20 +260,29 @@ function bindInviteButtons() {
             } else if (data === "request_accepted_by_invite") {
                 successMessage = "Friend had a pending request and is now an active member.";
             } else if (data === "not_friends") {
-                showError("You can only invite accepted friends.");
+                await showInfo({
+                    type: "error",
+                    message: "You can only invite accepted friends."
+                });
                 button.disabled = false;
                 button.textContent = "Invite";
                 currentConfig.onInviteError?.("You can only invite accepted friends.");
                 return;
             } else if (data === "cannot_invite_self") {
-                showError("You cannot invite yourself.");
+                await showInfo({
+                    type: "error",
+                    message: "You cannot invite yourself."
+                });
                 button.disabled = false;
                 button.textContent = "Invite";
                 currentConfig.onInviteError?.("You cannot invite yourself.");
                 return;
             }
 
-            showSuccess(successMessage);
+            await showInfo({
+                type: "success",
+                message: successMessage
+            });
 
             const nextStatus =
             data === "request_accepted_by_invite" ? "active" : "pending";
@@ -299,51 +313,6 @@ function bindInviteAvatarFallbacks() {
             img.src = DEFAULT_AVATAR;
         };
     });
-}
-
-function showError(message) {
-    const errorBox = document.getElementById("invite-friend-error");
-    const successBox = document.getElementById("invite-friend-success");
-
-    if (successBox) {
-        successBox.textContent = "";
-        successBox.classList.add("hidden");
-    }
-
-    if (!errorBox) return;
-
-    errorBox.textContent = message;
-    errorBox.classList.remove("hidden");
-}
-
-function showSuccess(message) {
-    const errorBox = document.getElementById("invite-friend-error");
-    const successBox = document.getElementById("invite-friend-success");
-
-    if (errorBox) {
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
-
-    if (!successBox) return;
-
-    successBox.textContent = message;
-    successBox.classList.remove("hidden");
-}
-
-function clearFeedback() {
-    const errorBox = document.getElementById("invite-friend-error");
-    const successBox = document.getElementById("invite-friend-success");
-
-    if (errorBox) {
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
-
-    if (successBox) {
-        successBox.textContent = "";
-        successBox.classList.add("hidden");
-    }
 }
 
 function escapeHtml(value) {

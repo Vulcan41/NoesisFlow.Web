@@ -1,5 +1,6 @@
 import { supabase } from "../../../core/supabase.js";
 import { loadView } from "../../../core/router.js";
+import { showInfo } from "../../../components/info.js";
 
 const PROJECT_AVATAR_BUCKET = "project-avatars";
 
@@ -55,7 +56,6 @@ function fillProjectSettingsForm(project) {
     }
 
     renderAvatarPreview(project.avatar_url, project.name);
-    clearFeedback();
 }
 
 /* =========================
@@ -117,7 +117,6 @@ function setupFormSubmit() {
 
         if (!currentProject?.id) return;
 
-        clearFeedback();
         setSubmitting(true);
 
         try {
@@ -131,7 +130,10 @@ function setupFormSubmit() {
             document.getElementById("project-settings-members-can-view-members")?.checked ?? true;
 
             if (!name) {
-                showError("Project name is required.");
+                await showInfo({
+                    type: "error",
+                    message: "Project name is required."
+                });
                 setSubmitting(false);
                 return;
             }
@@ -178,10 +180,16 @@ function setupFormSubmit() {
                 })
             );
 
-            showSuccess("Project updated successfully.");
+            await showInfo({
+                type: "success",
+                message: "Project updated successfully."
+            });
         } catch (error) {
             console.error("Project update failed:", error);
-            showError(error?.message || "Failed to update project.");
+            await showInfo({
+                type: "error",
+                message: error?.message || "Failed to update project."
+            });
         } finally {
             setSubmitting(false);
         }
@@ -231,7 +239,6 @@ function setupDeleteButton() {
 
         if (!confirmed) return;
 
-        clearFeedback();
         button.disabled = true;
 
         try {
@@ -247,7 +254,10 @@ function setupDeleteButton() {
             loadView("basic");
         } catch (error) {
             console.error("Project delete failed:", error);
-            showError(error?.message || "Failed to delete project.");
+            await showInfo({
+                type: "error",
+                message: error?.message || "Failed to delete project."
+            });
             button.disabled = false;
         }
     };
@@ -277,51 +287,6 @@ function setSubmitting(isSubmitting) {
 
     if (avatarInput) {
         avatarInput.disabled = isSubmitting;
-    }
-}
-
-function showError(message) {
-    const errorBox = document.getElementById("project-settings-error");
-    const successBox = document.getElementById("project-settings-success");
-
-    if (successBox) {
-        successBox.textContent = "";
-        successBox.classList.add("hidden");
-    }
-
-    if (!errorBox) return;
-
-    errorBox.textContent = message;
-    errorBox.classList.remove("hidden");
-}
-
-function showSuccess(message) {
-    const errorBox = document.getElementById("project-settings-error");
-    const successBox = document.getElementById("project-settings-success");
-
-    if (errorBox) {
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
-
-    if (!successBox) return;
-
-    successBox.textContent = message;
-    successBox.classList.remove("hidden");
-}
-
-function clearFeedback() {
-    const errorBox = document.getElementById("project-settings-error");
-    const successBox = document.getElementById("project-settings-success");
-
-    if (errorBox) {
-        errorBox.textContent = "";
-        errorBox.classList.add("hidden");
-    }
-
-    if (successBox) {
-        successBox.textContent = "";
-        successBox.classList.add("hidden");
     }
 }
 

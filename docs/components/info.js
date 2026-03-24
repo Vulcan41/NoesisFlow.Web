@@ -65,26 +65,26 @@ function getTypeMeta(type) {
     switch (type) {
         case "success":
             return {
-                title: "Επιτυχία",
+                title: "Succeed",
                 icon: "✓"
             };
 
         case "error":
             return {
-                title: "Σφάλμα",
+                title: "Error",
                 icon: "!"
             };
 
         case "warning":
             return {
-                title: "Προσοχή",
+                title: "Warning",
                 icon: "!"
             };
 
         case "info":
         default:
             return {
-                title: "Ενημέρωση",
+                title: "Info",
                 icon: "i"
             };
     }
