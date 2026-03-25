@@ -6,6 +6,9 @@
     position: fixed;
     inset: 0;
     z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .invite-friend-backdrop {
@@ -16,9 +19,8 @@
 
 .invite-friend-panel {
     position: relative;
-    width: min(680px, calc(100vw - 32px));
+    width: min(760px, calc(100vw - 32px));
     max-height: calc(100vh - 48px);
-    margin: 24px auto;
     background: #ffffff;
     border-radius: 16px;
     overflow: hidden;
@@ -61,6 +63,46 @@
     background: #ececec;
 }
 
+.invite-friend-body {
+    padding: 18px 20px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.invite-friend-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.invite-friend-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.invite-friend-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8b8b95;
+}
+
+.invite-friend-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
 
 .invite-friend-row {
     display: flex;
@@ -69,6 +111,7 @@
     gap: 12px;
     padding: 12px 16px;
     border-bottom: 1px solid #eeeeee;
+    background: #ffffff;
 }
 
 .invite-friend-row:last-child {
@@ -174,62 +217,200 @@
     justify-content: flex-end;
 }
 
-.invite-friend-cancel-btn {
-    border: 1px solid #e6e6e6;
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 10px 14px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-}
-
 .invite-friend-cancel-btn:hover {
     background: #f7f7f7;
 }
 
-.invite-friend-body {
-    padding: 18px 20px 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-}
-
-.invite-friend-section {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.invite-friend-section-title {
+.invite-friend-group-toggle-btn {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #444;
+    border-radius: 8px;
+    padding: 7px 12px;
     font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #8b8b95;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.invite-friend-list {
-    padding: 0;
+.invite-friend-group-toggle-btn:hover {
+    background: #f9fafb;
+}
+
+.invite-friend-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 2px 0 2px;
+}
+
+.invite-friend-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.invite-friend-sort-select {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #333;
+}
+
+.invite-friend-search-input {
+    height: 32px;
+    min-width: 220px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #333;
+    outline: none;
+}
+
+.invite-friend-search-input::placeholder {
+    color: #9aa0a6;
+}
+
+.invite-friend-search-input:focus {
+    border-color: #d1d5db;
+    background: #fff;
+}
+
+.invite-friend-toolbar-btn {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: #ffffff;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.invite-friend-cancel-btn {
+    height: 36px;
+    padding: 0 16px;
+    border: 1px solid #e6e6e6;
+    background: #ffffff;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-sizing: border-box;
+}
+
+.invite-friend-toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.invite-friend-toolbar-btn-secondary {
+    border-color: #e5e7eb;
+    background: #ffffff;
+    color: #333;
+}
+
+.invite-friend-toolbar-btn-secondary:hover:not(:disabled) {
+    background: #f9fafb;
+}
+
+.invite-friend-toolbar-btn-primary {
+    border-color: #111111;
+    background: #111111;
+    color: #ffffff;
+}
+
+.invite-friend-toolbar-btn-primary:hover:not(:disabled) {
+    background: #1e1e1e;
+}
+
+#invite-friend-list-section {
+    border: none;
+    background: transparent;
     overflow: visible;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+    padding: 0;
 }
 
-.invite-friend-group-list {
+.invite-friend-active-layout {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: stretch;
+}
+
+.invite-friend-checkboxes {
     display: flex;
     flex-direction: column;
-    gap: 0;
+}
+
+.invite-friend-box {
     border: 1px solid #e6e6e6;
     border-radius: 12px;
     overflow: hidden;
     background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.invite-friend-row-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 63px;
+    box-sizing: border-box;
+    border-bottom: 1px solid transparent;
+}
+
+.invite-friend-row-checkbox:last-child {
+    border-bottom: none;
+}
+
+.invite-friend-row-inside-box {
+    min-height: 63px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.invite-friend-row-inside-box:last-child {
+    border-bottom: none;
+}
+
+.invite-friend-select-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: #111111;
+    transform: translateY(1px);
+}
+
+.invite-friend-footer {
+    padding: 16px 20px 20px;
+    border-top: 1px solid #eeeeee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 @media (max-width: 760px) {
-    .invite-friend-row {
+    .invite-friend-row,
+    .invite-friend-header {
         flex-direction: column;
         align-items: flex-start;
     }
@@ -237,5 +418,20 @@
     .invite-friend-row-right {
         width: 100%;
         justify-content: flex-start;
+    }
+
+    .invite-friend-toolbar-left {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .invite-friend-search-input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .invite-friend-active-layout {
+        grid-template-columns: 24px minmax(0, 1fr);
+        column-gap: 8px;
     }
 }

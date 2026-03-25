@@ -100,7 +100,7 @@
 .project-member-title-meta {
     display: flex;
     gap: 6px;
-    margin-top: 6px;
+    margin-top: 10px;
     flex-wrap: wrap;
 }
 
@@ -276,15 +276,15 @@
 }
 
 .project-member-pill-private {
-    background: #f5f3ff;
-    color: #6d28d9;
-    border-color: #e9d5ff;
+    background: #eef6ff;
+    color: #246bce;
+    border-color: #d7e7ff;
 }
 
 .project-member-pill-role-member {
-    background: #fff7ed;
-    color: #c56a17;
-    border-color: #fde2c4;
+    background: #ecfdf3;
+    color: #16794b;
+    border-color: #cfeedd;
 }
 
 .project-member-pill-neutral {

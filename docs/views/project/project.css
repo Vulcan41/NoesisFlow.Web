@@ -100,7 +100,7 @@
 .project-sidebar-meta {
     display: flex;
     gap: 6px;
-    margin-top: 6px;
+    margin-top: 10px;
     flex-wrap: wrap;
 }
 
@@ -132,9 +132,9 @@
 }
 
 .project-sidebar-pill-member {
-    background: #fff7ed;
-    color: #c56a17;
-    border-color: #fde2c4;
+    background: #ecfdf3;
+    color: #16794b;
+    border-color: #cfeedd;
 }
 
 /* MENU */
