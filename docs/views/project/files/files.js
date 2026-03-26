@@ -5,6 +5,9 @@ let defaultFolderId = null;
 let currentFolderId = null;
 let currentFolderName = "General Files";
 
+let currentSort = "name_asc";
+let currentSearch = "";
+
 export async function initFiles(project) {
     if (!project) return;
 
@@ -17,6 +20,8 @@ export async function initFiles(project) {
     setupCreateFolderButton();
     setupBackFolderButton();
     setupGlobalMenuCloser();
+    setupSort();
+    setupSearch();
     await loadFolderContent();
 }
 
@@ -128,6 +133,60 @@ function updateBackButtonVisibility() {
 }
 
 /* =========================
+   SORT / SEARCH
+========================= */
+
+function setupSort() {
+    const select = document.getElementById("files-sort-select");
+    if (!select) return;
+
+    select.value = currentSort;
+
+    select.onchange = async () => {
+        currentSort = select.value;
+        await loadFolderContent();
+    };
+}
+
+function setupSearch() {
+    const input = document.getElementById("files-search-input");
+    if (!input) return;
+
+    input.value = currentSearch;
+
+    input.oninput = async () => {
+        currentSearch = input.value.trim().toLowerCase();
+        await loadFolderContent();
+    };
+}
+
+function matchesSearch(value) {
+    if (!currentSearch) return true;
+    return String(value || "").toLowerCase().includes(currentSearch);
+}
+
+function sortByCurrentRule(items, getName, getDate) {
+    const sorted = [...items];
+
+    switch (currentSort) {
+        case "name_asc":
+            return sorted.sort((a, b) => getName(a).localeCompare(getName(b)));
+
+        case "name_desc":
+            return sorted.sort((a, b) => getName(b).localeCompare(getName(a)));
+
+        case "newest_desc":
+            return sorted.sort((a, b) => new Date(getDate(b)) - new Date(getDate(a)));
+
+        case "newest_asc":
+            return sorted.sort((a, b) => new Date(getDate(a)) - new Date(getDate(b)));
+
+        default:
+            return sorted;
+    }
+}
+
+/* =========================
    LOAD FOLDER CONTENT
 ========================= */
 
@@ -167,8 +226,18 @@ async function loadFolderContent() {
         return;
     }
 
-    const safeFolders = folders ?? [];
-    const safeFiles = files ?? [];
+    const safeFolders = sortByCurrentRule(
+        (folders ?? []).filter((folder) => matchesSearch(folder.name)),
+        (folder) => folder.name?.toLowerCase() || "",
+        (folder) => folder.created_at
+    );
+
+    const safeFiles = sortByCurrentRule(
+        (files ?? []).filter((file) => matchesSearch(file.filename)),
+        (file) => file.filename?.toLowerCase() || "",
+        (file) => file.created_at
+    );
+
     const totalItems = safeFolders.length + safeFiles.length;
 
     if (countEl) {

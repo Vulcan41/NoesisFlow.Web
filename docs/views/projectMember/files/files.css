@@ -257,3 +257,42 @@
     font-size: 13px;
     color: #9ca3af;
 }
+
+
+
+.files-toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.files-sort-select {
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111111;
+    font-size: 13px;
+    outline: none;
+}
+
+.files-search-input {
+    width: 220px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #111111;
+    font-size: 13px;
+    outline: none;
+}
+
+.files-search-input::placeholder {
+    color: #9ca3af;
+}
+
+.file-row {
+    cursor: pointer;
+}

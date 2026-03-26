@@ -24,6 +24,22 @@
 
     <div class="files-shell">
         <div class="files-toolbar">
+            <div class="files-toolbar-controls">
+                <select id="files-sort-select" class="files-sort-select">
+                    <option value="name_asc">Name A → Z</option>
+                    <option value="name_desc">Name Z → A</option>
+                    <option value="newest_desc">Newest first</option>
+                    <option value="newest_asc">Oldest first</option>
+                </select>
+
+                <input
+                        id="files-search-input"
+                        class="files-search-input"
+                        type="text"
+                        placeholder="Search files and folders..."
+                />
+            </div>
+
             <div class="files-count" id="files-count">0 items</div>
         </div>
 
