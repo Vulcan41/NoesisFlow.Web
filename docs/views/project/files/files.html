@@ -1,19 +1,34 @@
 <div class="files-section">
 
-  <!-- HEADER -->
   <div class="files-header">
-    <div class="files-title">Files</div>
+    <div class="files-title-block">
+      <div class="files-title">Files</div>
+      <div class="files-current-folder" id="files-current-folder">
+        Folder: General Files
+      </div>
+    </div>
 
-    <button id="files-upload-btn" class="files-upload-btn" type="button">
-      Upload file
-    </button>
+    <div class="files-header-actions">
+      <button id="files-create-folder-btn" class="files-secondary-btn" type="button">
+        New folder
+      </button>
+
+      <button id="files-upload-btn" class="files-upload-btn" type="button">
+        Upload file
+      </button>
+    </div>
 
     <input id="files-input" type="file" hidden />
   </div>
 
-  <!-- LIST -->
-  <div id="files-list" class="files-list">
-    <div class="files-empty">Loading files...</div>
+  <div class="files-shell">
+    <div class="files-toolbar">
+      <div class="files-count" id="files-count">0 items</div>
+    </div>
+
+    <div id="files-list" class="files-list">
+      <div class="files-empty">Loading files...</div>
+    </div>
   </div>
 
 </div>
