@@ -189,3 +189,35 @@
     color: #6b7280;
     font-weight: 500;
 }
+
+
+
+.hidden {
+    display: none !important;
+}
+
+.files-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.files-secondary-btn {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.file-row-folder {
+    cursor: pointer;
+}
+
+.file-row-folder:hover {
+    background: #f6f8fb;
+}

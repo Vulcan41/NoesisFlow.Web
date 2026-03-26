@@ -1,6 +1,7 @@
 import { supabase } from "../../../core/supabase.js";
 
 let currentProject = null;
+let defaultFolderId = null;
 let currentFolderId = null;
 let currentFolderName = "General Files";
 
@@ -13,6 +14,7 @@ export async function initFiles(project) {
     if (!ready) return;
 
     renderCurrentFolderLabel();
+    setupBackFolderButton();
     await loadFolderContent();
 }
 
@@ -42,9 +44,26 @@ async function loadDefaultFolder() {
         return false;
     }
 
+    defaultFolderId = data.id;
     currentFolderId = data.id;
     currentFolderName = data.name || "General Files";
     return true;
+}
+
+async function loadFolderMeta(folderId) {
+    const { data, error } = await supabase
+        .from("project_folders")
+        .select("id, name, parent_folder_id")
+        .eq("id", folderId)
+        .eq("project_id", currentProject.id)
+        .single();
+
+    if (error || !data) {
+        console.error("Failed to load folder meta:", error);
+        return null;
+    }
+
+    return data;
 }
 
 function renderCurrentFolderLabel() {
@@ -52,6 +71,13 @@ function renderCurrentFolderLabel() {
     if (!el) return;
 
     el.textContent = `Folder: ${currentFolderName}`;
+}
+
+function updateBackButtonVisibility() {
+    const btn = document.getElementById("files-back-folder-btn");
+    if (!btn) return;
+
+    btn.classList.toggle("hidden", currentFolderId === defaultFolderId);
 }
 
 /* =========================
@@ -63,6 +89,9 @@ async function loadFolderContent() {
     const countEl = document.getElementById("files-count");
 
     if (!list || !currentFolderId) return;
+
+    renderCurrentFolderLabel();
+    updateBackButtonVisibility();
 
     list.innerHTML = `<div class="files-empty">Loading files...</div>`;
 
@@ -127,6 +156,37 @@ async function getAuthHeaders() {
 }
 
 /* =========================
+   NAVIGATION
+========================= */
+
+function setupBackFolderButton() {
+    const btn = document.getElementById("files-back-folder-btn");
+    if (!btn) return;
+
+    btn.onclick = async () => {
+        if (!currentFolderId || currentFolderId === defaultFolderId) return;
+
+        const currentFolder = await loadFolderMeta(currentFolderId);
+        if (!currentFolder) return;
+
+        if (!currentFolder.parent_folder_id) {
+            currentFolderId = defaultFolderId;
+            const defaultFolder = await loadFolderMeta(defaultFolderId);
+            currentFolderName = defaultFolder?.name || "General Files";
+            await loadFolderContent();
+            return;
+        }
+
+        const parentFolder = await loadFolderMeta(currentFolder.parent_folder_id);
+        if (!parentFolder) return;
+
+        currentFolderId = parentFolder.id;
+        currentFolderName = parentFolder.name;
+        await loadFolderContent();
+    };
+}
+
+/* =========================
    ROWS
 ========================= */
 
@@ -165,6 +225,12 @@ function createFolderRow(folder) {
     main.appendChild(metaWrap);
 
     row.appendChild(main);
+
+    row.onclick = async () => {
+        currentFolderId = folder.id;
+        currentFolderName = folder.name;
+        await loadFolderContent();
+    };
 
     return row;
 }
@@ -210,7 +276,9 @@ function createFileRow(file) {
     downloadBtn.className = "file-btn file-btn-download";
     downloadBtn.textContent = "Download";
 
-    downloadBtn.onclick = async () => {
+    downloadBtn.onclick = async (event) => {
+        event.stopPropagation();
+
         try {
             const headers = await getAuthHeaders();
 

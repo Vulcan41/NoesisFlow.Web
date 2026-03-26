@@ -271,3 +271,15 @@
 .files-secondary-btn:active {
     transform: scale(0.98);
 }
+
+.hidden {
+    display: none !important;
+}
+
+.file-row-folder {
+    cursor: pointer;
+}
+
+.file-row-folder:hover {
+    background: #f6f8fb;
+}
