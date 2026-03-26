@@ -302,23 +302,29 @@ async function deleteFolder(folder) {
     }
 
     const confirmed = window.confirm(
-        `Delete folder "${folder.name}"?`
+        `Delete folder "${folder.name}" and everything inside it?`
     );
 
     if (!confirmed) return;
 
     try {
-        const { error } = await supabase
-            .from("project_folders")
-            .delete()
-            .eq("id", folder.id);
+        const headers = await getAuthHeaders();
 
-        if (error) throw error;
+        const res = await fetch("/api/project-files/delete-folder", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ folderId: folder.id })
+        });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => null);
+            throw new Error(data?.error || "Delete failed");
+        }
 
         await loadFolderContent();
     } catch (err) {
         console.error("Delete folder failed:", err);
-        alert("Failed to delete folder");
+        alert(err.message || "Failed to delete folder");
     }
 }
 
