@@ -421,7 +421,7 @@ function getFileIcon(file) {
     const ext = getFileExtension(name);
 
     if (mime.startsWith("image/") || ["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
-        return "assets/icon_png.png";
+        return "assets/icon_img.png";
     }
 
     if (mime === "application/pdf" || ext === "pdf") {
@@ -452,7 +452,7 @@ function getFileIcon(file) {
         return "assets/icon_audio.png";
     }
 
-    return "assets/icon_file.png";
+    return "assets/icon_file_file.png";
 }
 
 function getFileExtension(filename) {
