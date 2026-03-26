@@ -519,40 +519,12 @@ function createFileRow(file) {
     const actions = document.createElement("div");
     actions.className = "file-actions";
 
-    const downloadBtn = document.createElement("button");
-    downloadBtn.className = "file-btn file-btn-download";
-    downloadBtn.textContent = "Download";
-
-    downloadBtn.onclick = async (event) => {
-        event.stopPropagation();
-
-        try {
-            const headers = await getAuthHeaders();
-
-            const res = await fetch("/api/project-files/download-url", {
-                method: "POST",
-                headers,
-                body: JSON.stringify({ fileId: file.id })
-            });
-
-            if (!res.ok) {
-                throw new Error("Failed to get download URL");
-            }
-
-            const { downloadUrl } = await res.json();
-            window.open(downloadUrl, "_blank");
-        } catch (err) {
-            console.error("Download error:", err);
-            alert("Download failed");
-        }
-    };
-
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "file-btn file-btn-delete";
     deleteBtn.textContent = "Delete";
 
     deleteBtn.onclick = async (event) => {
-        event.stopPropagation();
+        event.stopPropagation(); // IMPORTANT
 
         if (!confirm(`Delete "${file.filename}"?`)) return;
 
@@ -576,11 +548,36 @@ function createFileRow(file) {
         }
     };
 
-    actions.appendChild(downloadBtn);
     actions.appendChild(deleteBtn);
 
     row.appendChild(main);
     row.appendChild(actions);
+
+    /* =========================
+       ROW CLICK = DOWNLOAD
+    ========================= */
+
+    row.onclick = async () => {
+        try {
+            const headers = await getAuthHeaders();
+
+            const res = await fetch("/api/project-files/download-url", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({ fileId: file.id })
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to get download URL");
+            }
+
+            const { downloadUrl } = await res.json();
+            window.open(downloadUrl, "_blank");
+        } catch (err) {
+            console.error("Download error:", err);
+            alert("Download failed");
+        }
+    };
 
     return row;
 }
