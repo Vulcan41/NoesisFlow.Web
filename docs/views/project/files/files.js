@@ -549,6 +549,7 @@ function createFolderRow(folder) {
     img.src = "assets/folder.png";
     img.alt = "folder";
     img.className = "file-icon-img";
+
     icon.appendChild(img);
 
     const metaWrap = document.createElement("div");
@@ -611,6 +612,7 @@ function createFileRow(file) {
     img.src = getFileIcon(file);
     img.alt = "file";
     img.className = "file-icon-img";
+
     icon.appendChild(img);
 
     const metaWrap = document.createElement("div");
@@ -695,26 +697,46 @@ function createFileRow(file) {
 function getFileIcon(file) {
     const mime = (file.mime_type || "").toLowerCase();
     const name = (file.filename || "").toLowerCase();
+    const ext = getFileExtension(name);
 
-    if (mime.startsWith("image/")) return "assets/icon_jpg.png";
-    if (mime === "application/pdf" || name.endsWith(".pdf")) return "assets/icon_pdf.png";
+    if (mime.startsWith("image/") || ["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
+        return "assets/icon_img.png";
+    }
 
-    if (mime.startsWith("video/")) return "assets/logo_5.png";
-    if (mime.startsWith("audio/")) return "assets/logo_5.png";
+    if (mime === "application/pdf" || ext === "pdf") {
+        return "assets/icon_pdf.png";
+    }
 
-    if (
-    name.endsWith(".zip") ||
-    name.endsWith(".rar") ||
-    name.endsWith(".7z")
-    ) return "assets/logo_5.png";
+    if (["doc", "docx"].includes(ext)) {
+        return "assets/icon_doc.png";
+    }
 
-    if (
-    name.endsWith(".doc") ||
-    name.endsWith(".docx") ||
-    name.endsWith(".txt")
-    ) return "assets/logo_5.png";
+    if (["txt"].includes(ext)) {
+        return "assets/icon_txt.png";
+    }
 
-    return "assets/logo_5.png";
+    if (["xls", "xlsx", "csv"].includes(ext)) {
+        return "assets/icon_xls.png";
+    }
+
+    if (["zip", "rar", "7z"].includes(ext)) {
+        return "assets/icon_zip.png";
+    }
+
+    if (mime.startsWith("video/") || ["mp4", "mov", "avi"].includes(ext)) {
+        return "assets/icon_video.png";
+    }
+
+    if (mime.startsWith("audio/") || ["mp3", "wav"].includes(ext)) {
+        return "assets/icon_audio.png";
+    }
+
+    return "assets/icon_file_file.png";
+}
+
+function getFileExtension(filename) {
+    const parts = filename.split(".");
+    return parts.length > 1 ? parts.pop().toLowerCase() : "";
 }
 
 function formatSize(bytes) {
