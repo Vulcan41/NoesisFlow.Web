@@ -3,8 +3,7 @@ import { supabase } from "../../../core/supabase.js";
 let currentProject = null;
 let defaultFolderId = null;
 let currentFolderId = null;
-let currentFolderName = "General Files";
-
+let currentFolderName = "Root Folder";
 let currentSort = "name_asc";
 let currentSearch = "";
 
@@ -53,7 +52,7 @@ async function loadDefaultFolder() {
 
     defaultFolderId = data.id;
     currentFolderId = data.id;
-    currentFolderName = data.name || "General Files";
+    currentFolderName = data.name || "Root Folder";
     return true;
 }
 
@@ -308,7 +307,7 @@ function setupBackFolderButton() {
         if (!currentFolder.parent_folder_id) {
             currentFolderId = defaultFolderId;
             const defaultFolder = await loadFolderMeta(defaultFolderId);
-            currentFolderName = defaultFolder?.name || "General Files";
+            currentFolderName = defaultFolder?.name || "Root Folder";
             await loadFolderContent();
             return;
         }
