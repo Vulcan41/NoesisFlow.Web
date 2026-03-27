@@ -26,8 +26,9 @@ export async function initFiles(project) {
     setupBackFolderButton();
     setupSort();
     setupSearch();
-
-    updateContributionUI(); // 👈 NEW
+    setupCreateFolderButton();
+    setupUpload();
+    updateContributionUI();
 
     await loadFolderContent();
 }
@@ -342,6 +343,119 @@ function setupBackFolderButton() {
         updateContributionUI();
 
         await loadFolderContent();
+    };
+}
+
+function setupCreateFolderButton() {
+    const btn = document.getElementById("files-create-folder-btn");
+    if (!btn) return;
+
+    btn.onclick = async () => {
+        if (!currentFolderId || !currentFolderCanContribute) return;
+
+        const name = window.prompt("Folder name:");
+        if (!name || !name.trim()) return;
+
+        try {
+            const {
+                data: { user }
+            } = await supabase.auth.getUser();
+
+            const parentFolder = await loadFolderMeta(currentFolderId);
+
+            const { error } = await supabase
+                .from("project_folders")
+                .insert({
+                project_id: currentProject.id,
+                parent_folder_id: currentFolderId,
+                name: name.trim(),
+                created_by: user.id,
+                is_default: false,
+                member_can_contribute: parentFolder?.member_can_contribute ?? false
+            });
+
+            if (error) throw error;
+
+            await loadFolderContent();
+        } catch (err) {
+            console.error("Create folder failed:", err);
+            alert("Failed to create folder");
+        }
+    };
+}
+
+function setupUpload() {
+    const btn = document.getElementById("files-upload-btn");
+    const input = document.getElementById("files-input");
+
+    if (!btn || !input) return;
+
+    btn.onclick = () => {
+        if (!currentFolderCanContribute) return;
+        input.click();
+    };
+
+    input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file || !currentFolderId || !currentFolderCanContribute) return;
+
+        try {
+            const headers = await getAuthHeaders();
+
+            const res = await fetch("/api/project-files/upload-url", {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                    projectId: currentProject.id,
+                    fileName: file.name,
+                    contentType: file.type
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to get upload URL");
+            }
+
+            const { uploadUrl, objectKey, fileId } = await res.json();
+
+            const uploadRes = await fetch(uploadUrl, {
+                method: "PUT",
+                body: file
+            });
+
+            if (!uploadRes.ok) {
+                throw new Error("Upload to storage failed");
+            }
+
+            const {
+                data: { user }
+            } = await supabase.auth.getUser();
+
+            const { error } = await supabase
+                .from("project_files")
+                .insert({
+                id: fileId,
+                project_id: currentProject.id,
+                folder_id: currentFolderId,
+                uploaded_by: user.id,
+                filename: file.name,
+                object_key: objectKey,
+                size_bytes: file.size,
+                mime_type: file.type,
+                status: "ready",
+                visibility: "public",
+                kind: "general"
+            });
+
+            if (error) throw error;
+
+            await loadFolderContent();
+        } catch (err) {
+            console.error("Upload failed:", err);
+            alert("Upload failed");
+        }
+
+        input.value = "";
     };
 }
 

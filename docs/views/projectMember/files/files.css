@@ -295,3 +295,42 @@
 .file-row {
     cursor: pointer;
 }
+
+
+
+.files-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.files-header-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid #d9dde3;
+    background: #ffffff;
+    color: #111111;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.files-header-btn:hover {
+    background: #f6f7f9;
+}
+
+.files-header-btn-secondary {
+    background: #ffffff;
+    color: #111111;
+}
+
+.files-header-btn-secondary:hover {
+    background: #f6f7f9;
+}
+
+.hidden {
+    display: none !important;
+}
