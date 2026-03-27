@@ -339,31 +339,40 @@ function setupCreateFolderButton() {
     btn.onclick = async () => {
         if (!currentFolderId) return;
 
-        const name = window.prompt("Folder name:");
-        if (!name || !name.trim()) return;
+        openFolderModal({
+            title: "New folder",
+            label: "Folder name:",
+            confirmText: "Create",
+            initialValue: "",
+            onConfirm: async (value) => {
+                try {
+                    const {
+                        data: { user }
+                    } = await supabase.auth.getUser();
 
-        try {
-            const {
-                data: { user }
-            } = await supabase.auth.getUser();
+                    const { error } = await supabase
+                        .from("project_folders")
+                        .insert({
+                        project_id: currentProject.id,
+                        parent_folder_id: currentFolderId,
+                        name: value,
+                        created_by: user.id,
+                        is_default: false
+                    });
 
-            const { error } = await supabase
-                .from("project_folders")
-                .insert({
-                project_id: currentProject.id,
-                parent_folder_id: currentFolderId,
-                name: name.trim(),
-                created_by: user.id,
-                is_default: false
-            });
+                    if (error) throw error;
 
-            if (error) throw error;
-
-            await loadFolderContent();
-        } catch (err) {
-            console.error("Create folder failed:", err);
-            alert("Failed to create folder");
-        }
+                    closeFolderModal();
+                    await loadFolderContent();
+                } catch (err) {
+                    console.error("Create folder failed:", err);
+                    alert("Failed to create folder");
+                }
+            },
+            onCancel: () => {
+                closeFolderModal();
+            }
+        });
     };
 }
 
