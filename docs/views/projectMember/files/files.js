@@ -6,11 +6,19 @@ let currentFolderId = null;
 let currentFolderName = "Root Folder";
 let currentSort = "name_asc";
 let currentSearch = "";
+let currentUserId = null;
+let currentFolderCanContribute = false;
 
 export async function initFiles(project) {
     if (!project) return;
 
     currentProject = project;
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    currentUserId = user?.id || null;
 
     const ready = await loadDefaultFolder();
     if (!ready) return;
@@ -18,6 +26,9 @@ export async function initFiles(project) {
     setupBackFolderButton();
     setupSort();
     setupSearch();
+
+    updateContributionUI(); // 👈 NEW
+
     await loadFolderContent();
 }
 
@@ -50,6 +61,7 @@ async function loadDefaultFolder() {
     defaultFolderId = data.id;
     currentFolderId = data.id;
     currentFolderName = data.name || "Root Folder";
+    currentFolderCanContribute = !!data.member_can_contribute;
     return true;
 }
 
@@ -302,19 +314,33 @@ function setupBackFolderButton() {
         const currentFolder = await loadFolderMeta(currentFolderId);
         if (!currentFolder) return;
 
+        // 🔹 Going back to ROOT
         if (!currentFolder.parent_folder_id) {
             currentFolderId = defaultFolderId;
+
             const defaultFolder = await loadFolderMeta(defaultFolderId);
+
             currentFolderName = defaultFolder?.name || "Root Folder";
+
+            // (IMPORTANT)
+            currentFolderCanContribute = !!defaultFolder?.member_can_contribute;
+            updateContributionUI();
+
             await loadFolderContent();
             return;
         }
 
+        // Going to parent folder
         const parentFolder = await loadFolderMeta(currentFolder.parent_folder_id);
         if (!parentFolder) return;
 
         currentFolderId = parentFolder.id;
         currentFolderName = parentFolder.name;
+
+        // (IMPORTANT)
+        currentFolderCanContribute = !!parentFolder.member_can_contribute;
+        updateContributionUI();
+
         await loadFolderContent();
     };
 }
@@ -365,6 +391,8 @@ function createFolderRow(folder) {
     row.onclick = async () => {
         currentFolderId = folder.id;
         currentFolderName = folder.name;
+        currentFolderCanContribute = !!folder.member_can_contribute; // 👈 NEW
+        updateContributionUI(); // 👈 NEW
         await loadFolderContent();
     };
 
@@ -525,6 +553,21 @@ function formatDate(dateString) {
         month: "2-digit",
         year: "numeric"
     });
+}
+
+function updateContributionUI() {
+    const uploadBtn = document.getElementById("files-upload-btn");
+    const createBtn = document.getElementById("files-create-folder-btn");
+
+    const can = currentFolderCanContribute === true;
+
+    if (uploadBtn) {
+        uploadBtn.classList.toggle("hidden", !can);
+    }
+
+    if (createBtn) {
+        createBtn.classList.toggle("hidden", !can);
+    }
 }
 
 function escapeHtml(value) {
