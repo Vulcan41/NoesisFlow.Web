@@ -21,6 +21,7 @@ let currentFolderId = null;
 let currentFolderName = "Root Folder";
 let currentSort = "name_asc";
 let currentSearch = "";
+let currentFolderCanContribute = false;
 
 export async function initFiles(project) {
     if (!project) return;
@@ -41,6 +42,7 @@ export async function initFiles(project) {
     setupSort();
     setupSearch();
     setupContainerDragAndDrop();
+    setupContributionToggle();
     await loadFolderContent();
 }
 
@@ -54,7 +56,7 @@ async function loadDefaultFolder() {
 
     const { data, error } = await supabase
         .from("project_folders")
-        .select("id, name")
+        .select("id, name, member_can_contribute")
         .eq("project_id", currentProject.id)
         .eq("is_default", true)
         .single();
@@ -73,6 +75,8 @@ async function loadDefaultFolder() {
     defaultFolderId = data.id;
     currentFolderId = data.id;
     currentFolderName = data.name || "Root Folder";
+    currentFolderCanContribute = !!data.member_can_contribute;
+    updateContributionToggleUI();
     return true;
 }
 
@@ -129,6 +133,8 @@ async function renderBreadcrumbs() {
             btn.onclick = async () => {
                 currentFolderId = folder.id;
                 currentFolderName = folder.name;
+                currentFolderCanContribute = !!folder.member_can_contribute;
+                updateContributionToggleUI();
                 await loadFolderContent();
             };
         }
@@ -328,6 +334,8 @@ function setupBackFolderButton() {
             currentFolderId = defaultFolderId;
             const defaultFolder = await loadFolderMeta(defaultFolderId);
             currentFolderName = defaultFolder?.name || "Root Folder";
+            currentFolderCanContribute = !!defaultFolder?.member_can_contribute;
+            updateContributionToggleUI();
             await loadFolderContent();
             return;
         }
@@ -337,6 +345,8 @@ function setupBackFolderButton() {
 
         currentFolderId = parentFolder.id;
         currentFolderName = parentFolder.name;
+        currentFolderCanContribute = !!parentFolder.member_can_contribute;
+        updateContributionToggleUI();
         await loadFolderContent();
     };
 }
@@ -602,6 +612,44 @@ function createActionMenu(items) {
     return wrapper;
 }
 
+function setupContributionToggle() {
+    const toggle = document.getElementById("files-contrib-toggle");
+    if (!toggle) return;
+
+    toggle.onclick = async (event) => {
+        event.stopPropagation();
+
+        if (!currentFolderId) return;
+
+        const next = !currentFolderCanContribute;
+
+        try {
+            const { error } = await supabase
+                .from("project_folders")
+                .update({
+                member_can_contribute: next
+            })
+                .eq("id", currentFolderId);
+
+            if (error) throw error;
+
+            currentFolderCanContribute = next;
+            updateContributionToggleUI();
+
+        } catch (err) {
+            console.error("Toggle contribution failed:", err);
+            alert("Failed to update setting");
+        }
+    };
+}
+
+function updateContributionToggleUI() {
+    const toggle = document.getElementById("files-contrib-toggle");
+    if (!toggle) return;
+
+    toggle.classList.toggle("active", currentFolderCanContribute === true);
+}
+
 /* =========================
    DRAG & DROP
 ========================= */
@@ -740,14 +788,6 @@ function createFolderRow(folder) {
                 await renameFolder(folder);
             }
         },
-        {
-            label: folder.member_can_contribute
-            ? "Disable member contributions"
-            : "Enable member contributions",
-            onClick: async () => {
-                await toggleFolderMemberContribution(folder);
-            }
-        },
         ...(!folder.is_default ? [{
             label: "Delete",
             danger: true,
@@ -765,6 +805,8 @@ function createFolderRow(folder) {
     row.onclick = async () => {
         currentFolderId = folder.id;
         currentFolderName = folder.name;
+        currentFolderCanContribute = !!folder.member_can_contribute;
+        updateContributionToggleUI();
         await loadFolderContent();
     };
 
@@ -1056,6 +1098,7 @@ async function uploadSingleFileToFolder(file, folderId, targetFilename = null) {
         headers,
         body: JSON.stringify({
             projectId: currentProject.id,
+            folderId,
             fileName: finalFilename,
             contentType: file.type
         })
@@ -1293,36 +1336,6 @@ async function resolveUploadPlans(files, folderId) {
     }
 
     return plans;
-}
-
-async function toggleFolderMemberContribution(folder) {
-    try {
-        const { error } = await supabase
-            .from("project_folders")
-            .update({
-            member_can_contribute: !folder.member_can_contribute
-        })
-            .eq("id", folder.id)
-            .eq("project_id", currentProject.id);
-
-        if (error) throw error;
-
-        await showInfo({
-            type: "success",
-            message: !folder.member_can_contribute
-            ? "Members can now contribute in this folder."
-            : "Members can no longer contribute in this folder."
-        });
-
-        await loadFolderContent();
-    } catch (err) {
-        console.error("Toggle member contribution failed:", err);
-
-        await showInfo({
-            type: "error",
-            message: "Failed to update folder permissions"
-        });
-    }
 }
 
 function showUploadProgress(filename) {
