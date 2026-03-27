@@ -28,6 +28,7 @@ export async function initFiles(project) {
     setupSearch();
     setupCreateFolderButton();
     setupUpload();
+    setupGlobalMenuCloser();
     updateContributionUI();
 
     await loadFolderContent();
@@ -460,6 +461,58 @@ function setupUpload() {
     };
 }
 
+function createActionMenu(items) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "file-actions-menu";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "file-menu-trigger";
+    trigger.textContent = "⋯";
+
+    const dropdown = document.createElement("div");
+    dropdown.className = "file-menu-dropdown";
+
+    items.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `file-menu-item${item.danger ? " file-menu-item-danger" : ""}`;
+        btn.textContent = item.label;
+
+        btn.onclick = async (event) => {
+            event.stopPropagation();
+            dropdown.classList.remove("open");
+            await item.onClick();
+        };
+
+        dropdown.appendChild(btn);
+    });
+
+    trigger.onclick = (event) => {
+        event.stopPropagation();
+        const isOpen = dropdown.classList.contains("open");
+        closeAllMenus();
+        if (!isOpen) {
+            dropdown.classList.add("open");
+        }
+    };
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    return wrapper;
+}
+
+function setupGlobalMenuCloser() {
+    document.addEventListener("click", closeAllMenus);
+}
+
+function closeAllMenus() {
+    document.querySelectorAll(".file-menu-dropdown.open").forEach((menu) => {
+        menu.classList.remove("open");
+    });
+}
+
 /* =========================
    ROWS
 ========================= */
@@ -501,13 +554,35 @@ function createFolderRow(folder) {
 
     row.appendChild(main);
 
+    const isOwnFolder = folder.created_by === currentUserId;
+
+    if (isOwnFolder) {
+        const actions = createActionMenu([
+            {
+                label: "Rename",
+                onClick: async () => {
+                    await renameFolder(folder);
+                }
+            },
+            {
+                label: "Delete",
+                danger: true,
+                onClick: async () => {
+                    await deleteFolder(folder);
+                }
+            }
+        ]);
+
+        row.appendChild(actions);
+    }
+
     loadFolderStats(folder.id, sub);
 
     row.onclick = async () => {
         currentFolderId = folder.id;
         currentFolderName = folder.name;
-        currentFolderCanContribute = !!folder.member_can_contribute; // 👈 NEW
-        updateContributionUI(); // 👈 NEW
+        currentFolderCanContribute = !!folder.member_can_contribute;
+        updateContributionUI();
         await loadFolderContent();
     };
 
@@ -550,6 +625,22 @@ function createFileRow(file) {
     main.appendChild(metaWrap);
 
     row.appendChild(main);
+
+    const isOwnFile = file.uploaded_by === currentUserId;
+
+    if (isOwnFile) {
+        const actions = createActionMenu([
+            {
+                label: "Delete",
+                danger: true,
+                onClick: async () => {
+                    await deleteFile(file);
+                }
+            }
+        ]);
+
+        row.appendChild(actions);
+    }
 
     row.onclick = async () => {
         try {
@@ -682,6 +773,83 @@ function updateContributionUI() {
 
     if (createBtn) {
         createBtn.classList.toggle("hidden", !can);
+    }
+}
+
+async function renameFolder(folder) {
+    const nextName = window.prompt("Rename folder:", folder.name);
+    if (!nextName || !nextName.trim()) return;
+
+    try {
+        const { error } = await supabase
+            .from("project_folders")
+            .update({
+            name: nextName.trim()
+        })
+            .eq("id", folder.id);
+
+        if (error) throw error;
+
+        if (folder.id === currentFolderId) {
+            currentFolderName = nextName.trim();
+        }
+
+        await loadFolderContent();
+    } catch (err) {
+        console.error("Rename folder failed:", err);
+        alert("Failed to rename folder");
+    }
+}
+
+async function deleteFolder(folder) {
+    const confirmed = window.confirm(
+        `Delete folder "${folder.name}" and everything inside it?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const headers = await getAuthHeaders();
+
+        const res = await fetch("/api/project-files/delete-folder", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ folderId: folder.id })
+        });
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => null);
+            throw new Error(data?.error || "Delete failed");
+        }
+
+        await loadFolderContent();
+    } catch (err) {
+        console.error("Delete folder failed:", err);
+        alert(err.message || "Failed to delete folder");
+    }
+}
+
+async function deleteFile(file) {
+    const confirmed = window.confirm(`Delete "${file.filename}"?`);
+    if (!confirmed) return;
+
+    try {
+        const headers = await getAuthHeaders();
+
+        const res = await fetch("/api/project-files/delete-file", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ fileId: file.id })
+        });
+
+        if (!res.ok) {
+            throw new Error("Delete failed");
+        }
+
+        await loadFolderContent();
+    } catch (err) {
+        console.error("Delete file failed:", err);
+        alert("Failed to delete file");
     }
 }
 
