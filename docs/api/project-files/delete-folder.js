@@ -1,7 +1,11 @@
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { createClient } from "@supabase/supabase-js";
 
-const s3 = new S3Client({
+/* =========================
+   R2 CLIENT
+========================= */
+
+const client = new S3Client({
     region: "auto",
     endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
@@ -10,10 +14,57 @@ const s3 = new S3Client({
     },
 });
 
-const supabase = createClient(
+/* =========================
+   SUPABASE CLIENTS
+========================= */
+
+function getUserClient(req) {
+    return createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_ANON_KEY,
+        {
+            global: {
+                headers: {
+                    Authorization: req.headers.authorization || ""
+                }
+            }
+        }
+    );
+}
+
+const supabaseAdmin = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+/* =========================
+   HELPERS
+========================= */
+
+async function collectFolderTree(folderId) {
+    const folderIds = [];
+    const queue = [folderId];
+
+    while (queue.length) {
+        const currentId = queue.shift();
+        folderIds.push(currentId);
+
+        const { data: children, error } = await supabaseAdmin
+            .from("project_folders")
+            .select("id")
+            .eq("parent_folder_id", currentId);
+
+        if (error) throw error;
+
+        (children || []).forEach((child) => queue.push(child.id));
+    }
+
+    return folderIds;
+}
+
+/* =========================
+   HANDLER
+========================= */
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {
@@ -21,160 +72,158 @@ export default async function handler(req, res) {
     }
 
     try {
-        const token = req.headers.authorization?.replace("Bearer ", "");
-
-        if (!token) {
-            return res.status(401).json({ error: "Missing auth token" });
-        }
-
-        // get user from token
-        const {
-            data: { user },
-            error: userError
-        } = await supabase.auth.getUser(token);
-
-        if (userError || !user) {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-
-        const { folderId } = req.body;
+        const { folderId } = req.body || {};
 
         if (!folderId) {
             return res.status(400).json({ error: "Missing folderId" });
         }
 
         /* =========================
-           LOAD ROOT FOLDER
+           STEP 1: Get current user
         ========================= */
 
-        const { data: rootFolder, error: rootError } = await supabase
-            .from("project_folders")
-            .select("id, project_id, is_default")
-            .eq("id", folderId)
-            .single();
+        const supabaseUser = getUserClient(req);
 
-        if (rootError || !rootFolder) {
-            return res.status(404).json({ error: "Folder not found" });
-        }
+        const {
+            data: { user },
+            error: userError
+        } = await supabaseUser.auth.getUser();
 
-        if (rootFolder.is_default) {
-            return res.status(400).json({ error: "Cannot delete default folder" });
+        if (userError || !user) {
+            return res.status(401).json({ error: "Unauthorized" });
         }
 
         /* =========================
-           CHECK OWNER
+           STEP 2: Load target folder
         ========================= */
 
-        const { data: project, error: projectError } = await supabase
+        const { data: folder, error: folderError } = await supabaseAdmin
+            .from("project_folders")
+            .select("id, project_id, created_by, is_default")
+            .eq("id", folderId)
+            .single();
+
+        if (folderError || !folder) {
+            return res.status(404).json({ error: "Folder not found" });
+        }
+
+        if (folder.is_default) {
+            return res.status(403).json({ error: "Default folder cannot be deleted" });
+        }
+
+        /* =========================
+           STEP 3: Load project
+        ========================= */
+
+        const { data: project, error: projectError } = await supabaseAdmin
             .from("projects")
-            .select("owner_id")
-            .eq("id", rootFolder.project_id)
+            .select("id, owner_id")
+            .eq("id", folder.project_id)
             .single();
 
         if (projectError || !project) {
             return res.status(404).json({ error: "Project not found" });
         }
 
-        if (project.owner_id !== user.id) {
-            return res.status(403).json({ error: "Not allowed" });
+        const isOwner = project.owner_id === user.id;
+        const isFolderCreator = folder.created_by === user.id;
+
+        if (!isOwner && !isFolderCreator) {
+            return res.status(403).json({ error: "Forbidden" });
         }
 
         /* =========================
-           LOAD ALL FOLDERS IN PROJECT
+           STEP 4: Collect folder tree
         ========================= */
 
-        const { data: allFolders, error: foldersError } = await supabase
-            .from("project_folders")
-            .select("id, parent_folder_id")
-            .eq("project_id", rootFolder.project_id);
-
-        if (foldersError) {
-            throw foldersError;
-        }
+        const folderIds = await collectFolderTree(folder.id);
 
         /* =========================
-           BUILD TREE (RECURSIVE)
+           STEP 5: If member, ensure whole tree belongs to them
         ========================= */
 
-        const folderIdsToDelete = new Set();
-        const stack = [folderId];
+        if (!isOwner) {
+            const { data: treeFolders, error: treeFoldersError } = await supabaseAdmin
+                .from("project_folders")
+                .select("id, created_by")
+                .in("id", folderIds);
 
-        while (stack.length) {
-            const currentId = stack.pop();
-            folderIdsToDelete.add(currentId);
+            if (treeFoldersError) throw treeFoldersError;
 
-            const children = allFolders.filter(
-                f => f.parent_folder_id === currentId
+            const { data: treeFiles, error: treeFilesError } = await supabaseAdmin
+                .from("project_files")
+                .select("id, uploaded_by")
+                .in("folder_id", folderIds);
+
+            if (treeFilesError) throw treeFilesError;
+
+            const hasForeignFolder = (treeFolders || []).some(
+                (item) => item.created_by !== user.id
             );
 
-            children.forEach(child => stack.push(child.id));
-        }
+            const hasForeignFile = (treeFiles || []).some(
+                (item) => item.uploaded_by !== user.id
+            );
 
-        const folderIdsArray = [...folderIdsToDelete];
-
-        /* =========================
-           GET FILES IN THESE FOLDERS
-        ========================= */
-
-        const { data: files, error: filesError } = await supabase
-            .from("project_files")
-            .select("id, object_key")
-            .in("folder_id", folderIdsArray);
-
-        if (filesError) {
-            throw filesError;
-        }
-
-        /* =========================
-           DELETE FROM R2
-        ========================= */
-
-        for (const file of files) {
-            try {
-                const command = new DeleteObjectCommand({
-                    Bucket: process.env.R2_BUCKET_NAME,
-                    Key: file.object_key,
+            if (hasForeignFolder || hasForeignFile) {
+                return res.status(403).json({
+                    error: "You can only delete folder trees containing items you created"
                 });
-
-                await s3.send(command);
-            } catch (err) {
-                console.error("R2 delete failed for:", file.object_key, err);
             }
         }
 
         /* =========================
-           DELETE FILE ROWS
+           STEP 6: Load files to delete from storage
         ========================= */
 
-        const { error: deleteFilesError } = await supabase
+        const { data: files, error: filesError } = await supabaseAdmin
             .from("project_files")
-            .delete()
-            .in("folder_id", folderIdsArray);
+            .select("id, object_key")
+            .in("folder_id", folderIds);
 
-        if (deleteFilesError) {
-            throw deleteFilesError;
+        if (filesError) throw filesError;
+
+        /* =========================
+           STEP 7: Delete storage objects
+        ========================= */
+
+        for (const file of files || []) {
+            if (!file.object_key) continue;
+
+            const command = new DeleteObjectCommand({
+                Bucket: process.env.R2_BUCKET_NAME,
+                Key: file.object_key,
+            });
+
+            await client.send(command);
         }
 
         /* =========================
-           DELETE FOLDERS
+           STEP 8: Delete files from DB
         ========================= */
 
-        const { error: deleteFoldersError } = await supabase
+        const { error: deleteFilesError } = await supabaseAdmin
+            .from("project_files")
+            .delete()
+            .in("folder_id", folderIds);
+
+        if (deleteFilesError) throw deleteFilesError;
+
+        /* =========================
+           STEP 9: Delete folders from DB
+        ========================= */
+
+        const { error: deleteFoldersError } = await supabaseAdmin
             .from("project_folders")
             .delete()
-            .in("id", folderIdsArray);
+            .in("id", folderIds);
 
-        if (deleteFoldersError) {
-            throw deleteFoldersError;
-        }
+        if (deleteFoldersError) throw deleteFoldersError;
 
         return res.status(200).json({ success: true });
 
-    } catch (err) {
-        console.error("Delete folder error:", err);
-
-        return res.status(500).json({
-            error: "Failed to delete folder"
-        });
+    } catch (error) {
+        console.error("Delete folder error:", error);
+        return res.status(500).json({ error: "Failed to delete folder" });
     }
 }
