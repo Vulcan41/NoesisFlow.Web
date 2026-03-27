@@ -102,6 +102,52 @@ function resolveBatchModal(result) {
     closeFileConflictsBatchModal();
 }
 
+/* =========================
+   NEW: ROW WITH ICONS
+========================= */
+
+function createConflictRow(conflict) {
+    const row = document.createElement("div");
+    row.className = "file-conflict-row";
+
+    const left = document.createElement("div");
+    left.className = "file-conflict-left";
+
+    const iconWrap = document.createElement("div");
+    iconWrap.className = "file-conflict-icon";
+
+    const img = document.createElement("img");
+    img.src = getFileIcon({ filename: conflict.filename }); // FIXED
+    img.className = "file-conflict-icon-img";
+
+    iconWrap.appendChild(img);
+
+    const name = document.createElement("div");
+    name.className = "file-conflict-name";
+    name.textContent = conflict.filename;
+
+    left.appendChild(iconWrap);
+    left.appendChild(name);
+
+    const select = document.createElement("select");
+    select.className = "file-conflict-select";
+
+    select.innerHTML = `
+        <option value="rename">Keep both and rename</option>
+        <option value="replace">Replace existing</option>
+        <option value="skip">Skip</option>
+    `;
+
+    row.appendChild(left);
+    row.appendChild(select);
+
+    return { row, select };
+}
+
+/* =========================
+   OPEN MODAL
+========================= */
+
 export function openFileConflictsBatchModal(conflicts = []) {
     const modal = document.getElementById("file-conflicts-batch-modal");
     const subtitle = document.getElementById("file-conflicts-batch-subtitle");
@@ -119,36 +165,12 @@ export function openFileConflictsBatchModal(conflicts = []) {
     list.innerHTML = "";
 
     conflicts.forEach((conflict) => {
-        const row = document.createElement("div");
-        row.className = "file-conflicts-batch-row";
+        const { row, select } = createConflictRow(conflict);
 
-        const fileCol = document.createElement("div");
-        fileCol.className = "file-conflicts-batch-file";
-
-        const fileName = document.createElement("div");
-        fileName.className = "file-conflicts-batch-file-name";
-        fileName.textContent = conflict.filename;
-        fileName.title = conflict.filename;
-
-        const fileNote = document.createElement("div");
-        fileNote.className = "file-conflicts-batch-file-note";
-        fileNote.textContent = "A file with this exact name already exists in this folder.";
-
-        fileCol.appendChild(fileName);
-        fileCol.appendChild(fileNote);
-
-        const select = document.createElement("select");
-        select.className = "file-conflicts-batch-select";
+        // IMPORTANT: keep compatibility with existing logic
+        select.classList.add("file-conflicts-batch-select");
         select.setAttribute("data-filename", conflict.filename);
 
-        select.innerHTML = `
-            <option value="rename">Keep both and rename</option>
-            <option value="replace">Replace existing</option>
-            <option value="skip">Skip</option>
-        `;
-
-        row.appendChild(fileCol);
-        row.appendChild(select);
         list.appendChild(row);
     });
 
@@ -165,4 +187,53 @@ export function closeFileConflictsBatchModal() {
 
     modal.classList.add("hidden");
     batchResolveHandler = null;
+}
+
+/* =========================
+   ICON LOGIC
+========================= */
+
+function getFileIcon(file) {
+    const mime = (file.mime_type || "").toLowerCase();
+    const name = (file.filename || "").toLowerCase();
+    const ext = getFileExtension(name);
+
+    if (mime.startsWith("image/") || ["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
+        return "assets/icons_img.png";
+    }
+
+    if (mime === "application/pdf" || ext === "pdf") {
+        return "assets/icon_pdf.png";
+    }
+
+    if (["doc", "docx"].includes(ext)) {
+        return "assets/icon_doc.png";
+    }
+
+    if (["txt"].includes(ext)) {
+        return "assets/icon_txt.png";
+    }
+
+    if (["xls", "xlsx", "csv"].includes(ext)) {
+        return "assets/icon_xls.png";
+    }
+
+    if (["zip", "rar", "7z"].includes(ext)) {
+        return "assets/icon_zip.png";
+    }
+
+    if (mime.startsWith("video/") || ["mp4", "mov", "avi"].includes(ext)) {
+        return "assets/icon_video.png";
+    }
+
+    if (mime.startsWith("audio/") || ["mp3", "wav"].includes(ext)) {
+        return "assets/icon_audio.png";
+    }
+
+    return "assets/icon_file_file.png";
+}
+
+function getFileExtension(filename) {
+    const parts = filename.split(".");
+    return parts.length > 1 ? parts.pop().toLowerCase() : "";
 }
