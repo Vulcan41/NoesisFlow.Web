@@ -462,3 +462,19 @@
     background: #111111;
     transition: width 0.12s linear;
 }
+
+.files-drop-active {
+    outline: 2px dashed #111111;
+    outline-offset: -8px;
+    background: #fafafa;
+}
+
+.file-row-drop-target {
+    background: #f3f4f6;
+    outline: 2px dashed #111111;
+    outline-offset: -6px;
+}
+
+.file-row-no-drop {
+    background: #fff5f5;
+}

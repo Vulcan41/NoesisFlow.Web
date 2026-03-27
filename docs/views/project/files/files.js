@@ -30,6 +30,7 @@ export async function initFiles(project) {
     setupGlobalMenuCloser();
     setupSort();
     setupSearch();
+    setupContainerDragAndDrop();
     await loadFolderContent();
 }
 
@@ -488,61 +489,19 @@ function setupUpload() {
     btn.onclick = () => input.click();
 
     input.onchange = async () => {
-        const file = input.files?.[0];
-        if (!file || !currentFolderId) return;
+        const files = [...(input.files || [])];
+        if (!files.length || !currentFolderId) return;
 
         try {
-            const headers = await getAuthHeaders();
-
-            const res = await fetch("/api/project-files/upload-url", {
-                method: "POST",
-                headers,
-                body: JSON.stringify({
-                    projectId: currentProject.id,
-                    fileName: file.name,
-                    contentType: file.type
-                })
-            });
-
-            if (!res.ok) {
-                throw new Error("Failed to get upload URL");
+            for (const file of files) {
+                await uploadSingleFileToFolder(file, currentFolderId);
             }
-
-            const { uploadUrl, objectKey, fileId } = await res.json();
-
-            showUploadProgress(file.name);
-
-            await uploadFileWithProgress(uploadUrl, file, (progress) => {
-                updateUploadProgress(progress);
-            });
-
-            updateUploadProgress(100);
-
-            const {
-                data: { user }
-            } = await supabase.auth.getUser();
-
-            const { error } = await supabase
-                .from("project_files")
-                .insert({
-                id: fileId,
-                project_id: currentProject.id,
-                folder_id: currentFolderId,
-                uploaded_by: user.id,
-                filename: file.name,
-                object_key: objectKey,
-                size_bytes: file.size,
-                mime_type: file.type,
-                status: "ready",
-                visibility: "public",
-                kind: "general"
-            });
-
-            if (error) throw error;
 
             await showInfo({
                 type: "success",
-                message: "Upload completed successfully."
+                message: files.length === 1
+                ? "Upload completed successfully."
+                : "Files uploaded successfully."
             });
 
             await loadFolderContent();
@@ -550,11 +509,10 @@ function setupUpload() {
             console.error("Upload failed:", err);
             await showInfo({
                 type: "error",
-                message: "Upload failed"
+                message: err?.message || "Upload failed"
             });
         } finally {
             input.value = "";
-
             setTimeout(() => {
                 hideUploadProgress();
             }, 500);
@@ -616,6 +574,85 @@ function createActionMenu(items) {
     wrapper.appendChild(dropdown);
 
     return wrapper;
+}
+
+/* =========================
+   DRAG & DROP
+========================= */
+
+function setupContainerDragAndDrop() {
+    const list = document.getElementById("files-list");
+    if (!list) return;
+
+    list.addEventListener("dragenter", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+
+        const row = event.target.closest(".file-row");
+        if (row) return;
+
+        list.classList.add("files-drop-active");
+    });
+
+    list.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+
+        const row = event.target.closest(".file-row");
+        if (row) return;
+
+        event.preventDefault();
+        list.classList.add("files-drop-active");
+    });
+
+    list.addEventListener("dragleave", (event) => {
+        const related = event.relatedTarget;
+        if (related && list.contains(related)) return;
+
+        list.classList.remove("files-drop-active");
+    });
+
+    list.addEventListener("drop", async (event) => {
+        if (!hasDraggedFiles(event)) return;
+
+        const row = event.target.closest(".file-row");
+        if (row) return;
+
+        event.preventDefault();
+        list.classList.remove("files-drop-active");
+
+        const files = [...(event.dataTransfer?.files || [])];
+        if (!files.length || !currentFolderId) return;
+
+        try {
+            for (const file of files) {
+                await uploadSingleFileToFolder(file, currentFolderId);
+            }
+
+            await showInfo({
+                type: "success",
+                message: files.length === 1
+                ? "File uploaded successfully."
+                : "Files uploaded successfully."
+            });
+
+            await loadFolderContent();
+        } catch (err) {
+            console.error("Container drop upload failed:", err);
+            await showInfo({
+                type: "error",
+                message: err?.message || "Upload failed"
+            });
+        } finally {
+            setTimeout(() => {
+                hideUploadProgress();
+            }, 500);
+        }
+    });
+}
+
+function hasDraggedFiles(event) {
+    const types = event.dataTransfer?.types;
+    return !!types && [...types].includes("Files");
 }
 
 /* =========================
@@ -683,6 +720,66 @@ function createFolderRow(folder) {
         currentFolderName = folder.name;
         await loadFolderContent();
     };
+
+    /* =========================
+       DROP INTO THIS FOLDER
+    ========================= */
+
+    row.addEventListener("dragenter", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-drop-target");
+    });
+
+    row.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-drop-target");
+    });
+
+    row.addEventListener("dragleave", (event) => {
+        const related = event.relatedTarget;
+        if (related && row.contains(related)) return;
+        row.classList.remove("file-row-drop-target");
+    });
+
+    row.addEventListener("drop", async (event) => {
+        if (!hasDraggedFiles(event)) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.remove("file-row-drop-target");
+
+        const files = [...(event.dataTransfer?.files || [])];
+        if (!files.length) return;
+
+        try {
+            for (const file of files) {
+                await uploadSingleFileToFolder(file, folder.id);
+            }
+
+            await showInfo({
+                type: "success",
+                message: files.length === 1
+                ? `File uploaded to "${folder.name}".`
+                : `Files uploaded to "${folder.name}".`
+            });
+
+            await loadFolderContent();
+        } catch (err) {
+            console.error("Folder drop upload failed:", err);
+            await showInfo({
+                type: "error",
+                message: err?.message || "Upload failed"
+            });
+        } finally {
+            setTimeout(() => {
+                hideUploadProgress();
+            }, 500);
+        }
+    });
 
     return row;
 }
@@ -796,6 +893,35 @@ function createFileRow(file) {
         }
     };
 
+    /* =========================
+       BLOCK DROP ON FILE ROWS
+    ========================= */
+
+    row.addEventListener("dragenter", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-no-drop");
+    });
+
+    row.addEventListener("dragover", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.add("file-row-no-drop");
+    });
+
+    row.addEventListener("dragleave", () => {
+        row.classList.remove("file-row-no-drop");
+    });
+
+    row.addEventListener("drop", (event) => {
+        if (!hasDraggedFiles(event)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        row.classList.remove("file-row-no-drop");
+    });
+
     return row;
 }
 
@@ -857,6 +983,58 @@ async function loadFolderStats(folderId, subEl) {
         console.error("Folder size error:", err);
         subEl.textContent = "Folder";
     }
+}
+
+async function uploadSingleFileToFolder(file, folderId) {
+    if (!file || !folderId) return;
+
+    const headers = await getAuthHeaders();
+
+    const res = await fetch("/api/project-files/upload-url", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+            projectId: currentProject.id,
+            fileName: file.name,
+            contentType: file.type
+        })
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to get upload URL");
+    }
+
+    const { uploadUrl, objectKey, fileId } = await res.json();
+
+    showUploadProgress(file.name);
+
+    await uploadFileWithProgress(uploadUrl, file, (progress) => {
+        updateUploadProgress(progress);
+    });
+
+    updateUploadProgress(100);
+
+    const {
+        data: { user }
+    } = await supabase.auth.getUser();
+
+    const { error } = await supabase
+        .from("project_files")
+        .insert({
+        id: fileId,
+        project_id: currentProject.id,
+        folder_id: folderId,
+        uploaded_by: user.id,
+        filename: file.name,
+        object_key: objectKey,
+        size_bytes: file.size,
+        mime_type: file.type,
+        status: "ready",
+        visibility: "public",
+        kind: "general"
+    });
+
+    if (error) throw error;
 }
 
 function showUploadProgress(filename) {
