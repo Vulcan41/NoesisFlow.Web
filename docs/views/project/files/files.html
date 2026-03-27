@@ -12,11 +12,7 @@
     </div>
 
     <div class="files-header-actions">
-      <button
-              id="files-back-folder-btn"
-              class="files-secondary-btn hidden"
-              type="button"
-      >
+      <button id="files-back-folder-btn" class="files-secondary-btn hidden" type="button">
         Back
       </button>
 
@@ -32,6 +28,7 @@
     <input id="files-input" type="file" hidden />
   </div>
 
+  <!-- Upload progress -->
   <div id="files-upload-progress" class="files-upload-progress hidden">
     <div class="files-upload-progress-top">
       <span id="files-upload-progress-text">Uploading...</span>
@@ -44,46 +41,55 @@
   </div>
 
   <div class="files-shell">
+
     <div class="files-toolbar">
-      <div class="files-toolbar-controls">
-        <select id="files-sort-select" class="files-sort-select">
-          <option value="name_asc">Name A → Z</option>
-          <option value="name_desc">Name Z → A</option>
-          <option value="newest_desc">Newest first</option>
-          <option value="newest_asc">Oldest first</option>
-          <option value="size_desc">Largest first</option>
-          <option value="size_asc">Smallest first</option>
-        </select>
 
-        <input
-                id="files-search-input"
-                class="files-search-input"
-                type="text"
-                placeholder="Search files and folders..."
-        />
+      <!-- LEFT -->
+      <div class="files-toolbar-left">
+        <div class="files-count" id="files-count">0 items</div>
+
+        <div class="files-toolbar-controls">
+          <select id="files-sort-select" class="files-sort-select">
+            <option value="name_asc">Name A → Z</option>
+            <option value="name_desc">Name Z → A</option>
+            <option value="newest_desc">Newest first</option>
+            <option value="newest_asc">Oldest first</option>
+            <option value="size_desc">Largest first</option>
+            <option value="size_asc">Smallest first</option>
+          </select>
+
+          <input
+                  id="files-search-input"
+                  class="files-search-input"
+                  type="text"
+                  placeholder="Search files and folders..."
+          />
+        </div>
       </div>
 
-      <div class="files-header-contrib">
-    <span class="files-header-contrib-label">
+      <!-- RIGHT -->
+      <div class="files-toolbar-right">
+        <div class="files-header-contrib">
+      <span class="files-header-contrib-label">
         Members can contribute
-    </span>
+      </span>
 
-        <button
-                id="files-contrib-toggle"
-                class="files-contrib-toggle"
-                type="button"
-                title="Toggle member contributions"
-        >
-          <span class="files-contrib-toggle-knob"></span>
-        </button>
+          <button
+                  id="files-contrib-toggle"
+                  class="files-contrib-toggle"
+                  type="button"
+          >
+            <span class="files-contrib-toggle-knob"></span>
+          </button>
+        </div>
       </div>
 
-      <div class="files-count" id="files-count">0 items</div>
     </div>
 
     <div id="files-list" class="files-list">
       <div class="files-empty">Loading files...</div>
     </div>
+
   </div>
 
 </div>

@@ -75,12 +75,6 @@
     background: #fcfcfc;
 }
 
-.files-count {
-    font-size: 13px;
-    color: #6b6b6b;
-    font-weight: 500;
-}
-
 /* =========================
    LIST
 ========================= */
@@ -393,10 +387,46 @@
 
 
 
+.files-toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #ececec;
+    background: #fcfcfc;
+}
+
+.files-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+    flex: 1;
+}
+
 .files-toolbar-controls {
     display: flex;
     align-items: center;
     gap: 10px;
+    min-width: 0;
+}
+
+.files-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex: 0 0 auto;
+}
+
+.files-count {
+    font-size: 13px;
+    color: #6b6b6b;
+    font-weight: 500;
+    white-space: nowrap;
+    padding-right: 2px;
+    border-left: none;
 }
 
 .files-sort-select {
@@ -483,7 +513,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-left: auto;
 }
 
 .files-header-contrib-label {
