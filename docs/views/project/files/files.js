@@ -363,6 +363,8 @@ function setupCreateFolderButton() {
                         data: { user }
                     } = await supabase.auth.getUser();
 
+                    const parentFolder = await loadFolderMeta(currentFolderId);
+
                     const { error } = await supabase
                         .from("project_folders")
                         .insert({
@@ -370,7 +372,8 @@ function setupCreateFolderButton() {
                         parent_folder_id: currentFolderId,
                         name: value,
                         created_by: user.id,
-                        is_default: false
+                        is_default: false,
+                        member_can_contribute: parentFolder?.member_can_contribute ?? false
                     });
 
                     if (error) throw error;
