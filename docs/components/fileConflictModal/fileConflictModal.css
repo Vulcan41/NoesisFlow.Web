@@ -1,0 +1,77 @@
+.file-conflict-modal.hidden {
+    display: none !important;
+}
+
+.file-conflict-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2200;
+}
+
+.file-conflict-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+}
+
+.file-conflict-modal-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(460px, calc(100vw - 32px));
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.file-conflict-modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.file-conflict-modal-message {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #444444;
+}
+
+.file-conflict-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.file-conflict-btn {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.file-conflict-btn-secondary {
+    background: #f3f4f6;
+    color: #111111;
+}
+
+.file-conflict-btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.file-conflict-btn-danger {
+    background: #b42318;
+    color: #ffffff;
+}
+
+.file-conflict-btn-danger:hover {
+    background: #991b1b;
+}
