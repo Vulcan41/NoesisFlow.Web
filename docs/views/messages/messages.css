@@ -974,3 +974,71 @@
 .message-row.other .message-time {
     margin-top: 2px;
 }
+
+
+
+
+
+
+
+/* =========================
+   ATTACHMENT UPLOAD PROGRESS
+========================= */
+
+.chat-attachment-progress {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.chat-attachment-progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: #246e9d;
+    transition: width 0.15s ease;
+}
+
+.chat-attachment-progress.is-done {
+    opacity: 0.75;
+}
+
+/* file chips need positioning context */
+.chat-attachment-chip:not(.is-image) {
+    position: relative;
+    width: 100%;
+    min-height: 52px;
+    padding-bottom: 14px;
+}
+
+/* image chips already have position: relative, so this fits well */
+.chat-attachment-chip.is-image .chat-attachment-progress {
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.chat-attachment-chip.is-image .chat-attachment-progress-bar {
+    background: #ffffff;
+}
+
+.chat-attachment-error {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(180, 35, 24, 0.92);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 600;
+    z-index: 3;
+}

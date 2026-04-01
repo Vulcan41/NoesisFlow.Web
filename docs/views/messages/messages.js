@@ -914,10 +914,23 @@ function addPendingAttachments(files) {
 
     const nextFiles = [...files].map((file) => ({
         id: crypto.randomUUID(),
-        file
+        file,
+        progress: 0,
+        uploading: false,
+        uploaded: false,
+        error: false
     }));
 
     pendingAttachments.push(...nextFiles);
+    renderAttachmentPreview();
+}
+function updatePendingAttachmentState(attachmentId, patch) {
+    pendingAttachments = pendingAttachments.map((item) =>
+    item.id === attachmentId
+    ? { ...item, ...patch }
+    : item
+    );
+
     renderAttachmentPreview();
 }
 
@@ -1011,6 +1024,25 @@ function renderAttachmentPreview() {
             removePendingAttachment(item.id);
         };
 
+        if (item.uploading || item.uploaded) {
+            const progressWrap = document.createElement("div");
+            progressWrap.className = `chat-attachment-progress${item.uploaded ? " is-done" : ""}`;
+
+            const progressBar = document.createElement("div");
+            progressBar.className = "chat-attachment-progress-bar";
+            progressBar.style.width = `${item.progress || 0}%`;
+
+            progressWrap.appendChild(progressBar);
+            chip.appendChild(progressWrap);
+        }
+
+        if (item.error) {
+            const errorBadge = document.createElement("div");
+            errorBadge.className = "chat-attachment-error";
+            errorBadge.textContent = "Upload failed";
+            chip.appendChild(errorBadge);
+        }
+
         chip.appendChild(removeBtn);
         preview.appendChild(chip);
     });
@@ -1034,7 +1066,8 @@ async function getMessagesAuthHeaders() {
     };
 }
 
-async function uploadMessageAttachment(conversationId, file) {
+async function uploadMessageAttachment(conversationId, pendingItem) {
+    const file = pendingItem.file;
     const headers = await getMessagesAuthHeaders();
 
     const res = await fetch("/api/messages/upload-attachment-url", {
@@ -1054,7 +1087,19 @@ async function uploadMessageAttachment(conversationId, file) {
 
     const { uploadUrl, objectKey } = await res.json();
 
-    await uploadFileWithProgress(uploadUrl, file);
+    updatePendingAttachmentState(pendingItem.id, {
+        uploading: true,
+        progress: 0,
+        error: false
+    });
+
+    await uploadFileWithProgress(uploadUrl, file, (progress) => {
+        updatePendingAttachmentState(pendingItem.id, {
+            progress,
+            uploading: progress < 100,
+            uploaded: progress >= 100
+        });
+    });
 
     return {
         object_key: objectKey,
@@ -1064,14 +1109,27 @@ async function uploadMessageAttachment(conversationId, file) {
     };
 }
 
-function uploadFileWithProgress(uploadUrl, file) {
+function uploadFileWithProgress(uploadUrl, file, onProgress) {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
         xhr.open("PUT", uploadUrl, true);
 
+        xhr.upload.onprogress = (event) => {
+            if (!event.lengthComputable) return;
+
+            const progress = Math.round((event.loaded / event.total) * 100);
+
+            if (typeof onProgress === "function") {
+                onProgress(progress);
+            }
+        };
+
         xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
+                if (typeof onProgress === "function") {
+                    onProgress(100);
+                }
                 resolve();
             } else {
                 reject(new Error(`Upload failed with status ${xhr.status}`));
@@ -1142,7 +1200,7 @@ function bindChatInput(currentUserId) {
             const uploadedAttachments = [];
 
             for (const item of getGroupedPendingAttachments()) {
-                const uploaded = await uploadMessageAttachment(conversationId, item.file);
+                const uploaded = await uploadMessageAttachment(conversationId, item);
                 uploadedAttachments.push(uploaded);
             }
 
