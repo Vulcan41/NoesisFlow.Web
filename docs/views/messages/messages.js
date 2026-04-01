@@ -14,6 +14,9 @@ let pendingMessages = [];
 let activeConversationMessages = [];
 let scrollScheduled = false;
 
+// switch to English
+localStorage.setItem("lang", "en");
+
 /* =========================
    INIT
 ========================= */

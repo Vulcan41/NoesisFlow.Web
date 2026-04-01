@@ -51,5 +51,5 @@ export function t(key, params = {}) {
 ========================= */
 
 export function getLocale() {
-    return currentLang === "en" ? "el-GR" : "en-US";
+    return localStorage.getItem("lang") || "en";
 }
