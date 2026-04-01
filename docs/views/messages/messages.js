@@ -940,22 +940,54 @@ function renderAttachmentPreview() {
     preview.innerHTML = "";
 
     pendingAttachments.forEach((item) => {
+        const file = item.file;
+        const isImage = String(file?.type || "").toLowerCase().startsWith("image/");
+
         const row = document.createElement("div");
         row.className = "chat-attachment-chip";
 
+        const left = document.createElement("div");
+        left.className = "chat-attachment-chip-left";
+
+        if (isImage) {
+            const thumbWrap = document.createElement("div");
+            thumbWrap.className = "chat-attachment-chip-thumb";
+
+            const thumb = document.createElement("img");
+            thumb.className = "chat-attachment-chip-thumb-img";
+            thumb.alt = file.name;
+
+            const objectUrl = URL.createObjectURL(file);
+            thumb.src = objectUrl;
+            thumb.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+            };
+
+            thumbWrap.appendChild(thumb);
+            left.appendChild(thumbWrap);
+        } else {
+            const icon = document.createElement("img");
+            icon.className = "chat-attachment-chip-file-icon";
+            icon.src = getMessageFileIcon(file.name);
+            icon.alt = "file";
+            left.appendChild(icon);
+        }
+
+        const metaWrap = document.createElement("div");
+        metaWrap.className = "chat-attachment-chip-meta-wrap";
+
         const name = document.createElement("div");
         name.className = "chat-attachment-chip-name";
-        name.textContent = item.file.name;
-        name.title = item.file.name;
+        name.textContent = file.name;
+        name.title = file.name;
 
         const meta = document.createElement("div");
         meta.className = "chat-attachment-chip-meta";
-        meta.textContent = formatAttachmentSize(item.file.size);
+        meta.textContent = formatAttachmentSize(file.size);
 
-        const left = document.createElement("div");
-        left.className = "chat-attachment-chip-left";
-        left.appendChild(name);
-        left.appendChild(meta);
+        metaWrap.appendChild(name);
+        metaWrap.appendChild(meta);
+        left.appendChild(metaWrap);
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
