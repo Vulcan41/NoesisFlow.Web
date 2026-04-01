@@ -1000,7 +1000,7 @@ async function loadMessages(conversationId, showLoading = false) {
 
     activeConversationMessages = data || [];
     renderActiveConversationWithPending();
-    scheduleScrollToBottom();
+    scheduleScrollToBottom(true);
 }
 
 /* =========================
@@ -1488,6 +1488,8 @@ function bindChatInput(currentUserId) {
                 attachments: tempAttachments
             });
 
+            scheduleScrollToBottom(true);
+
             input.value = "";
             input.style.height = "42px";
             input.style.overflowY = "hidden";
@@ -1748,17 +1750,28 @@ function getPendingMessagesForActiveConversation() {
 
 
 
-function scheduleScrollToBottom() {
+let scrollScheduled = false;
+
+function isUserNearBottom() {
+    const el = document.getElementById("chat-messages-area");
+    if (!el) return true;
+
+    const threshold = 80; // px tolerance
+    return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+}
+
+function scheduleScrollToBottom(force = false) {
     if (scrollScheduled) return;
+
+    const messagesArea = document.getElementById("chat-messages-area");
+    if (!messagesArea) return;
+
+    if (!force && !isUserNearBottom()) return;
 
     scrollScheduled = true;
 
     requestAnimationFrame(() => {
-        const messagesArea = document.getElementById("chat-messages-area");
-        if (messagesArea) {
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-
+        messagesArea.scrollTop = messagesArea.scrollHeight;
         scrollScheduled = false;
     });
 }
