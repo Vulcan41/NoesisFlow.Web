@@ -943,11 +943,8 @@ function renderAttachmentPreview() {
         const file = item.file;
         const isImage = String(file?.type || "").toLowerCase().startsWith("image/");
 
-        const row = document.createElement("div");
-        row.className = "chat-attachment-chip";
-
-        const left = document.createElement("div");
-        left.className = "chat-attachment-chip-left";
+        const chip = document.createElement("div");
+        chip.className = `chat-attachment-chip${isImage ? " is-image" : ""}`;
 
         if (isImage) {
             const thumbWrap = document.createElement("div");
@@ -964,30 +961,47 @@ function renderAttachmentPreview() {
             };
 
             thumbWrap.appendChild(thumb);
-            left.appendChild(thumbWrap);
+            chip.appendChild(thumbWrap);
+
+            const name = document.createElement("div");
+            name.className = "chat-attachment-chip-name image-name";
+            name.textContent = file.name;
+            name.title = file.name;
+
+            const meta = document.createElement("div");
+            meta.className = "chat-attachment-chip-meta image-meta";
+            meta.textContent = formatAttachmentSize(file.size);
+
+            chip.appendChild(name);
+            chip.appendChild(meta);
         } else {
+            const left = document.createElement("div");
+            left.className = "chat-attachment-chip-left";
+
             const icon = document.createElement("img");
             icon.className = "chat-attachment-chip-file-icon";
             icon.src = getMessageFileIcon(file.name);
             icon.alt = "file";
+
+            const metaWrap = document.createElement("div");
+            metaWrap.className = "chat-attachment-chip-meta-wrap";
+
+            const name = document.createElement("div");
+            name.className = "chat-attachment-chip-name";
+            name.textContent = file.name;
+            name.title = file.name;
+
+            const meta = document.createElement("div");
+            meta.className = "chat-attachment-chip-meta";
+            meta.textContent = formatAttachmentSize(file.size);
+
+            metaWrap.appendChild(name);
+            metaWrap.appendChild(meta);
+
             left.appendChild(icon);
+            left.appendChild(metaWrap);
+            chip.appendChild(left);
         }
-
-        const metaWrap = document.createElement("div");
-        metaWrap.className = "chat-attachment-chip-meta-wrap";
-
-        const name = document.createElement("div");
-        name.className = "chat-attachment-chip-name";
-        name.textContent = file.name;
-        name.title = file.name;
-
-        const meta = document.createElement("div");
-        meta.className = "chat-attachment-chip-meta";
-        meta.textContent = formatAttachmentSize(file.size);
-
-        metaWrap.appendChild(name);
-        metaWrap.appendChild(meta);
-        left.appendChild(metaWrap);
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
@@ -997,9 +1011,8 @@ function renderAttachmentPreview() {
             removePendingAttachment(item.id);
         };
 
-        row.appendChild(left);
-        row.appendChild(removeBtn);
-        preview.appendChild(row);
+        chip.appendChild(removeBtn);
+        preview.appendChild(chip);
     });
 }
 
