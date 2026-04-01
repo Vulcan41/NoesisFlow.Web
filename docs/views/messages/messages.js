@@ -11,6 +11,7 @@ let currentUserId = null;
 let pendingAttachments = [];
 let pendingMessages = [];
 let activeConversationMessages = [];
+let scrollScheduled = false;
 
 /* =========================
    INIT
@@ -681,7 +682,7 @@ function createImageAttachmentCard(attachment) {
     )
         .then(({ downloadUrl }) => {
         img.onload = () => {
-            scrollMessagesToBottom();
+            scheduleScrollToBottom();
         };
         img.src = downloadUrl;
     })
@@ -759,9 +760,7 @@ function renderActiveConversationWithPending() {
         }
     });
 
-    requestAnimationFrame(() => {
-        scrollMessagesToBottom();
-    });
+    scheduleScrollToBottom();
 }
 
 function renderSingleRealMessage(messagesArea, message) {
@@ -1001,14 +1000,7 @@ async function loadMessages(conversationId, showLoading = false) {
 
     activeConversationMessages = data || [];
     renderActiveConversationWithPending();
-
-    requestAnimationFrame(() => {
-        scrollMessagesToBottom();
-
-        setTimeout(() => {
-            scrollMessagesToBottom();
-        }, 120);
-    });
+    scheduleScrollToBottom();
 }
 
 /* =========================
@@ -1661,4 +1653,21 @@ function getPendingMessagesForActiveConversation() {
     return pendingMessages.filter(
         (msg) => msg.conversationId === activeConversationId
     );
+}
+
+
+
+function scheduleScrollToBottom() {
+    if (scrollScheduled) return;
+
+    scrollScheduled = true;
+
+    requestAnimationFrame(() => {
+        const messagesArea = document.getElementById("chat-messages-area");
+        if (messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        scrollScheduled = false;
+    });
 }
