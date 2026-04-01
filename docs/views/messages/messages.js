@@ -607,9 +607,10 @@ function createFileAttachmentCard(attachment) {
     const left = document.createElement("div");
     left.className = "message-attachment-file-left";
 
-    const icon = document.createElement("div");
+    const icon = document.createElement("img");
     icon.className = "message-attachment-file-icon";
-    icon.textContent = "📎";
+    icon.src = getMessageFileIcon(attachment.file_name);
+    icon.alt = "file";
 
     const meta = document.createElement("div");
     meta.className = "message-attachment-file-meta";
@@ -1220,4 +1221,42 @@ function scrollMessagesToBottom() {
     if (!messagesArea) return;
 
     messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+
+function getMessageFileIcon(fileName = "") {
+    const ext = String(fileName).split(".").pop()?.toLowerCase() || "";
+
+    if (["png", "jpg", "jpeg", "webp", "gif"].includes(ext)) {
+        return "assets/icons_img.png";
+    }
+
+    if (ext === "pdf") {
+        return "assets/icon_pdf.png";
+    }
+
+    if (["doc", "docx"].includes(ext)) {
+        return "assets/icon_doc.png";
+    }
+
+    if (["txt"].includes(ext)) {
+        return "assets/icon_txt.png";
+    }
+
+    if (["xls", "xlsx", "csv"].includes(ext)) {
+        return "assets/icon_xls.png";
+    }
+
+    if (["zip", "rar", "7z"].includes(ext)) {
+        return "assets/icon_zip.png";
+    }
+
+    if (["mp4", "mov", "avi"].includes(ext)) {
+        return "assets/icon_video.png";
+    }
+
+    if (["mp3", "wav"].includes(ext)) {
+        return "assets/icon_audio.png";
+    }
+
+    return "assets/icon_file_file.png";
 }

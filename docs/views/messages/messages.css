@@ -771,23 +771,47 @@
 .message-attachments {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.message-bubble-attachment-only {
+    background: transparent !important;
+    padding: 2px 0;
+    box-shadow: none;
+    max-width: 260px;
 }
 
 .message-attachment-file {
-    width: 100%;
-    border: 1px solid rgba(0,0,0,0.08);
-    background: rgba(255,255,255,0.7);
-    border-radius: 12px;
+    width: 240px;
+    border: 1px solid #e6e9ee;
+    background: #ffffff;
+    border-radius: 14px;
     padding: 10px 12px;
     text-align: left;
     cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.message-attachment-file:hover {
+    background: #f8fafc;
+    border-color: #d7dde5;
+}
+
+.message-attachment-file:active {
+    transform: scale(0.99);
 }
 
 .message-row.own .message-attachment-file {
-    background: rgba(255,255,255,0.14);
-    border-color: rgba(255,255,255,0.18);
-    color: #ffffff;
+    background: #ffffff;
+    border-color: #d9e3ec;
+    color: #111111;
+}
+
+.message-row.own .message-attachment-file:hover {
+    background: #f8fafc;
+    border-color: #cfd9e3;
 }
 
 .message-attachment-file-left {
@@ -798,7 +822,10 @@
 }
 
 .message-attachment-file-icon {
-    font-size: 18px;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
     flex-shrink: 0;
 }
 
@@ -811,6 +838,7 @@
 .message-attachment-file-name {
     font-size: 13px;
     font-weight: 600;
+    color: #171717;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -818,7 +846,7 @@
 
 .message-attachment-file-info {
     font-size: 11px;
-    opacity: 0.8;
+    color: #7a7a84;
     margin-top: 2px;
 }
 
@@ -828,25 +856,25 @@
     background: transparent;
     cursor: pointer;
     width: fit-content;
-    max-width: 240px;
+    max-width: 260px;
+    align-self: flex-start;
 }
 
 .message-attachment-image img {
     display: block;
-    max-width: 240px;
-    max-height: 220px;
+    max-width: 260px;
+    max-height: 240px;
     object-fit: cover;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+.message-row.own .message-attachment-image {
+    align-self: flex-end;
+}
 
-
-
-
-
-.message-bubble-attachment-only {
-    background: transparent !important;
-    padding: 4px 0;
-    box-shadow: none;
+.message-row.own .message-time,
+.message-row.other .message-time {
+    margin-top: 2px;
 }
