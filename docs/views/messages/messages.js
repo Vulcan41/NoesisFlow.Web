@@ -693,7 +693,7 @@ function renderMessageAttachments(container, attachments = []) {
 
     const list = createAttachmentList();
 
-    attachments.forEach((attachment) => {
+    groupMessageAttachments(attachments).forEach((attachment) => {
         const node = isImageAttachment(attachment)
         ? createImageAttachmentCard(attachment)
         : createFileAttachmentCard(attachment);
@@ -939,7 +939,7 @@ function renderAttachmentPreview() {
     preview.classList.remove("hidden");
     preview.innerHTML = "";
 
-    pendingAttachments.forEach((item) => {
+    getGroupedPendingAttachments().forEach((item) => {
         const file = item.file;
         const isImage = String(file?.type || "").toLowerCase().startsWith("image/");
 
@@ -1141,7 +1141,7 @@ function bindChatInput(currentUserId) {
         try {
             const uploadedAttachments = [];
 
-            for (const item of pendingAttachments) {
+            for (const item of getGroupedPendingAttachments()) {
                 const uploaded = await uploadMessageAttachment(conversationId, item.file);
                 uploadedAttachments.push(uploaded);
             }
@@ -1313,4 +1313,20 @@ function getMessageFileIcon(fileName = "") {
     }
 
     return "assets/icon_file_file.png";
+}
+
+function isPendingImage(item) {
+    return String(item?.file?.type || "").toLowerCase().startsWith("image/");
+}
+
+function getGroupedPendingAttachments() {
+    const images = pendingAttachments.filter(isPendingImage);
+    const files = pendingAttachments.filter((item) => !isPendingImage(item));
+    return [...images, ...files];
+}
+
+function groupMessageAttachments(attachments = []) {
+    const images = attachments.filter(isImageAttachment);
+    const files = attachments.filter((a) => !isImageAttachment(a));
+    return [...images, ...files];
 }

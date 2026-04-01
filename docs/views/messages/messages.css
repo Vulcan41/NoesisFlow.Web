@@ -691,12 +691,9 @@
 
 }
 
-
-
-
-
-
-
+/* =========================
+   ATTACHMENTS
+========================= */
 
 .chat-attachments-preview {
     display: flex;
@@ -705,7 +702,7 @@
     margin-bottom: 10px;
 }
 
-/* default file chip stays row-like */
+/* base chip */
 .chat-attachment-chip {
     display: flex;
     align-items: center;
@@ -715,11 +712,13 @@
     border: 1px solid #e6e6e6;
     border-radius: 10px;
     background: #fafafa;
-    width: 100%;
     box-sizing: border-box;
 }
 
-/* image preview becomes square */
+/* =========================
+   IMAGE PREVIEW CHIPS
+========================= */
+
 .chat-attachment-chip.is-image {
     position: relative;
     width: 72px;
@@ -732,7 +731,6 @@
     flex: 0 0 72px;
 }
 
-/* image wrapper fills the square */
 .chat-attachment-chip.is-image .chat-attachment-chip-thumb {
     width: 100%;
     height: 100%;
@@ -742,7 +740,6 @@
     background: transparent;
 }
 
-/* image fills square */
 .chat-attachment-chip.is-image .chat-attachment-chip-thumb-img {
     width: 100%;
     height: 100%;
@@ -750,26 +747,26 @@
     display: block;
 }
 
-/* hide filename/meta for image squares */
 .chat-attachment-chip.is-image .chat-attachment-chip-name,
 .chat-attachment-chip.is-image .chat-attachment-chip-meta {
     display: none;
 }
 
-/* remove button overlays the image */
 .chat-attachment-chip.is-image .chat-attachment-chip-remove {
     position: absolute;
     top: 4px;
     right: 4px;
     width: 22px;
     height: 22px;
+    border: none;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.65);
-    color: white;
+    color: #ffffff;
     font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     z-index: 2;
 }
 
@@ -777,26 +774,35 @@
     background: rgba(0, 0, 0, 0.8);
 }
 
-/* file chips still appear as normal rows */
+/* =========================
+   FILE PREVIEW CHIPS
+========================= */
+
 .chat-attachment-chip:not(.is-image) {
+    width: 100%;
     min-height: 52px;
 }
 
-.chat-attachment-chip {
+.chat-attachment-chip-left {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 10px;
-    padding: 8px 10px;
-    border: 1px solid #e6e6e6;
-    border-radius: 10px;
-    background: #fafafa;
+    flex: 1;
+    min-width: 0;
 }
 
-.chat-attachment-chip-left {
-    min-width: 0;
+.chat-attachment-chip-file-icon {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
+.chat-attachment-chip-meta-wrap {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .chat-attachment-chip-name {
@@ -830,18 +836,33 @@
     background: #efefef;
 }
 
+/* default thumb box */
+.chat-attachment-chip-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f1f3f5;
+    border: 1px solid #e4e7eb;
+}
 
+.chat-attachment-chip-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
+/* optional hover for files */
+.chat-attachment-chip:not(.is-image):hover {
+    background: #f1f5f9;
+    border-color: #d7dde5;
+}
 
-
-
-
-
-
-
-
-
-
+/* =========================
+   MESSAGE ATTACHMENTS INSIDE CHAT
+========================= */
 
 .message-attachments {
     display: flex;
@@ -952,47 +973,4 @@
 .message-row.own .message-time,
 .message-row.other .message-time {
     margin-top: 2px;
-}
-
-
-
-
-
-.chat-attachment-chip-left {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-}
-
-.chat-attachment-chip-meta-wrap {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.chat-attachment-chip-thumb {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: #f1f3f5;
-    border: 1px solid #e4e7eb;
-}
-
-.chat-attachment-chip-thumb-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.chat-attachment-chip-file-icon {
-    width: 26px;
-    height: 26px;
-    object-fit: contain;
-    display: block;
-    flex-shrink: 0;
 }
