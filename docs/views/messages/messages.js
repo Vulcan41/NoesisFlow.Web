@@ -1366,6 +1366,9 @@ function bindAttachmentInputs() {
         attachInput.onchange = () => {
             addPendingAttachments(attachInput.files);
             attachInput.value = "";
+            if (inputArea) {
+                inputArea.classList.remove("drag-over");
+            }
         };
     }
 
@@ -1373,6 +1376,9 @@ function bindAttachmentInputs() {
         imageInput.onchange = () => {
             addPendingAttachments(imageInput.files);
             imageInput.value = "";
+            if (inputArea) {
+                inputArea.classList.remove("drag-over");
+            }
         };
     }
 
@@ -1426,6 +1432,13 @@ function bindAttachmentInputs() {
 
         addPendingAttachments(files);
     });
+
+    inputArea.addEventListener("dragend", clearDragState);
+
+    window.addEventListener("blur", clearDragState);
+    window.addEventListener("focus", clearDragState);
+    document.addEventListener("drop", clearDragState);
+    document.addEventListener("dragend", clearDragState);
 }
 
 function bindChatInput(currentUserId) {
