@@ -1748,10 +1748,6 @@ function getPendingMessagesForActiveConversation() {
     );
 }
 
-
-
-let scrollScheduled = false;
-
 function isUserNearBottom() {
     const el = document.getElementById("chat-messages-area");
     if (!el) return true;
