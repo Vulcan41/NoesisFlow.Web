@@ -724,19 +724,19 @@ async function loadMessages(conversationId, showLoading = false) {
     const { data, error } = await supabase
         .from("messages")
         .select(`
-        id,
-        sender_id,
-        content,
-        created_at,
-        attachments:message_attachments (
             id,
-            object_key,
-            file_name,
-            mime_type,
-            size_bytes,
-            created_at
-        )
-    `)
+            sender_id,
+            content,
+            created_at,
+            attachments:message_attachments (
+                id,
+                object_key,
+                file_name,
+                mime_type,
+                size_bytes,
+                created_at
+            )
+        `)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
@@ -756,6 +756,10 @@ async function loadMessages(conversationId, showLoading = false) {
 
         const currentDayKey = getMessageDayKey(message.created_at);
 
+        /* =========================
+           DAY DIVIDER
+        ========================= */
+
         if (currentDayKey !== lastDayKey) {
             const dividerRow = document.createElement("div");
             dividerRow.className = "chat-day-divider-row";
@@ -770,54 +774,59 @@ async function loadMessages(conversationId, showLoading = false) {
             lastDayKey = currentDayKey;
         }
 
-        const row = document.createElement("div");
-        row.className =
-        `message-row ${message.sender_id === user.id ? "own" : "other"}`;
-
-        const bubble = document.createElement("div");
-        bubble.className = "message-bubble";
-
+        const isOwn = message.sender_id === user.id;
         const hasText = message.content && message.content.trim();
         const hasAttachments = message.attachments && message.attachments.length > 0;
 
         /* =========================
-           TEXT CONTENT
+           TEXT MESSAGE
         ========================= */
 
         if (hasText) {
+            const row = document.createElement("div");
+            row.className = `message-row ${isOwn ? "own" : "other"}`;
+
+            const bubble = document.createElement("div");
+            bubble.className = "message-bubble";
+
             const content = document.createElement("div");
             content.className = "message-content";
             renderMessageContent(content, message.content);
+
+            const time = document.createElement("div");
+            time.className = "message-time";
+            time.textContent = formatMessageTime(message.created_at);
+
             bubble.appendChild(content);
+            bubble.appendChild(time);
+            row.appendChild(bubble);
+
+            messagesArea.appendChild(row);
         }
 
         /* =========================
-           ATTACHMENTS
+           ATTACHMENT MESSAGE
         ========================= */
 
         if (hasAttachments) {
+            const row = document.createElement("div");
+            row.className = `message-row ${isOwn ? "own" : "other"}`;
+
+            const bubble = document.createElement("div");
+            bubble.className = "message-bubble message-bubble-attachment-only";
+
             renderMessageAttachments(bubble, message.attachments);
+
+            const time = document.createElement("div");
+            time.className = "message-time";
+            time.textContent = formatMessageTime(message.created_at);
+
+            bubble.appendChild(time);
+            row.appendChild(bubble);
+
+            messagesArea.appendChild(row);
         }
 
-        /* =========================
-           TRANSPARENT BUBBLE LOGIC
-        ========================= */
-
-        if (!hasText && hasAttachments) {
-            bubble.classList.add("message-bubble-attachment-only");
-        }
-
-        /* =========================
-           TIME
-        ========================= */
-
-        const time = document.createElement("div");
-        time.className = "message-time";
-        time.textContent = formatMessageTime(message.created_at);
-
-        bubble.appendChild(time);
-        row.appendChild(bubble);
-        messagesArea.appendChild(row);
     });
 
     /* =========================
