@@ -1,6 +1,12 @@
 let lightboxInitialized = false;
 let lightboxItems = [];
 let lightboxIndex = 0;
+let isLightboxClosing = false;
+
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
 
 function createLightboxMarkup() {
     return `
@@ -76,6 +82,90 @@ function showNextLightboxImage() {
     renderLightboxImage();
 }
 
+function resetTouchState() {
+    touchStartX = 0;
+    touchStartY = 0;
+    touchEndX = 0;
+    touchEndY = 0;
+}
+
+function handleTouchStart(e) {
+    if (lightboxItems.length <= 1) return;
+
+    const touch = e.changedTouches?.[0];
+    if (!touch) return;
+
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchEndX = touch.clientX;
+    touchEndY = touch.clientY;
+}
+
+function handleTouchMove(e) {
+    if (lightboxItems.length <= 1) return;
+
+    const touch = e.changedTouches?.[0];
+    if (!touch) return;
+
+    touchEndX = touch.clientX;
+    touchEndY = touch.clientY;
+}
+
+function handleTouchEnd() {
+    if (lightboxItems.length <= 1) return;
+
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    const minSwipeDistance = 50;
+
+    if (absX < minSwipeDistance) {
+        resetTouchState();
+        return;
+    }
+
+    if (absX <= absY) {
+        resetTouchState();
+        return;
+    }
+
+    if (deltaX < 0) {
+        showNextLightboxImage();
+    } else {
+        showPreviousLightboxImage();
+    }
+
+    resetTouchState();
+}
+
+function finishLightboxClose() {
+    const modal = document.getElementById("lightbox-modal");
+    const image = document.getElementById("lightbox-image");
+    const counter = document.getElementById("lightbox-counter");
+
+    if (!modal || !image) return;
+
+    modal.classList.add("hidden");
+    modal.classList.remove("is-closing");
+
+    image.src = "";
+    image.alt = "";
+
+    if (counter) {
+        counter.textContent = "";
+        counter.classList.add("hidden");
+    }
+
+    lightboxItems = [];
+    lightboxIndex = 0;
+    isLightboxClosing = false;
+    resetTouchState();
+    document.body.classList.remove("lightbox-open");
+}
+
 export function initLightboxModal() {
     if (lightboxInitialized) return;
 
@@ -90,6 +180,7 @@ export function initLightboxModal() {
     const closeBtn = document.getElementById("lightbox-close-btn");
     const prevBtn = document.getElementById("lightbox-prev-btn");
     const nextBtn = document.getElementById("lightbox-next-btn");
+    const image = document.getElementById("lightbox-image");
 
     if (backdrop) {
         backdrop.addEventListener("click", closeLightboxModal);
@@ -105,6 +196,16 @@ export function initLightboxModal() {
 
     if (nextBtn) {
         nextBtn.addEventListener("click", showNextLightboxImage);
+    }
+
+    if (image) {
+        image.addEventListener("touchstart", handleTouchStart, { passive: true });
+        image.addEventListener("touchmove", handleTouchMove, { passive: true });
+        image.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+        image.addEventListener("click", (e) => {
+            e.stopPropagation();
+        });
     }
 
     document.addEventListener("keydown", (e) => {
@@ -143,30 +244,24 @@ export function openLightboxGallery(items = [], startIndex = 0) {
 
     lightboxItems = items;
     lightboxIndex = Math.max(0, Math.min(startIndex, items.length - 1));
+    resetTouchState();
 
     renderLightboxImage();
 
     modal.classList.remove("hidden");
+    modal.classList.remove("is-closing");
     document.body.classList.add("lightbox-open");
 }
 
 export function closeLightboxModal() {
     const modal = document.getElementById("lightbox-modal");
-    const image = document.getElementById("lightbox-image");
-    const counter = document.getElementById("lightbox-counter");
+    if (!modal || modal.classList.contains("hidden")) return;
+    if (isLightboxClosing) return;
 
-    if (!modal || !image) return;
+    isLightboxClosing = true;
+    modal.classList.add("is-closing");
 
-    modal.classList.add("hidden");
-    image.src = "";
-    image.alt = "";
-
-    if (counter) {
-        counter.textContent = "";
-        counter.classList.add("hidden");
-    }
-
-    lightboxItems = [];
-    lightboxIndex = 0;
-    document.body.classList.remove("lightbox-open");
+    setTimeout(() => {
+        finishLightboxClose();
+    }, 180);
 }

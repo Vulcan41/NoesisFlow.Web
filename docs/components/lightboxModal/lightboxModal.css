@@ -5,10 +5,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 1;
+    transition: opacity 0.18s ease;
 }
 
 .lightbox-modal.hidden {
     display: none;
+}
+
+.lightbox-modal.is-closing {
+    opacity: 0;
 }
 
 .lightbox-backdrop {
@@ -28,6 +34,14 @@
     justify-content: center;
     padding: 20px 64px;
     box-sizing: border-box;
+    transform: scale(1);
+    transition: transform 0.18s ease, opacity 0.18s ease;
+    opacity: 1;
+}
+
+.lightbox-modal.is-closing .lightbox-content {
+    transform: scale(0.96);
+    opacity: 0;
 }
 
 .lightbox-image {
@@ -38,6 +52,9 @@
     border-radius: 14px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
     background: #111;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .lightbox-close-btn {
