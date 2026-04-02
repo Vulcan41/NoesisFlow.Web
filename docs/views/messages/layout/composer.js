@@ -29,21 +29,25 @@ export function initComposer({ onSend, onFilesSelected }) {
     // =========================
     // SEND MESSAGE
     // =========================
-    if (sendBtn) {
-        sendBtn.onclick = () => {
-            const text = input.value.trim();
-            if (!text) return;
+    const handleSendClick = async () => {
+        const text = input.value.trim();
 
-            onSend?.(text);
+        const didSend = await onSend?.(text);
+
+        if (didSend !== false) {
             input.value = "";
             resize();
-        };
+        }
+    };
+
+    if (sendBtn) {
+        sendBtn.onclick = handleSendClick;
     }
 
-    input.addEventListener("keydown", (e) => {
+    input.addEventListener("keydown", async (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            sendBtn?.click();
+            await handleSendClick();
         }
     });
 
