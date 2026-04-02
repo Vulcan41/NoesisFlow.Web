@@ -5,6 +5,7 @@ import { initTextTools } from "../../components/textTools.js";
 import { t, getLocale } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 import { initComposer } from "./layout/composer.js";
+import { renderMessages, appendMessage } from "./layout/chatHistory.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -807,122 +808,9 @@ function renderActiveConversationWithPending() {
     scheduleScrollToBottom();
 }
 
-function renderSingleRealMessage(messagesArea, message) {
-    const isOwn = message.sender_id === currentUserId;
-    const hasText = message.content && message.content.trim();
-    const hasAttachments = message.attachments && message.attachments.length > 0;
 
-    const groupPosition = getMessageGroupPosition(message);
-    const showTime = shouldShowTimeForMessage(message);
 
-    if (hasText) {
-        const row = document.createElement("div");
-        row.className = `message-row ${isOwn ? "own" : "other"}`;
-        row.dataset.messageId = message.id;
 
-        const stack = document.createElement("div");
-        stack.className = "message-stack";
-
-        const bubble = document.createElement("div");
-        bubble.className = "message-bubble";
-
-        applyBubbleGroupClasses(row, bubble, groupPosition);
-
-        const content = document.createElement("div");
-        content.className = "message-content";
-        renderMessageContent(content, message.content);
-
-        bubble.appendChild(content);
-        stack.appendChild(bubble);
-
-        if (showTime) {
-            const time = document.createElement("div");
-            time.className = "message-time";
-            time.textContent = formatMessageTime(message.created_at);
-            stack.appendChild(time);
-        }
-
-        row.appendChild(stack);
-        messagesArea.appendChild(row);
-    }
-
-    if (hasAttachments) {
-        const row = document.createElement("div");
-        row.className = `message-row ${isOwn ? "own" : "other"}`;
-        row.dataset.messageId = message.id;
-
-        const bubble = document.createElement("div");
-        bubble.className = "message-bubble message-bubble-attachment-only";
-
-        applyBubbleGroupClasses(row, bubble, groupPosition);
-
-        const contentWrap = document.createElement("div");
-        contentWrap.className = "message-attachment-content";
-
-        renderMessageAttachments(contentWrap, message.attachments);
-        bubble.appendChild(contentWrap);
-
-        if (showTime) {
-            const time = document.createElement("div");
-            time.className = "message-time";
-            time.textContent = formatMessageTime(message.created_at);
-            bubble.appendChild(time);
-        }
-
-        row.appendChild(bubble);
-        messagesArea.appendChild(row);
-    }
-}
-
-function renderSinglePendingMessage(container, pendingMessage) {
-    const hasText = pendingMessage.content && pendingMessage.content.trim();
-    const hasAttachments = pendingMessage.attachments && pendingMessage.attachments.length > 0;
-
-    if (hasText) {
-        const row = document.createElement("div");
-        row.className = "message-row own";
-
-        const stack = document.createElement("div");
-        stack.className = "message-stack";
-
-        const bubble = document.createElement("div");
-        bubble.className = "message-bubble pending-message-bubble";
-
-        const content = document.createElement("div");
-        content.className = "message-content";
-        renderMessageContent(content, pendingMessage.content);
-
-        const time = document.createElement("div");
-        time.className = "message-time";
-        time.textContent = getPendingMessageStatusText(pendingMessage);
-
-        bubble.appendChild(content);
-        stack.appendChild(bubble);
-        stack.appendChild(time);
-        row.appendChild(stack);
-
-        container.appendChild(row);
-    }
-
-    if (hasAttachments) {
-        const row = document.createElement("div");
-        row.className = "message-row own";
-
-        const bubble = document.createElement("div");
-        bubble.className = "message-bubble message-bubble-attachment-only pending-message-bubble";
-
-        renderPendingMessageAttachments(bubble, pendingMessage.attachments);
-
-        const time = document.createElement("div");
-        time.className = "message-time";
-        time.textContent = getPendingMessageStatusText(pendingMessage);
-
-        bubble.appendChild(time);
-        row.appendChild(bubble);
-
-        container.appendChild(row);
-    }
-}
 
 function getPendingMessageStatusText(message) {
     if (message.status === "failed") return t("messages.failed");
@@ -1091,33 +979,19 @@ async function loadMessages(conversationId, showLoading = false) {
     activeConversationMessages = data || [];
     renderedMessageIds.clear();
 
-    messagesArea.innerHTML = "";
-
-    let lastDayKey = null;
-
-    activeConversationMessages.forEach((message) => {
-
-        const currentDayKey = getMessageDayKey(message.created_at);
-
-        if (currentDayKey !== lastDayKey) {
-            const dividerRow = document.createElement("div");
-            dividerRow.className = "chat-day-divider-row";
-
-            const divider = document.createElement("div");
-            divider.className = "chat-day-divider";
-            divider.textContent = formatMessageDayLabel(message.created_at);
-
-            dividerRow.appendChild(divider);
-            messagesArea.appendChild(dividerRow);
-
-            lastDayKey = currentDayKey;
-        }
-
-        renderSingleRealMessage(messagesArea, message);
-        renderedMessageIds.add(message.id);
+    renderMessages({
+        messagesArea,
+        messages: activeConversationMessages,
+        currentUserId,
+        renderMessageContent,
+        formatMessageTime,
+        getMessageDayKey,
+        formatMessageDayLabel,
+        isImageAttachment,
+        createImageAttachmentCard,
+        createFileAttachmentCard,
+        scheduleScrollToBottom
     });
-
-    scheduleScrollToBottom(true);
 }
 
 /* =========================
@@ -1432,26 +1306,37 @@ function subscribeToActiveConversation() {
             const { data, error } = await supabase
                 .from("messages")
                 .select(`
+                    id,
+                    sender_id,
+                    content,
+                    created_at,
+                    attachments:message_attachments (
                         id,
-                        sender_id,
-                        content,
-                        created_at,
-                        attachments:message_attachments (
-                            id,
-                            object_key,
-                            file_name,
-                            mime_type,
-                            size_bytes,
-                            created_at
-                        )
-                    `)
+                        object_key,
+                        file_name,
+                        mime_type,
+                        size_bytes,
+                        created_at
+                    )
+                `)
                 .eq("id", messageId)
                 .single();
 
             if (error || !data) return;
 
-            appendRealMessageToChat(data);
-            await loadConversations(); // keep sidebar updated
+            appendMessage({
+                messagesArea: document.getElementById("chat-messages-area"),
+                message: data,
+                currentUserId,
+                renderMessageContent,
+                formatMessageTime,
+                isImageAttachment,
+                createImageAttachmentCard,
+                createFileAttachmentCard,
+                scheduleScrollToBottom
+            });
+
+            await loadConversations();
         }
     )
         .subscribe();
@@ -1605,90 +1490,6 @@ function scheduleScrollToBottom(force = false) {
     });
 }
 
-function createMessageImageGrid(images = []) {
-    const grid = document.createElement("div");
-    grid.className = "message-image-grid";
-
-    if (images.length === 1) {
-        grid.classList.add("one");
-    } else if (images.length === 2) {
-        grid.classList.add("two");
-    } else if (images.length === 3) {
-        grid.classList.add("three");
-    } else {
-        grid.classList.add("multi");
-    }
-
-    images.forEach((attachment, index) => {
-        const node = createImageAttachmentCard(attachment, images, index);
-        node.classList.add("message-image-grid-item");
-        grid.appendChild(node);
-    });
-
-    return grid;
-}
-
-function appendRealMessageToChat(message) {
-    const messagesArea = document.getElementById("chat-messages-area");
-    if (!messagesArea) return;
-
-    if (renderedMessageIds.has(message.id)) return;
-
-    const matchedPending = findMatchingPendingMessage(message);
-
-    if (matchedPending) {
-        removePendingMessage(matchedPending.tempId);
-    }
-
-    const currentDayKey = getMessageDayKey(message.created_at);
-
-    let lastDate = null;
-    const datedNodes = messagesArea.querySelectorAll("[data-date]");
-    const lastDatedNode = datedNodes[datedNodes.length - 1];
-
-    if (lastDatedNode) {
-        lastDate = lastDatedNode.dataset.date;
-    }
-
-    if (currentDayKey !== lastDate) {
-        const dividerRow = document.createElement("div");
-        dividerRow.className = "chat-day-divider-row";
-        dividerRow.dataset.date = currentDayKey;
-
-        const divider = document.createElement("div");
-        divider.className = "chat-day-divider";
-        divider.textContent = formatMessageDayLabel(message.created_at);
-
-        dividerRow.appendChild(divider);
-        messagesArea.appendChild(dividerRow);
-    }
-
-    const previousMessage = activeConversationMessages[activeConversationMessages.length - 1] || null;
-
-    activeConversationMessages.push(message);
-    activeConversationMessages.sort(
-        (a, b) => new Date(a.created_at) - new Date(b.created_at)
-    );
-
-    if (shouldGroupWithPreviousMessage(previousMessage, message)) {
-        hideRenderedTimeForMessage(previousMessage.id);
-    }
-
-    renderSingleRealMessage(messagesArea, message);
-
-    const appendedRows = messagesArea.querySelectorAll(`.message-row[data-message-id="${message.id}"]`);
-    appendedRows.forEach((row) => {
-        row.dataset.date = currentDayKey;
-
-        const bubble = row.querySelector(".message-bubble");
-        if (bubble) {
-            bubble.classList.add("fade-in");
-        }
-    });
-
-    renderedMessageIds.add(message.id);
-    scheduleScrollToBottom();
-}
 
 function findMatchingPendingMessage(realMessage) {
     const candidates = getPendingMessagesForActiveConversation();
@@ -1842,7 +1643,7 @@ async function handleSendMessage(content) {
     const conversationId = activeConversationId;
     const hasAttachments = pendingAttachments.length > 0;
 
-    if (!content && !hasAttachments) return;
+    if (!content && !hasAttachments) return false;
 
     const input = document.getElementById("chat-input");
     const sendBtn = document.getElementById("chat-send-btn");
@@ -1936,12 +1737,18 @@ async function handleSendMessage(content) {
             .eq("id", conversationId);
 
         await loadConversations();
+
+        return true;
+
     } catch (err) {
         console.error("Send failed:", err);
 
         if (shouldUsePendingBubble && tempMessageId) {
             updatePendingMessage(tempMessageId, { status: "failed" });
         }
+
+        return false;
+
     } finally {
         if (input) input.disabled = false;
         if (sendBtn) sendBtn.disabled = false;
