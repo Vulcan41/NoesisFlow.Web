@@ -1449,12 +1449,20 @@ function subscribeToActiveConversation() {
 
             if (error || !data) return;
 
+            activeConversationMessages.push(data);
+            activeConversationMessages.sort(
+                (a, b) => new Date(a.created_at) - new Date(b.created_at)
+            );
+
             appendMessage({
                 messagesArea: document.getElementById("chat-messages-area"),
                 message: data,
+                messages: activeConversationMessages,
                 currentUserId,
                 renderMessageContent,
                 formatMessageTime,
+                getMessageDayKey,
+                formatMessageDayLabel,
                 isImageAttachment,
                 createImageAttachmentCard,
                 createFileAttachmentCard,
