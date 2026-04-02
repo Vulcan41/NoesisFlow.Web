@@ -880,6 +880,12 @@ async function loadMessages(conversationId, showLoading = false) {
 ========================= */
 
 function resetPendingAttachments() {
+    pendingAttachments.forEach((item) => {
+        if (item?.previewUrl) {
+            URL.revokeObjectURL(item.previewUrl);
+        }
+    });
+
     pendingAttachments = [];
     renderAttachmentPreview();
 }
@@ -890,6 +896,9 @@ function addPendingAttachments(files) {
     const nextFiles = [...files].map((file) => ({
         id: crypto.randomUUID(),
         file,
+        previewUrl: String(file?.type || "").toLowerCase().startsWith("image/")
+        ? URL.createObjectURL(file)
+        : null,
         progress: 0,
         uploading: false,
         uploaded: false,
@@ -911,7 +920,13 @@ function updatePendingAttachmentState(attachmentId, patch) {
 }
 
 function removePendingAttachment(attachmentId) {
-    pendingAttachments = pendingAttachments.filter((item) => item.id !== attachmentId);
+    const item = pendingAttachments.find((x) => x.id === attachmentId);
+
+    if (item?.previewUrl) {
+        URL.revokeObjectURL(item.previewUrl);
+    }
+
+    pendingAttachments = pendingAttachments.filter((x) => x.id !== attachmentId);
     renderAttachmentPreview();
 }
 
@@ -942,12 +957,7 @@ function renderAttachmentPreview() {
             const thumb = document.createElement("img");
             thumb.className = "chat-attachment-chip-thumb-img";
             thumb.alt = file.name;
-
-            const objectUrl = URL.createObjectURL(file);
-            thumb.src = objectUrl;
-            thumb.onload = () => {
-                URL.revokeObjectURL(objectUrl);
-            };
+            thumb.src = item.previewUrl || "";
 
             thumbWrap.appendChild(thumb);
             chip.appendChild(thumbWrap);
