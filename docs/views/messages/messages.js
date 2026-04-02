@@ -1813,7 +1813,7 @@ function isUserNearBottom() {
     const el = document.getElementById("chat-messages-area");
     if (!el) return true;
 
-    const threshold = 80;
+    const threshold = 400;
     return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
 }
 
