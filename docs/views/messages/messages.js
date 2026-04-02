@@ -766,6 +766,9 @@ function renderSingleRealMessage(messagesArea, message) {
             row.classList.add("message-row-grouped");
         }
 
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
 
@@ -778,15 +781,16 @@ function renderSingleRealMessage(messagesArea, message) {
         renderMessageContent(content, message.content);
 
         bubble.appendChild(content);
+        stack.appendChild(bubble);
 
         if (showTime) {
             const time = document.createElement("div");
             time.className = "message-time";
             time.textContent = formatMessageTime(message.created_at);
-            bubble.appendChild(time);
+            stack.appendChild(time);
         }
 
-        row.appendChild(bubble);
+        row.appendChild(stack);
         messagesArea.appendChild(row);
     }
 
@@ -832,6 +836,9 @@ function renderSinglePendingMessage(container, pendingMessage) {
         const row = document.createElement("div");
         row.className = "message-row own";
 
+        const stack = document.createElement("div");
+        stack.className = "message-stack";
+
         const bubble = document.createElement("div");
         bubble.className = "message-bubble pending-message-bubble";
 
@@ -844,8 +851,9 @@ function renderSinglePendingMessage(container, pendingMessage) {
         time.textContent = getPendingMessageStatusText(pendingMessage);
 
         bubble.appendChild(content);
-        bubble.appendChild(time);
-        row.appendChild(bubble);
+        stack.appendChild(bubble);
+        stack.appendChild(time);
+        row.appendChild(stack);
 
         container.appendChild(row);
     }
