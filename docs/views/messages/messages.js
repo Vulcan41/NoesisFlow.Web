@@ -3,6 +3,7 @@ import { DEFAULT_AVATAR } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
 import { initTextTools } from "../../components/textTools.js";
 import { t, getLocale } from "../../core/i18n.js";
+import { initLightboxModal, openLightboxModal } from "../../components/lightboxModal/lightboxModal.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -25,6 +26,7 @@ localStorage.setItem("lang", "en");
 export async function initMessages(targetUserId = null)  {
 
     cleanupMessagesRealtime();
+    initLightboxModal();
 
     const container = document.getElementById("conversations-list");
     const info = document.getElementById("messages-info");
@@ -680,7 +682,7 @@ function createImageAttachmentCard(attachment) {
                 attachment.file_name
             );
 
-            window.open(downloadUrl, "_blank");
+            openLightboxModal(downloadUrl, attachment.file_name);
         } catch (err) {
             console.error("Image attachment open failed:", err);
         }
