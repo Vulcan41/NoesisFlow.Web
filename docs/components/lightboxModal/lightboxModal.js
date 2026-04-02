@@ -23,11 +23,11 @@ function createLightboxMarkup() {
                 </button>
 
                 <div class="lightbox-image-wrap">
-                    <img id="lightbox-image" class="lightbox-image" alt="" />
-
-                    <a id="lightbox-download-btn" class="lightbox-download-btn" href="#" download>
+                    <a id="lightbox-download-btn" class="lightbox-download-btn" href="#">
                         Download
                     </a>
+
+                    <img id="lightbox-image" class="lightbox-image" alt="" />
                 </div>
 
                 <button id="lightbox-next-btn" class="lightbox-nav-btn lightbox-next-btn" type="button" aria-label="Next image">
@@ -40,12 +40,49 @@ function createLightboxMarkup() {
     `;
 }
 
+function getCurrentLightboxItem() {
+    if (!lightboxItems.length) return null;
+    return lightboxItems[lightboxIndex] || null;
+}
+
+async function handleLightboxDownloadClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const currentItem = getCurrentLightboxItem();
+    if (!currentItem?.src) return;
+
+    try {
+        const response = await fetch(currentItem.src);
+        if (!response.ok) {
+            throw new Error(`Download failed with status ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = currentItem.alt || "image";
+        a.style.display = "none";
+
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        setTimeout(() => {
+            URL.revokeObjectURL(objectUrl);
+        }, 1000);
+    } catch (err) {
+        console.error("Lightbox download failed:", err);
+    }
+}
+
 function renderLightboxImage() {
     const image = document.getElementById("lightbox-image");
     const prevBtn = document.getElementById("lightbox-prev-btn");
     const nextBtn = document.getElementById("lightbox-next-btn");
     const counter = document.getElementById("lightbox-counter");
-    const downloadBtn = document.getElementById("lightbox-download-btn");
 
     if (!image) return;
     if (!lightboxItems.length) return;
@@ -53,11 +90,6 @@ function renderLightboxImage() {
     const currentItem = lightboxItems[lightboxIndex];
     image.src = currentItem.src;
     image.alt = currentItem.alt || "";
-
-    if (downloadBtn) {
-        downloadBtn.href = currentItem.src;
-        downloadBtn.setAttribute("download", currentItem.alt || "image");
-    }
 
     const shouldShowNav = lightboxItems.length > 1;
 
@@ -157,7 +189,6 @@ function finishLightboxClose() {
     const modal = document.getElementById("lightbox-modal");
     const image = document.getElementById("lightbox-image");
     const counter = document.getElementById("lightbox-counter");
-    const downloadBtn = document.getElementById("lightbox-download-btn");
 
     if (!modal || !image) return;
 
@@ -170,11 +201,6 @@ function finishLightboxClose() {
     if (counter) {
         counter.textContent = "";
         counter.classList.add("hidden");
-    }
-
-    if (downloadBtn) {
-        downloadBtn.href = "#";
-        downloadBtn.removeAttribute("download");
     }
 
     lightboxItems = [];
@@ -199,6 +225,7 @@ export function initLightboxModal() {
     const prevBtn = document.getElementById("lightbox-prev-btn");
     const nextBtn = document.getElementById("lightbox-next-btn");
     const image = document.getElementById("lightbox-image");
+    const downloadBtn = document.getElementById("lightbox-download-btn");
 
     if (backdrop) {
         backdrop.addEventListener("click", closeLightboxModal);
@@ -214,6 +241,10 @@ export function initLightboxModal() {
 
     if (nextBtn) {
         nextBtn.addEventListener("click", showNextLightboxImage);
+    }
+
+    if (downloadBtn) {
+        downloadBtn.addEventListener("click", handleLightboxDownloadClick);
     }
 
     if (image) {
