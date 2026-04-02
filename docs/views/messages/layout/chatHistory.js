@@ -15,14 +15,19 @@ export function renderMessages({
 
     messagesArea.innerHTML = "";
 
+    const sortedMessages = [...messages].sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+    );
+
     let lastDayKey = null;
 
-    messages.forEach((message, index) => {
+    sortedMessages.forEach((message, index) => {
         const currentDayKey = getMessageDayKey(message.created_at);
 
         if (currentDayKey !== lastDayKey) {
             const dividerRow = document.createElement("div");
             dividerRow.className = "chat-day-divider-row";
+            dividerRow.dataset.dayKey = currentDayKey;
 
             const divider = document.createElement("div");
             divider.className = "chat-day-divider";
@@ -38,7 +43,7 @@ export function renderMessages({
             messagesArea,
             message,
             index,
-            messages,
+            messages: sortedMessages,
             currentUserId,
             renderMessageContent,
             formatMessageTime,
@@ -294,19 +299,11 @@ function getMessageGroupPosition(messages, index, getMessageDayKey) {
 }
 
 function shouldShowTimeForMessage(messages, index, getMessageDayKey) {
-    const current = messages[index];
-    const next = index < messages.length - 1 ? messages[index + 1] : null;
+    const currentMessage = messages[index];
+    const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
 
-    if (!next) return true; // last message always shows time
+    if (!currentMessage) return false;
+    if (!nextMessage) return true;
 
-    // different sender → end of group
-    if (current.sender_id !== next.sender_id) return true;
-
-    // different day → end of group
-    const currentDay = getMessageDayKey(current.created_at);
-    const nextDay = getMessageDayKey(next.created_at);
-    if (currentDay !== nextDay) return true;
-
-    // otherwise → still same group → DON'T show time
-    return false;
+    return !shouldGroupMessages(currentMessage, nextMessage, getMessageDayKey);
 }
