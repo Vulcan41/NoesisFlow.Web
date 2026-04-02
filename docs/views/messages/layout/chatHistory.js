@@ -294,7 +294,19 @@ function getMessageGroupPosition(messages, index, getMessageDayKey) {
 }
 
 function shouldShowTimeForMessage(messages, index, getMessageDayKey) {
-    const message = messages[index];
-    const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
-    return !shouldGroupMessages(message, nextMessage, getMessageDayKey);
+    const current = messages[index];
+    const next = index < messages.length - 1 ? messages[index + 1] : null;
+
+    if (!next) return true; // last message always shows time
+
+    // different sender → end of group
+    if (current.sender_id !== next.sender_id) return true;
+
+    // different day → end of group
+    const currentDay = getMessageDayKey(current.created_at);
+    const nextDay = getMessageDayKey(next.created_at);
+    if (currentDay !== nextDay) return true;
+
+    // otherwise → still same group → DON'T show time
+    return false;
 }
