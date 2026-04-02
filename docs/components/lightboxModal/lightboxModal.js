@@ -250,7 +250,15 @@ export function openLightboxGallery(items = [], startIndex = 0) {
 
     modal.classList.remove("hidden");
     modal.classList.remove("is-closing");
+    modal.classList.add("is-opening");
+
     document.body.classList.add("lightbox-open");
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            modal.classList.remove("is-opening");
+        });
+    });
 }
 
 export function closeLightboxModal() {

@@ -13,6 +13,10 @@
     display: none;
 }
 
+.lightbox-modal.is-opening {
+    opacity: 0;
+}
+
 .lightbox-modal.is-closing {
     opacity: 0;
 }
@@ -39,6 +43,7 @@
     opacity: 1;
 }
 
+.lightbox-modal.is-opening .lightbox-content,
 .lightbox-modal.is-closing .lightbox-content {
     transform: scale(0.96);
     opacity: 0;
