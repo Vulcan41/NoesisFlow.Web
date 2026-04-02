@@ -4,6 +4,7 @@ import { loadView } from "../../core/router.js";
 import { initTextTools } from "../../components/textTools.js";
 import { t, getLocale } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
+import { initComposer } from "./layout/composer.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -294,12 +295,19 @@ async function loadConversations(targetUserId = null) {
             const input = chatPanel.querySelector("#chat-input");
 
             if (inputArea && input) {
-                bindAttachmentInputs();
                 resetPendingAttachments();
+
+                initComposer({
+                    onSend: async (text) => {
+                        await handleSendMessage(text);
+                    },
+                    onFilesSelected: (files) => {
+                        addPendingAttachments(files);
+                    }
+                });
             }
 
             await loadMessages(conversation.id, true);
-            bindChatInput(currentUserId);
             subscribeToActiveConversation();
 
         });
@@ -1113,64 +1121,6 @@ async function loadMessages(conversationId, showLoading = false) {
 }
 
 /* =========================
-   HELPER FUNCTION FOR AUTO RESIZE THE TEXT AREA
-========================= */
-
-function setupAutoResizeTextarea(textarea) {
-    if (!textarea) return;
-
-    const resize = () => {
-        textarea.style.height = "24px";
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 48)}px`;
-
-        if (textarea.scrollHeight > 48) {
-            textarea.style.overflowY = "auto";
-        } else {
-            textarea.style.overflowY = "hidden";
-        }
-    };
-
-    textarea.addEventListener("input", resize);
-    resize();
-}
-
-/* =========================
-   HELPER FUNCTION FOR TOOLBAR
-========================= */
-
-function setupChatInputExpand() {
-    const inputArea = document.getElementById("chat-input-area");
-    const input = document.getElementById("chat-input");
-    const messagesArea = document.getElementById("chat-messages-area");
-
-    if (!inputArea || !input || !messagesArea) return;
-
-    const scrollToBottom = () => {
-        messagesArea.scrollTop = messagesArea.scrollHeight;
-    };
-
-    inputArea.addEventListener("focusin", () => {
-        inputArea.classList.add("expanded");
-
-        requestAnimationFrame(() => {
-            scrollToBottom();
-        });
-    });
-
-    inputArea.addEventListener("transitionend", (e) => {
-        if (e.propertyName === "padding-top" || e.propertyName === "min-height") {
-            scrollToBottom();
-        }
-    });
-
-    document.addEventListener("click", (e) => {
-        if (!inputArea.contains(e.target)) {
-            inputArea.classList.remove("expanded");
-        }
-    });
-}
-
-/* =========================
    SEND MESSAGE
 ========================= */
 
@@ -1450,267 +1400,6 @@ function uploadFileWithProgress(uploadUrl, file, onProgress) {
 
         xhr.send(file);
     });
-}
-
-function bindAttachmentInputs() {
-    const attachBtn = document.querySelector(".chat-composer-tool.text-tool-attach");
-    const imageBtn = document.querySelector(".chat-composer-tool.text-tool-image");
-    const emojiBtn = document.querySelector(".chat-composer-tool.text-tool-emoji");
-    const attachInput = document.getElementById("chat-attach-input");
-    const imageInput = document.getElementById("chat-image-input");
-    const inputArea = document.getElementById("chat-input-area");
-    const input = document.getElementById("chat-input");
-
-    if (attachBtn && attachInput) {
-        attachBtn.onclick = () => {
-            attachInput.click();
-        };
-    }
-
-    if (imageBtn && imageInput) {
-        imageBtn.onclick = () => {
-            imageInput.click();
-        };
-    }
-
-    if (emojiBtn && input) {
-        emojiBtn.onclick = () => {
-            input.value += "😊";
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            input.focus();
-        };
-    }
-
-    if (attachInput) {
-        attachInput.onchange = () => {
-            addPendingAttachments(attachInput.files);
-            attachInput.value = "";
-            if (inputArea) {
-                inputArea.classList.remove("drag-over");
-            }
-        };
-    }
-
-    if (imageInput) {
-        imageInput.onchange = () => {
-            addPendingAttachments(imageInput.files);
-            imageInput.value = "";
-            if (inputArea) {
-                inputArea.classList.remove("drag-over");
-            }
-        };
-    }
-
-    if (!inputArea) return;
-
-    let dragCounter = 0;
-
-    const hasFilesInDragEvent = (e) => {
-        return Array.from(e.dataTransfer?.types || []).includes("Files");
-    };
-
-    const clearDragState = () => {
-        dragCounter = 0;
-        inputArea.classList.remove("drag-over");
-    };
-
-    inputArea.addEventListener("dragenter", (e) => {
-        if (!hasFilesInDragEvent(e)) return;
-
-        e.preventDefault();
-        dragCounter += 1;
-        inputArea.classList.add("drag-over");
-    });
-
-    inputArea.addEventListener("dragover", (e) => {
-        if (!hasFilesInDragEvent(e)) return;
-
-        e.preventDefault();
-        inputArea.classList.add("drag-over");
-    });
-
-    inputArea.addEventListener("dragleave", (e) => {
-        if (!hasFilesInDragEvent(e)) return;
-
-        e.preventDefault();
-        dragCounter -= 1;
-
-        if (dragCounter <= 0) {
-            clearDragState();
-        }
-    });
-
-    inputArea.addEventListener("drop", (e) => {
-        if (!hasFilesInDragEvent(e)) return;
-
-        e.preventDefault();
-        clearDragState();
-
-        const files = Array.from(e.dataTransfer?.files || []);
-        if (!files.length) return;
-
-        addPendingAttachments(files);
-    });
-
-    inputArea.addEventListener("dragend", clearDragState);
-
-    window.addEventListener("blur", clearDragState);
-    window.addEventListener("focus", clearDragState);
-    document.addEventListener("drop", clearDragState);
-    document.addEventListener("dragend", clearDragState);
-}
-
-function bindChatInput(currentUserId) {
-    const input = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("chat-send-btn");
-
-    setupChatInputExpand();
-
-    if (!input || !sendBtn || !activeConversationId) return;
-
-    setupAutoResizeTextarea(input);
-
-    const sendMessage = async () => {
-        const content = input.value.trim();
-        const conversationId = activeConversationId;
-        const hasAttachments = pendingAttachments.length > 0;
-
-        if (!content && !hasAttachments) return;
-
-        sendBtn.disabled = true;
-        input.disabled = true;
-
-        const shouldUsePendingBubble = hasAttachments;
-
-        let tempMessageId = null;
-        let tempAttachments = [];
-
-        if (shouldUsePendingBubble) {
-            const wasNearBottom = isUserNearBottom();
-
-            tempMessageId = crypto.randomUUID();
-
-            tempAttachments = getGroupedPendingAttachments().map((item) => ({
-                id: item.id,
-                file: item.file,
-                progress: 0,
-                uploading: true,
-                uploaded: false,
-                error: false
-            }));
-
-            addPendingMessage({
-                tempId: tempMessageId,
-                conversationId,
-                senderId: currentUserId,
-                content,
-                createdAt: new Date().toISOString(),
-                status: "uploading",
-                attachments: tempAttachments
-            });
-
-            scheduleScrollToBottom(wasNearBottom);
-
-            input.value = "";
-            input.style.height = "42px";
-            input.style.overflowY = "hidden";
-            resetPendingAttachments();
-        }
-
-        try {
-            const uploadedAttachments = [];
-
-            if (shouldUsePendingBubble) {
-                for (const tempAttachment of tempAttachments) {
-                    const uploaded = await uploadMessageAttachmentForPendingMessage(
-                        conversationId,
-                        tempMessageId,
-                        tempAttachment
-                    );
-                    uploadedAttachments.push(uploaded);
-                }
-
-                updatePendingMessage(tempMessageId, { status: "sending" });
-            } else {
-                for (const item of getGroupedPendingAttachments()) {
-                    const uploaded = await uploadMessageAttachment(conversationId, item);
-                    uploadedAttachments.push(uploaded);
-                }
-            }
-
-            const { data: insertedMessage, error: insertError } = await supabase
-                .from("messages")
-                .insert({
-                conversation_id: conversationId,
-                sender_id: currentUserId,
-                content: content || ""
-            })
-                .select("id")
-                .single();
-
-            if (insertError || !insertedMessage) {
-                throw insertError || new Error("Failed to create message");
-            }
-
-            if (uploadedAttachments.length > 0) {
-                const attachmentRows = uploadedAttachments.map((attachment) => ({
-                    message_id: insertedMessage.id,
-                    conversation_id: conversationId,
-                    sender_id: currentUserId,
-                    object_key: attachment.object_key,
-                    file_name: attachment.file_name,
-                    mime_type: attachment.mime_type,
-                    size_bytes: attachment.size_bytes
-                }));
-
-                const { error: attachmentError } = await supabase
-                    .from("message_attachments")
-                    .insert(attachmentRows);
-
-                if (attachmentError) {
-                    throw attachmentError;
-                }
-            }
-
-            const { error: updateError } = await supabase
-                .from("conversations")
-                .update({
-                last_message_at: new Date().toISOString()
-            })
-                .eq("id", conversationId);
-
-            if (updateError) {
-                console.error("Conversation timestamp update failed:", updateError);
-            }
-
-            if (!shouldUsePendingBubble) {
-                input.value = "";
-                input.style.height = "42px";
-                input.style.overflowY = "hidden";
-                resetPendingAttachments();
-            }
-
-            await loadConversations();
-        } catch (err) {
-            console.error("Send message failed:", err);
-
-            if (shouldUsePendingBubble && tempMessageId) {
-                updatePendingMessage(tempMessageId, { status: "failed" });
-            }
-        } finally {
-            sendBtn.disabled = false;
-            input.disabled = false;
-        }
-    };
-
-    sendBtn.onclick = sendMessage;
-
-    input.onkeydown = async (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            await sendMessage();
-        }
-    };
 }
 
 /* =========================
@@ -2146,4 +1835,115 @@ async function initComposerTools(inputArea, input) {
 
     if (boldBtn) boldBtn.remove();
     if (italicBtn) italicBtn.remove();
+}
+
+
+async function handleSendMessage(content) {
+    const conversationId = activeConversationId;
+    const hasAttachments = pendingAttachments.length > 0;
+
+    if (!content && !hasAttachments) return;
+
+    const input = document.getElementById("chat-input");
+    const sendBtn = document.getElementById("chat-send-btn");
+
+    if (input) input.disabled = true;
+    if (sendBtn) sendBtn.disabled = true;
+
+    const shouldUsePendingBubble = hasAttachments;
+
+    let tempMessageId = null;
+    let tempAttachments = [];
+
+    if (shouldUsePendingBubble) {
+        const wasNearBottom = isUserNearBottom();
+
+        tempMessageId = crypto.randomUUID();
+
+        tempAttachments = getGroupedPendingAttachments().map((item) => ({
+            id: item.id,
+            file: item.file,
+            progress: 0,
+            uploading: true,
+            uploaded: false,
+            error: false
+        }));
+
+        addPendingMessage({
+            tempId: tempMessageId,
+            conversationId,
+            senderId: currentUserId,
+            content,
+            createdAt: new Date().toISOString(),
+            status: "uploading",
+            attachments: tempAttachments
+        });
+
+        scheduleScrollToBottom(wasNearBottom);
+        resetPendingAttachments();
+    }
+
+    try {
+        const uploadedAttachments = [];
+
+        if (shouldUsePendingBubble) {
+            for (const tempAttachment of tempAttachments) {
+                const uploaded = await uploadMessageAttachmentForPendingMessage(
+                    conversationId,
+                    tempMessageId,
+                    tempAttachment
+                );
+                uploadedAttachments.push(uploaded);
+            }
+
+            updatePendingMessage(tempMessageId, { status: "sending" });
+        } else {
+            for (const item of getGroupedPendingAttachments()) {
+                const uploaded = await uploadMessageAttachment(conversationId, item);
+                uploadedAttachments.push(uploaded);
+            }
+        }
+
+        const { data: insertedMessage, error } = await supabase
+            .from("messages")
+            .insert({
+            conversation_id: conversationId,
+            sender_id: currentUserId,
+            content: content || ""
+        })
+            .select("id")
+            .single();
+
+        if (error || !insertedMessage) throw error;
+
+        if (uploadedAttachments.length > 0) {
+            const rows = uploadedAttachments.map((a) => ({
+                message_id: insertedMessage.id,
+                conversation_id: conversationId,
+                sender_id: currentUserId,
+                object_key: a.object_key,
+                file_name: a.file_name,
+                mime_type: a.mime_type,
+                size_bytes: a.size_bytes
+            }));
+
+            await supabase.from("message_attachments").insert(rows);
+        }
+
+        await supabase
+            .from("conversations")
+            .update({ last_message_at: new Date().toISOString() })
+            .eq("id", conversationId);
+
+        await loadConversations();
+    } catch (err) {
+        console.error("Send failed:", err);
+
+        if (shouldUsePendingBubble && tempMessageId) {
+            updatePendingMessage(tempMessageId, { status: "failed" });
+        }
+    } finally {
+        if (input) input.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+    }
 }
