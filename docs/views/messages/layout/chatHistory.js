@@ -1,3 +1,7 @@
+/* =========================
+   PUBLIC API
+========================= */
+
 export function renderMessages({
     messagesArea,
     messages,
@@ -77,6 +81,7 @@ export function appendMessage({
 
     let lastDayKey = null;
     const existingDividers = messagesArea.querySelectorAll(".chat-day-divider-row");
+
     if (existingDividers.length) {
         const lastDivider = existingDividers[existingDividers.length - 1];
         lastDayKey = lastDivider.dataset.dayKey || null;
@@ -116,7 +121,7 @@ export function appendMessage({
 }
 
 /* =========================
-   INTERNAL HELPERS
+   REAL MESSAGE RENDERING
 ========================= */
 
 function renderSingleRealMessage({
@@ -142,7 +147,6 @@ function renderSingleRealMessage({
     if (hasText) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"} message-row-${groupPosition}`;
-        row.dataset.messageId = message.id;
 
         const stack = document.createElement("div");
         stack.className = "message-stack";
@@ -171,7 +175,6 @@ function renderSingleRealMessage({
     if (hasAttachments) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"} message-row-${groupPosition}`;
-        row.dataset.messageId = message.id;
 
         const stack = document.createElement("div");
         stack.className = "message-stack";
@@ -205,9 +208,13 @@ function renderSingleRealMessage({
     }
 }
 
+/* =========================
+   ATTACHMENTS
+========================= */
+
 function renderMessageAttachments(
 container,
-attachments = [],
+attachments,
 isImageAttachment,
 createImageAttachmentCard,
 createFileAttachmentCard
@@ -218,22 +225,18 @@ createFileAttachmentCard
     const files = attachments.filter((a) => !isImageAttachment(a));
 
     if (images.length) {
-        const imageGrid = createMessageImageGrid(
-            images,
-            createImageAttachmentCard
-        );
-        container.appendChild(imageGrid);
+        const grid = createMessageImageGrid(images, createImageAttachmentCard);
+        container.appendChild(grid);
     }
 
     if (files.length) {
-        const fileList = createAttachmentList();
+        const list = createAttachmentList();
 
         files.forEach((attachment) => {
-            const node = createFileAttachmentCard(attachment);
-            fileList.appendChild(node);
+            list.appendChild(createFileAttachmentCard(attachment));
         });
 
-        container.appendChild(fileList);
+        container.appendChild(list);
     }
 }
 
@@ -243,19 +246,14 @@ function createAttachmentList() {
     return wrap;
 }
 
-function createMessageImageGrid(images = [], createImageAttachmentCard) {
+function createMessageImageGrid(images, createImageAttachmentCard) {
     const grid = document.createElement("div");
     grid.className = "message-image-grid";
 
-    if (images.length === 1) {
-        grid.classList.add("one");
-    } else if (images.length === 2) {
-        grid.classList.add("two");
-    } else if (images.length === 3) {
-        grid.classList.add("three");
-    } else {
-        grid.classList.add("multi");
-    }
+    if (images.length === 1) grid.classList.add("one");
+    else if (images.length === 2) grid.classList.add("two");
+    else if (images.length === 3) grid.classList.add("three");
+    else grid.classList.add("multi");
 
     images.forEach((attachment, index) => {
         const node = createImageAttachmentCard(attachment, images, index);
@@ -266,44 +264,42 @@ function createMessageImageGrid(images = [], createImageAttachmentCard) {
     return grid;
 }
 
-function shouldGroupMessages(firstMessage, secondMessage, getMessageDayKey) {
-    if (!firstMessage || !secondMessage) return false;
+/* =========================
+   GROUPING + TIME
+========================= */
 
-    if (firstMessage.sender_id !== secondMessage.sender_id) return false;
+function shouldGroupMessages(first, second, getMessageDayKey) {
+    if (!first || !second) return false;
+    if (first.sender_id !== second.sender_id) return false;
 
-    const firstDay = getMessageDayKey(firstMessage.created_at);
-    const secondDay = getMessageDayKey(secondMessage.created_at);
+    if (
+    getMessageDayKey(first.created_at) !==
+    getMessageDayKey(second.created_at)
+    ) return false;
 
-    if (firstDay !== secondDay) return false;
-
-    const diffMs =
-    new Date(secondMessage.created_at) - new Date(firstMessage.created_at);
-
-    return diffMs >= 0 && diffMs <= 5 * 60 * 1000;
+    const diff = new Date(second.created_at) - new Date(first.created_at);
+    return diff >= 0 && diff <= 5 * 60 * 1000;
 }
 
 function getMessageGroupPosition(messages, index, getMessageDayKey) {
-    const message = messages[index];
-    if (!message) return "single";
+    const prev = messages[index - 1];
+    const next = messages[index + 1];
 
-    const previousMessage = index > 0 ? messages[index - 1] : null;
-    const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
+    const prevGroup = shouldGroupMessages(prev, messages[index], getMessageDayKey);
+    const nextGroup = shouldGroupMessages(messages[index], next, getMessageDayKey);
 
-    const groupedWithPrevious = shouldGroupMessages(previousMessage, message, getMessageDayKey);
-    const groupedWithNext = shouldGroupMessages(message, nextMessage, getMessageDayKey);
-
-    if (groupedWithPrevious && groupedWithNext) return "middle";
-    if (groupedWithPrevious) return "end";
-    if (groupedWithNext) return "start";
+    if (prevGroup && nextGroup) return "middle";
+    if (prevGroup) return "end";
+    if (nextGroup) return "start";
     return "single";
 }
 
 function shouldShowTimeForMessage(messages, index, getMessageDayKey) {
-    const currentMessage = messages[index];
-    const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
+    const current = messages[index];
+    const next = messages[index + 1];
 
-    if (!currentMessage) return false;
-    if (!nextMessage) return true;
+    if (!current) return false;
+    if (!next) return true;
 
-    return !shouldGroupMessages(currentMessage, nextMessage, getMessageDayKey);
+    return !shouldGroupMessages(current, next, getMessageDayKey);
 }
