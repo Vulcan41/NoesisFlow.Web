@@ -21,6 +21,8 @@ function createLightboxMarkup() {
                 <button id="lightbox-next-btn" class="lightbox-nav-btn lightbox-next-btn" type="button" aria-label="Next image">
                     ›
                 </button>
+
+                <div id="lightbox-counter" class="lightbox-counter hidden"></div>
             </div>
         </div>
     `;
@@ -30,6 +32,7 @@ function renderLightboxImage() {
     const image = document.getElementById("lightbox-image");
     const prevBtn = document.getElementById("lightbox-prev-btn");
     const nextBtn = document.getElementById("lightbox-next-btn");
+    const counter = document.getElementById("lightbox-counter");
 
     if (!image) return;
     if (!lightboxItems.length) return;
@@ -46,6 +49,16 @@ function renderLightboxImage() {
 
     if (nextBtn) {
         nextBtn.classList.toggle("hidden", !shouldShowNav);
+    }
+
+    if (counter) {
+        if (shouldShowNav) {
+            counter.textContent = `${lightboxIndex + 1} / ${lightboxItems.length}`;
+            counter.classList.remove("hidden");
+        } else {
+            counter.textContent = "";
+            counter.classList.add("hidden");
+        }
     }
 }
 
@@ -140,12 +153,19 @@ export function openLightboxGallery(items = [], startIndex = 0) {
 export function closeLightboxModal() {
     const modal = document.getElementById("lightbox-modal");
     const image = document.getElementById("lightbox-image");
+    const counter = document.getElementById("lightbox-counter");
 
     if (!modal || !image) return;
 
     modal.classList.add("hidden");
     image.src = "";
     image.alt = "";
+
+    if (counter) {
+        counter.textContent = "";
+        counter.classList.add("hidden");
+    }
+
     lightboxItems = [];
     lightboxIndex = 0;
     document.body.classList.remove("lightbox-open");
