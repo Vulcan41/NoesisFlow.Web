@@ -121,26 +121,34 @@ function renderSingleRealMessage({
     const isOwn = message.sender_id === currentUserId;
     const hasText = message.content && message.content.trim();
     const hasAttachments = message.attachments && message.attachments.length > 0;
+    const hasLinkPreview = !!message.link_url;
 
     const groupPosition = getMessageGroupPosition(messages, index, getMessageDayKey);
     const showTime = shouldShowTimeForMessage(messages, index, getMessageDayKey);
 
-    if (hasText) {
+    if (hasText || hasLinkPreview) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"} message-row-${groupPosition}`;
 
         const stack = document.createElement("div");
         stack.className = "message-stack";
 
-        const bubble = document.createElement("div");
-        bubble.className = `message-bubble message-bubble-${groupPosition}`;
+        if (hasText) {
+            const bubble = document.createElement("div");
+            bubble.className = `message-bubble message-bubble-${groupPosition}`;
 
-        const content = document.createElement("div");
-        content.className = "message-content";
-        renderMessageContent(content, message.content);
+            const content = document.createElement("div");
+            content.className = "message-content";
+            renderMessageContent(content, message.content);
 
-        bubble.appendChild(content);
-        stack.appendChild(bubble);
+            bubble.appendChild(content);
+            stack.appendChild(bubble);
+        }
+
+        if (hasLinkPreview) {
+            const previewCard = createLinkPreviewCard(message);
+            stack.appendChild(previewCard);
+        }
 
         if (showTime) {
             const time = document.createElement("div");
@@ -477,4 +485,49 @@ function shouldShowTimeForMessage(messages, index, getMessageDayKey) {
     if (!next) return true;
 
     return !shouldGroupMessages(current, next, getMessageDayKey);
+}
+
+function createLinkPreviewCard(message) {
+    const card = document.createElement("a");
+    card.className = "message-link-preview";
+    card.href = message.link_url;
+    card.target = "_blank";
+    card.rel = "noopener noreferrer";
+
+    const hasImage = !!message.link_image;
+
+    if (hasImage) {
+        const image = document.createElement("img");
+        image.className = "message-link-preview-image";
+        image.src = message.link_image;
+        image.alt = message.link_title || message.link_site || "Link preview";
+        image.loading = "lazy";
+        card.appendChild(image);
+    }
+
+    const body = document.createElement("div");
+    body.className = "message-link-preview-body";
+
+    if (message.link_title) {
+        const title = document.createElement("div");
+        title.className = "message-link-preview-title";
+        title.textContent = message.link_title;
+        body.appendChild(title);
+    }
+
+    if (message.link_description) {
+        const description = document.createElement("div");
+        description.className = "message-link-preview-description";
+        description.textContent = message.link_description;
+        body.appendChild(description);
+    }
+
+    const site = document.createElement("div");
+    site.className = "message-link-preview-site";
+    site.textContent = message.link_site || message.link_url;
+    body.appendChild(site);
+
+    card.appendChild(body);
+
+    return card;
 }

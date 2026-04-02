@@ -799,19 +799,24 @@ async function loadMessages(conversationId, showLoading = false) {
     const { data, error } = await supabase
         .from("messages")
         .select(`
-            id,
-            sender_id,
-            content,
-            created_at,
-            attachments:message_attachments (
-                id,
-                object_key,
-                file_name,
-                mime_type,
-                size_bytes,
-                created_at
-            )
-        `)
+    id,
+    sender_id,
+    content,
+    created_at,
+    link_url,
+    link_title,
+    link_description,
+    link_image,
+    link_site,
+    attachments:message_attachments (
+        id,
+        object_key,
+        file_name,
+        mime_type,
+        size_bytes,
+        created_at
+    )
+`)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
@@ -1134,6 +1139,28 @@ function uploadFileWithProgress(uploadUrl, file, onProgress) {
     });
 }
 
+function extractFirstUrl(text = "") {
+    const match = String(text).match(/(?:https?:\/\/|www\.)[^\s]+/i);
+    return match ? match[0] : null;
+}
+
+async function fetchLinkPreview(url) {
+    const res = await fetch("/api/link-preview", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+    });
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to fetch link preview");
+    }
+
+    return res.json();
+}
+
 async function handleSendMessage(content) {
     const conversationId = activeConversationId;
     const hasAttachments = pendingAttachments.length > 0;
@@ -1180,6 +1207,17 @@ async function handleSendMessage(content) {
     }
 
     try {
+        let preview = null;
+        const firstUrl = extractFirstUrl(content);
+
+        if (firstUrl) {
+            try {
+                preview = await fetchLinkPreview(firstUrl);
+            } catch (previewError) {
+                console.warn("Link preview failed, sending message without preview:", previewError);
+            }
+        }
+
         const uploadedAttachments = [];
 
         if (shouldUsePendingBubble) {
@@ -1205,7 +1243,12 @@ async function handleSendMessage(content) {
             .insert({
             conversation_id: conversationId,
             sender_id: currentUserId,
-            content: content || ""
+            content: content || "",
+            link_url: preview?.url || null,
+            link_title: preview?.title || null,
+            link_description: preview?.description || null,
+            link_image: preview?.image || null,
+            link_site: preview?.site || null
         })
             .select("id")
             .single();
@@ -1223,11 +1266,7 @@ async function handleSendMessage(content) {
                 size_bytes: a.size_bytes
             }));
 
-            const { error: attachmentsError } = await supabase
-                .from("message_attachments")
-                .insert(rows);
-
-            if (attachmentsError) throw attachmentsError;
+            await supabase.from("message_attachments").insert(rows);
         }
 
         await supabase
@@ -1286,19 +1325,24 @@ function subscribeToActiveConversation() {
             const { data, error } = await supabase
                 .from("messages")
                 .select(`
-                        id,
-                        sender_id,
-                        content,
-                        created_at,
-                        attachments:message_attachments (
-                            id,
-                            object_key,
-                            file_name,
-                            mime_type,
-                            size_bytes,
-                            created_at
-                        )
-                    `)
+    id,
+    sender_id,
+    content,
+    created_at,
+    link_url,
+    link_title,
+    link_description,
+    link_image,
+    link_site,
+    attachments:message_attachments (
+        id,
+        object_key,
+        file_name,
+        mime_type,
+        size_bytes,
+        created_at
+    )
+`)
                 .eq("id", messageId)
                 .single();
 
