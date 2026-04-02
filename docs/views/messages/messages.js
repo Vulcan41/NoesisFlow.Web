@@ -1871,12 +1871,28 @@ function appendRealMessageToChat(message) {
         if (pendingEl) {
             const parent = pendingEl.parentElement;
 
-            // render real message in a temp container
+            // create real message
             const tempWrap = document.createElement("div");
             renderSingleRealMessage(tempWrap, message);
 
-            // replace pending with real
-            parent.replaceChild(tempWrap.firstChild, pendingEl);
+            const newNode = tempWrap.firstChild;
+
+            // prepare animation
+            const bubble = newNode.querySelector(".message-bubble");
+            if (bubble) {
+                bubble.classList.add("fade-in");
+            }
+
+            // fade out pending
+            pendingEl.style.opacity = "0";
+            pendingEl.style.transform = "scale(0.98)";
+            pendingEl.style.transition = "opacity 0.15s ease, transform 0.15s ease";
+
+            setTimeout(() => {
+                if (parent.contains(pendingEl)) {
+                    parent.replaceChild(newNode, pendingEl);
+                }
+            }, 150);
         }
 
         removePendingMessage(matchedPending.tempId);
