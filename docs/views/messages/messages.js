@@ -755,10 +755,12 @@ function renderSingleRealMessage(messagesArea, message) {
 
     const previousMessage = getPreviousRealMessage(message);
     const groupedWithPrevious = shouldGroupWithPreviousMessage(previousMessage, message);
+    const showTime = shouldShowTimeForMessage(message);
 
     if (hasText) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"}`;
+        row.dataset.messageId = message.id;
 
         if (groupedWithPrevious) {
             row.classList.add("message-row-grouped");
@@ -775,20 +777,23 @@ function renderSingleRealMessage(messagesArea, message) {
         content.className = "message-content";
         renderMessageContent(content, message.content);
 
-        const time = document.createElement("div");
-        time.className = "message-time";
-        time.textContent = formatMessageTime(message.created_at);
-
         bubble.appendChild(content);
-        bubble.appendChild(time);
-        row.appendChild(bubble);
 
+        if (showTime) {
+            const time = document.createElement("div");
+            time.className = "message-time";
+            time.textContent = formatMessageTime(message.created_at);
+            bubble.appendChild(time);
+        }
+
+        row.appendChild(bubble);
         messagesArea.appendChild(row);
     }
 
     if (hasAttachments) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"}`;
+        row.dataset.messageId = message.id;
 
         if (groupedWithPrevious) {
             row.classList.add("message-row-grouped");
@@ -805,15 +810,16 @@ function renderSingleRealMessage(messagesArea, message) {
         contentWrap.className = "message-attachment-content";
 
         renderMessageAttachments(contentWrap, message.attachments);
-
-        const time = document.createElement("div");
-        time.className = "message-time";
-        time.textContent = formatMessageTime(message.created_at);
-
         bubble.appendChild(contentWrap);
-        bubble.appendChild(time);
-        row.appendChild(bubble);
 
+        if (showTime) {
+            const time = document.createElement("div");
+            time.className = "message-time";
+            time.textContent = formatMessageTime(message.created_at);
+            bubble.appendChild(time);
+        }
+
+        row.appendChild(bubble);
         messagesArea.appendChild(row);
     }
 }
@@ -1912,24 +1918,28 @@ function appendRealMessageToChat(message) {
         messagesArea.appendChild(dividerRow);
     }
 
+    const previousMessage = activeConversationMessages[activeConversationMessages.length - 1] || null;
+
     activeConversationMessages.push(message);
     activeConversationMessages.sort(
         (a, b) => new Date(a.created_at) - new Date(b.created_at)
     );
 
+    if (shouldGroupWithPreviousMessage(previousMessage, message)) {
+        hideRenderedTimeForMessage(previousMessage.id);
+    }
+
     renderSingleRealMessage(messagesArea, message);
 
-    const appendedRows = messagesArea.querySelectorAll(".message-row");
-    const lastAppendedRow = appendedRows[appendedRows.length - 1];
+    const appendedRows = messagesArea.querySelectorAll(`.message-row[data-message-id="${message.id}"]`);
+    appendedRows.forEach((row) => {
+        row.dataset.date = currentDayKey;
 
-    if (lastAppendedRow) {
-        lastAppendedRow.dataset.date = currentDayKey;
-
-        const bubble = lastAppendedRow.querySelector(".message-bubble");
+        const bubble = row.querySelector(".message-bubble");
         if (bubble) {
             bubble.classList.add("fade-in");
         }
-    }
+    });
 
     renderedMessageIds.add(message.id);
     scheduleScrollToBottom();
@@ -1983,4 +1993,27 @@ function getPreviousRealMessage(message) {
 
     if (index <= 0) return null;
     return messages[index - 1] || null;
+}
+
+function getNextRealMessage(message) {
+    const messages = activeConversationMessages || [];
+    const index = messages.findIndex((m) => m.id === message.id);
+
+    if (index < 0 || index >= messages.length - 1) return null;
+    return messages[index + 1] || null;
+}
+
+function shouldShowTimeForMessage(message) {
+    const nextMessage = getNextRealMessage(message);
+    return !shouldGroupWithPreviousMessage(message, nextMessage);
+}
+
+function hideRenderedTimeForMessage(messageId) {
+    const rows = document.querySelectorAll(`.message-row[data-message-id="${messageId}"]`);
+    rows.forEach((row) => {
+        const time = row.querySelector(".message-time");
+        if (time) {
+            time.remove();
+        }
+    });
 }

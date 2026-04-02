@@ -1225,3 +1225,8 @@
 .message-bubble-grouped.message-bubble-attachment-only {
     padding-top: 0;
 }
+
+
+.message-row-grouped .message-bubble {
+    gap: 4px;
+}
