@@ -753,8 +753,7 @@ function renderSingleRealMessage(messagesArea, message) {
     const hasText = message.content && message.content.trim();
     const hasAttachments = message.attachments && message.attachments.length > 0;
 
-    const previousMessage = getPreviousRealMessage(message);
-    const groupedWithPrevious = shouldGroupWithPreviousMessage(previousMessage, message);
+    const groupPosition = getMessageGroupPosition(message);
     const showTime = shouldShowTimeForMessage(message);
 
     if (hasText) {
@@ -762,19 +761,13 @@ function renderSingleRealMessage(messagesArea, message) {
         row.className = `message-row ${isOwn ? "own" : "other"}`;
         row.dataset.messageId = message.id;
 
-        if (groupedWithPrevious) {
-            row.classList.add("message-row-grouped");
-        }
-
         const stack = document.createElement("div");
         stack.className = "message-stack";
 
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
 
-        if (groupedWithPrevious) {
-            bubble.classList.add("message-bubble-grouped");
-        }
+        applyBubbleGroupClasses(row, bubble, groupPosition);
 
         const content = document.createElement("div");
         content.className = "message-content";
@@ -799,16 +792,10 @@ function renderSingleRealMessage(messagesArea, message) {
         row.className = `message-row ${isOwn ? "own" : "other"}`;
         row.dataset.messageId = message.id;
 
-        if (groupedWithPrevious) {
-            row.classList.add("message-row-grouped");
-        }
-
         const bubble = document.createElement("div");
         bubble.className = "message-bubble message-bubble-attachment-only";
 
-        if (groupedWithPrevious) {
-            bubble.classList.add("message-bubble-grouped");
-        }
+        applyBubbleGroupClasses(row, bubble, groupPosition);
 
         const contentWrap = document.createElement("div");
         contentWrap.className = "message-attachment-content";
@@ -2024,4 +2011,43 @@ function hideRenderedTimeForMessage(messageId) {
             time.remove();
         }
     });
+}
+
+function shouldGroupMessages(firstMessage, secondMessage) {
+    if (!firstMessage || !secondMessage) return false;
+
+    if (firstMessage.sender_id !== secondMessage.sender_id) return false;
+
+    const firstDay = getMessageDayKey(firstMessage.created_at);
+    const secondDay = getMessageDayKey(secondMessage.created_at);
+
+    if (firstDay !== secondDay) return false;
+
+    const diffMs =
+    new Date(secondMessage.created_at) - new Date(firstMessage.created_at);
+
+    return diffMs >= 0 && diffMs <= 5 * 60 * 1000;
+}
+
+function getMessageGroupPosition(message) {
+    const messages = activeConversationMessages || [];
+    const index = messages.findIndex((m) => m.id === message.id);
+
+    if (index === -1) return "single";
+
+    const previousMessage = index > 0 ? messages[index - 1] : null;
+    const nextMessage = index < messages.length - 1 ? messages[index + 1] : null;
+
+    const groupedWithPrevious = shouldGroupMessages(previousMessage, message);
+    const groupedWithNext = shouldGroupMessages(message, nextMessage);
+
+    if (groupedWithPrevious && groupedWithNext) return "middle";
+    if (groupedWithPrevious) return "end";
+    if (groupedWithNext) return "start";
+    return "single";
+}
+
+function applyBubbleGroupClasses(row, bubble, groupPosition) {
+    row.classList.add(`message-row-${groupPosition}`);
+    bubble.classList.add(`message-bubble-${groupPosition}`);
 }
