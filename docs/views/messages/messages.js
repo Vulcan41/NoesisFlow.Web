@@ -425,31 +425,33 @@ function renderChatSkeleton(chatPanel, conversation) {
 
             <div class="chat-input-area" id="chat-input-area" data-i18n-drop="${t("messages.drop_files")}">
 
-    <div id="chat-attachments-preview" class="chat-attachments-preview hidden"></div>
+                <div id="chat-attachments-preview" class="chat-attachments-preview hidden"></div>
 
-    <div class="chat-input-row">
-        <textarea
-            id="chat-input"
-            rows="1"
-            placeholder="${t("messages.type_message")}"
-            ${disabled ? "disabled" : ""}
-        ></textarea>
+                <div class="chat-composer-shell">
+                    <div class="chat-input-row">
+                        <textarea
+                            id="chat-input"
+                            rows="1"
+                            placeholder="${t("messages.type_message")}"
+                            ${disabled ? "disabled" : ""}
+                        ></textarea>
 
-        <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
-            ${t("messages.send")}
-        </button>
-    </div>
+                        <button id="chat-send-btn" class="chat-send-btn" ${disabled ? "disabled" : ""}>
+                            ${t("messages.send")}
+                        </button>
+                    </div>
+                </div>
 
-    <input id="chat-attach-input" type="file" hidden multiple />
-<input id="chat-image-input" type="file" hidden accept="image/*" multiple />
+                <input id="chat-attach-input" type="file" hidden multiple />
+                <input id="chat-image-input" type="file" hidden accept="image/*" multiple />
 
-    ${disabled
-        ? `<div class="chat-disabled-note">
-               ${t("messages.inactive_chat")}
-           </div>`
-        : ""}
+                ${disabled
+                    ? `<div class="chat-disabled-note">
+                           ${t("messages.inactive_chat")}
+                       </div>`
+                    : ""}
 
-</div>
+            </div>
 
         </div>
     `;
