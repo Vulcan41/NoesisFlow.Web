@@ -13,6 +13,7 @@ let pendingAttachments = [];
 let pendingMessages = [];
 let activeConversationMessages = [];
 let scrollScheduled = false;
+let renderedMessageIds = new Set();
 
 // switch to English
 localStorage.setItem("lang", "en");
@@ -263,6 +264,7 @@ async function loadConversations(targetUserId = null) {
 
             activeConversationId = conversation.id;
             activeConversationMessages = [];
+            renderedMessageIds.clear();
 
             await supabase
                 .from("conversations")
@@ -1041,7 +1043,34 @@ async function loadMessages(conversationId, showLoading = false) {
     }
 
     activeConversationMessages = data || [];
-    renderActiveConversationWithPending();
+    renderedMessageIds.clear();
+
+    messagesArea.innerHTML = "";
+
+    let lastDayKey = null;
+
+    activeConversationMessages.forEach((message) => {
+
+        const currentDayKey = getMessageDayKey(message.created_at);
+
+        if (currentDayKey !== lastDayKey) {
+            const dividerRow = document.createElement("div");
+            dividerRow.className = "chat-day-divider-row";
+
+            const divider = document.createElement("div");
+            divider.className = "chat-day-divider";
+            divider.textContent = formatMessageDayLabel(message.created_at);
+
+            dividerRow.appendChild(divider);
+            messagesArea.appendChild(dividerRow);
+
+            lastDayKey = currentDayKey;
+        }
+
+        renderSingleRealMessage(messagesArea, message);
+        renderedMessageIds.add(message.id);
+    });
+
     scheduleScrollToBottom(true);
 }
 
@@ -1613,7 +1642,6 @@ function bindChatInput(currentUserId) {
                 resetPendingAttachments();
             }
 
-            await loadMessages(conversationId);
             await loadConversations();
         } catch (err) {
             console.error("Send message failed:", err);
@@ -1659,11 +1687,34 @@ function subscribeToActiveConversation() {
             table: "messages",
             filter: `conversation_id=eq.${conversationId}`
         },
-        async () => {
+        async (payload) => {
             if (activeConversationId !== conversationId) return;
 
-            await loadMessages(conversationId);
-            await loadConversations();
+            const messageId = payload.new.id;
+
+            const { data, error } = await supabase
+                .from("messages")
+                .select(`
+                        id,
+                        sender_id,
+                        content,
+                        created_at,
+                        attachments:message_attachments (
+                            id,
+                            object_key,
+                            file_name,
+                            mime_type,
+                            size_bytes,
+                            created_at
+                        )
+                    `)
+                .eq("id", messageId)
+                .single();
+
+            if (error || !data) return;
+
+            appendRealMessageToChat(data);
+            await loadConversations(); // keep sidebar updated
         }
     )
         .subscribe();
@@ -1834,4 +1885,46 @@ function createMessageImageGrid(images = []) {
     });
 
     return grid;
+}
+
+function appendRealMessageToChat(message) {
+    const messagesArea = document.getElementById("chat-messages-area");
+    if (!messagesArea) return;
+
+    if (renderedMessageIds.has(message.id)) return;
+
+    const lastMessageEl = messagesArea.lastElementChild;
+
+    let lastDate = null;
+
+    if (lastMessageEl && lastMessageEl.dataset?.date) {
+        lastDate = lastMessageEl.dataset.date;
+    }
+
+    const currentDayKey = getMessageDayKey(message.created_at);
+
+    if (currentDayKey !== lastDate) {
+        const dividerRow = document.createElement("div");
+        dividerRow.className = "chat-day-divider-row";
+
+        const divider = document.createElement("div");
+        divider.className = "chat-day-divider";
+        divider.textContent = formatMessageDayLabel(message.created_at);
+
+        dividerRow.dataset.date = currentDayKey;
+
+        dividerRow.appendChild(divider);
+        messagesArea.appendChild(dividerRow);
+    }
+
+    renderSingleRealMessage(messagesArea, message);
+
+    const lastNode = messagesArea.lastElementChild;
+    if (lastNode) {
+        lastNode.dataset.date = currentDayKey;
+    }
+
+    renderedMessageIds.add(message.id);
+
+    scheduleScrollToBottom();
 }
