@@ -436,7 +436,7 @@ function renderChatSkeleton(chatPanel, conversation) {
                             ${disabled ? "disabled" : ""}
                         ></textarea>
 
-                        <button id="chat-send-btn" class="chat-send-btn" ${disabled ? "disabled" : ""}>
+                        <button id="chat-send-btn" ${disabled ? "disabled" : ""}>
                             ${t("messages.send")}
                         </button>
                     </div>
