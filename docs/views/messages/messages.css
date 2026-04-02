@@ -1121,9 +1121,6 @@
 
 
 
-.pending-message-bubble {
-    opacity: 0.92;
-}
 
 .pending-attachment-file,
 .pending-attachment-image {
@@ -1167,7 +1164,7 @@
 }
 
 .chat-input-area.drag-over::after {
-    content: "Αφήστε τα αρχεία εδώ";
+    content: attr(data-i18n-drop);
     position: absolute;
     inset: 8px;
     display: flex;
@@ -1213,13 +1210,8 @@
 
 
 
-
 .message-row-grouped {
-    margin-top: 4px !important;
-}
-
-.message-row:not(.message-row-grouped) {
-    margin-top: 10px;
+    margin-top: -4px;
 }
 
 .message-row.own.message-row-grouped .message-bubble:not(.message-bubble-attachment-only) {
