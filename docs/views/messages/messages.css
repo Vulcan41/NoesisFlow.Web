@@ -1210,3 +1210,26 @@
         transform: scale(1);
     }
 }
+
+
+
+
+.message-row-grouped {
+    margin-top: 4px !important;
+}
+
+.message-row:not(.message-row-grouped) {
+    margin-top: 10px;
+}
+
+.message-row.own.message-row-grouped .message-bubble:not(.message-bubble-attachment-only) {
+    border-top-right-radius: 10px;
+}
+
+.message-row.other.message-row-grouped .message-bubble:not(.message-bubble-attachment-only) {
+    border-top-left-radius: 10px;
+}
+
+.message-bubble-grouped.message-bubble-attachment-only {
+    padding-top: 0;
+}

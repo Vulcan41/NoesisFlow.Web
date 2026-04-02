@@ -753,12 +753,23 @@ function renderSingleRealMessage(messagesArea, message) {
     const hasText = message.content && message.content.trim();
     const hasAttachments = message.attachments && message.attachments.length > 0;
 
+    const previousMessage = getPreviousRealMessage(message);
+    const groupedWithPrevious = shouldGroupWithPreviousMessage(previousMessage, message);
+
     if (hasText) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"}`;
 
+        if (groupedWithPrevious) {
+            row.classList.add("message-row-grouped");
+        }
+
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
+
+        if (groupedWithPrevious) {
+            bubble.classList.add("message-bubble-grouped");
+        }
 
         const content = document.createElement("div");
         content.className = "message-content";
@@ -779,8 +790,16 @@ function renderSingleRealMessage(messagesArea, message) {
         const row = document.createElement("div");
         row.className = `message-row ${isOwn ? "own" : "other"}`;
 
+        if (groupedWithPrevious) {
+            row.classList.add("message-row-grouped");
+        }
+
         const bubble = document.createElement("div");
         bubble.className = "message-bubble message-bubble-attachment-only";
+
+        if (groupedWithPrevious) {
+            bubble.classList.add("message-bubble-grouped");
+        }
 
         const contentWrap = document.createElement("div");
         contentWrap.className = "message-attachment-content";
@@ -1813,7 +1832,7 @@ function isUserNearBottom() {
     const el = document.getElementById("chat-messages-area");
     if (!el) return true;
 
-    const threshold = 400;
+    const threshold = 80;
     return el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
 }
 
@@ -1870,15 +1889,15 @@ function appendRealMessageToChat(message) {
         removePendingMessage(matchedPending.tempId);
     }
 
-    const lastMessageEl = messagesArea.lastElementChild;
+    const currentDayKey = getMessageDayKey(message.created_at);
 
     let lastDate = null;
+    const datedNodes = messagesArea.querySelectorAll("[data-date]");
+    const lastDatedNode = datedNodes[datedNodes.length - 1];
 
-    if (lastMessageEl && lastMessageEl.dataset?.date) {
-        lastDate = lastMessageEl.dataset.date;
+    if (lastDatedNode) {
+        lastDate = lastDatedNode.dataset.date;
     }
-
-    const currentDayKey = getMessageDayKey(message.created_at);
 
     if (currentDayKey !== lastDate) {
         const dividerRow = document.createElement("div");
@@ -1893,10 +1912,16 @@ function appendRealMessageToChat(message) {
         messagesArea.appendChild(dividerRow);
     }
 
+    activeConversationMessages.push(message);
+    activeConversationMessages.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+    );
+
     renderSingleRealMessage(messagesArea, message);
 
-    const appendedNodes = messagesArea.querySelectorAll(".message-row");
-    const lastAppendedRow = appendedNodes[appendedNodes.length - 1];
+    const appendedRows = messagesArea.querySelectorAll(".message-row");
+    const lastAppendedRow = appendedRows[appendedRows.length - 1];
+
     if (lastAppendedRow) {
         lastAppendedRow.dataset.date = currentDayKey;
 
@@ -1932,4 +1957,30 @@ function findMatchingPendingMessage(realMessage) {
 
         return sameContent && sameAttachmentCount && timeDiff < 10000;
     });
+}
+
+function shouldGroupWithPreviousMessage(previousMessage, currentMessage) {
+    if (!previousMessage || !currentMessage) return false;
+
+    if (previousMessage.sender_id !== currentMessage.sender_id) return false;
+
+    const previousDay = getMessageDayKey(previousMessage.created_at);
+    const currentDay = getMessageDayKey(currentMessage.created_at);
+
+    if (previousDay !== currentDay) return false;
+
+    const timeDiffMs =
+    new Date(currentMessage.created_at) - new Date(previousMessage.created_at);
+
+    const fiveMinutesMs = 5 * 60 * 1000;
+
+    return timeDiffMs >= 0 && timeDiffMs <= fiveMinutesMs;
+}
+
+function getPreviousRealMessage(message) {
+    const messages = activeConversationMessages || [];
+    const index = messages.findIndex((m) => m.id === message.id);
+
+    if (index <= 0) return null;
+    return messages[index - 1] || null;
 }
