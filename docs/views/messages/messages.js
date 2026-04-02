@@ -1214,6 +1214,7 @@ async function handleSendMessage(content) {
         tempAttachments = getGroupedPendingAttachments().map((item) => ({
             id: item.id,
             file: item.file,
+            previewUrl: item.previewUrl || null,
             progress: 0,
             uploading: true,
             uploaded: false,

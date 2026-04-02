@@ -427,10 +427,7 @@ function createPendingImageAttachmentCard(attachment) {
 
     const img = document.createElement("img");
     img.alt = attachment.file.name;
-
-    const objectUrl = URL.createObjectURL(attachment.file);
-    img.src = objectUrl;
-    img.onload = () => URL.revokeObjectURL(objectUrl);
+    img.src = attachment.previewUrl || "";
 
     wrap.appendChild(img);
 
