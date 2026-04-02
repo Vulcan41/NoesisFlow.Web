@@ -426,53 +426,55 @@ function renderChatSkeleton(chatPanel, conversation) {
 
                 <div id="chat-attachments-preview" class="chat-attachments-preview hidden"></div>
 
-                <div class="chat-composer-instagram">
+                <div class="chat-composer-row">
+                    <div class="chat-composer-instagram">
+                        <div class="chat-composer-input-wrap">
+                            <textarea
+                                id="chat-input"
+                                rows="1"
+                                placeholder="${t("messages.type_message")}"
+                                ${disabled ? "disabled" : ""}
+                            ></textarea>
+                        </div>
+
+                        <div class="chat-composer-tools">
+                            <button
+                                type="button"
+                                class="chat-composer-tool text-tool-attach"
+                                aria-label="Attach file"
+                                ${disabled ? "disabled" : ""}
+                            >
+                                📎
+                            </button>
+
+                            <button
+                                type="button"
+                                class="chat-composer-tool text-tool-image"
+                                aria-label="Send image"
+                                ${disabled ? "disabled" : ""}
+                            >
+                                🖼
+                            </button>
+
+                            <button
+                                type="button"
+                                class="chat-composer-tool text-tool-emoji"
+                                aria-label="Emoji"
+                                ${disabled ? "disabled" : ""}
+                            >
+                                😊
+                            </button>
+                        </div>
+                    </div>
+
                     <button
+                        id="chat-send-btn"
                         type="button"
-                        class="chat-composer-left-btn text-tool-attach"
-                        aria-label="Attach file"
+                        class="chat-composer-send-outside"
                         ${disabled ? "disabled" : ""}
                     >
-                        📎
+                        ${t("messages.send")}
                     </button>
-
-                    <div class="chat-composer-input-wrap">
-                        <textarea
-                            id="chat-input"
-                            rows="1"
-                            placeholder="${t("messages.type_message")}"
-                            ${disabled ? "disabled" : ""}
-                        ></textarea>
-                    </div>
-
-                    <div class="chat-composer-tools">
-                        <button
-                            type="button"
-                            class="chat-composer-tool text-tool-image"
-                            aria-label="Send image"
-                            ${disabled ? "disabled" : ""}
-                        >
-                            🖼
-                        </button>
-
-                        <button
-                            type="button"
-                            class="chat-composer-tool text-tool-emoji"
-                            aria-label="Emoji"
-                            ${disabled ? "disabled" : ""}
-                        >
-                            😊
-                        </button>
-
-                        <button
-                            id="chat-send-btn"
-                            type="button"
-                            class="chat-composer-send"
-                            ${disabled ? "disabled" : ""}
-                        >
-                            ${t("messages.send")}
-                        </button>
-                    </div>
                 </div>
 
                 <input id="chat-attach-input" type="file" hidden multiple />
@@ -1448,7 +1450,7 @@ function uploadFileWithProgress(uploadUrl, file, onProgress) {
 }
 
 function bindAttachmentInputs() {
-    const attachBtn = document.querySelector(".chat-composer-left-btn.text-tool-attach");
+    const attachBtn = document.querySelector(".chat-composer-tool.text-tool-attach");
     const imageBtn = document.querySelector(".chat-composer-tool.text-tool-image");
     const emojiBtn = document.querySelector(".chat-composer-tool.text-tool-emoji");
     const attachInput = document.getElementById("chat-attach-input");
