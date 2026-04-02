@@ -4,7 +4,7 @@ import { loadView } from "../../core/router.js";
 import { t, getLocale } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 import { initComposer } from "./layout/composer.js";
-import { renderMessages } from "./layout/chatHistory.js";
+import { renderMessages, renderPendingMessages } from "./layout/chatHistory.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -1223,7 +1223,11 @@ async function handleSendMessage(content) {
                 size_bytes: a.size_bytes
             }));
 
-            await supabase.from("message_attachments").insert(rows);
+            const { error: attachmentsError } = await supabase
+                .from("message_attachments")
+                .insert(rows);
+
+            if (attachmentsError) throw attachmentsError;
         }
 
         await supabase
@@ -1235,6 +1239,7 @@ async function handleSendMessage(content) {
             removePendingMessage(tempMessageId);
         }
 
+        await loadMessages(conversationId);
         await loadConversations();
 
         return true;
