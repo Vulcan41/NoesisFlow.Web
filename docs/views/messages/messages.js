@@ -442,27 +442,30 @@ function renderChatSkeleton(chatPanel, conversation) {
                                 type="button"
                                 class="chat-composer-tool text-tool-attach"
                                 aria-label="Attach file"
+                                title="Attach file"
                                 ${disabled ? "disabled" : ""}
                             >
-                                📎
+                                <img src="assets/icon_attach_2.png" alt="Attach">
                             </button>
 
                             <button
                                 type="button"
                                 class="chat-composer-tool text-tool-image"
                                 aria-label="Send image"
+                                title="Send image"
                                 ${disabled ? "disabled" : ""}
                             >
-                                🖼
+                                <img src="assets/icons_img.png" alt="Image">
                             </button>
 
                             <button
                                 type="button"
                                 class="chat-composer-tool text-tool-emoji"
                                 aria-label="Emoji"
+                                title="Emoji"
                                 ${disabled ? "disabled" : ""}
                             >
-                                😊
+                                <img src="assets/icon_emoji_2.png" alt="Emoji">
                             </button>
                         </div>
                     </div>
