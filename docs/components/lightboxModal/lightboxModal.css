@@ -26,7 +26,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 20px 64px;
     box-sizing: border-box;
 }
 
@@ -65,6 +65,46 @@
 
 .lightbox-close-btn:active {
     transform: scale(0.96);
+}
+
+.lightbox-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.lightbox-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.24);
+}
+
+.lightbox-nav-btn:active {
+    transform: translateY(-50%) scale(0.96);
+}
+
+.lightbox-prev-btn {
+    left: 12px;
+}
+
+.lightbox-next-btn {
+    right: 12px;
+}
+
+.lightbox-nav-btn.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 body.lightbox-open {

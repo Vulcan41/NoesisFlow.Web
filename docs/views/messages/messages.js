@@ -3,7 +3,7 @@ import { DEFAULT_AVATAR } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
 import { initTextTools } from "../../components/textTools.js";
 import { t, getLocale } from "../../core/i18n.js";
-import { initLightboxModal, openLightboxModal } from "../../components/lightboxModal/lightboxModal.js";
+import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -664,7 +664,7 @@ function createFileAttachmentCard(attachment) {
     return card;
 }
 
-function createImageAttachmentCard(attachment) {
+function createImageAttachmentCard(attachment, imageItems = [], imageIndex = 0) {
     const wrap = document.createElement("button");
     wrap.type = "button";
     wrap.className = "message-attachment-image";
@@ -677,12 +677,21 @@ function createImageAttachmentCard(attachment) {
 
     wrap.onclick = async () => {
         try {
-            const { downloadUrl } = await getMessageAttachmentDownloadUrl(
-                attachment.object_key,
-                attachment.file_name
+            const galleryItems = await Promise.all(
+                imageItems.map(async (item) => {
+                    const { downloadUrl } = await getMessageAttachmentDownloadUrl(
+                        item.object_key,
+                        item.file_name
+                    );
+
+                    return {
+                        src: downloadUrl,
+                        alt: item.file_name || ""
+                    };
+                })
             );
 
-            openLightboxModal(downloadUrl, attachment.file_name);
+            openLightboxGallery(galleryItems, imageIndex);
         } catch (err) {
             console.error("Image attachment open failed:", err);
         }
@@ -1871,8 +1880,8 @@ function createMessageImageGrid(images = []) {
         grid.classList.add("multi");
     }
 
-    images.forEach((attachment) => {
-        const node = createImageAttachmentCard(attachment);
+    images.forEach((attachment, index) => {
+        const node = createImageAttachmentCard(attachment, images, index);
         node.classList.add("message-image-grid-item");
         grid.appendChild(node);
     });
@@ -2052,4 +2061,8 @@ function getMessageGroupPosition(message) {
 function applyBubbleGroupClasses(row, bubble, groupPosition) {
     row.classList.add(`message-row-${groupPosition}`);
     bubble.classList.add(`message-bubble-${groupPosition}`);
+}
+
+function getImageAttachmentsFromMessage(attachments = []) {
+    return attachments.filter(isImageAttachment);
 }
