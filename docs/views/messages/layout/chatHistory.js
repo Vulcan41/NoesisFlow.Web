@@ -9,7 +9,8 @@ export function renderMessages({
     createImageAttachmentCard,
     createFileAttachmentCard,
     scheduleScrollToBottom,
-    onReact
+    onReact,
+    autoScroll = true
 }) {
     if (!messagesArea) return;
 
@@ -51,14 +52,17 @@ export function renderMessages({
         });
     });
 
-    scheduleScrollToBottom?.(true);
+    if (autoScroll) {
+        scheduleScrollToBottom(true);
+    }
 }
 
 export function renderPendingMessages({
     messagesArea,
     pendingMessages,
     activeConversationId,
-    scheduleScrollToBottom
+    scheduleScrollToBottom,
+    autoScroll = true
 }) {
     if (!messagesArea) return;
 
@@ -83,7 +87,9 @@ export function renderPendingMessages({
         });
     });
 
-    scheduleScrollToBottom?.();
+    if (autoScroll) {
+        scheduleScrollToBottom();
+    }
 }
 
 /* =========================

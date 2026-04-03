@@ -487,7 +487,7 @@ function createImageAttachmentCard(attachment, imageItems = [], imageIndex = 0) 
    MESSAGES RENDER
 ========================= */
 
-function renderActiveConversationWithPending() {
+function renderActiveConversationWithPending({ autoScroll = true } = {}) {
     const messagesArea = document.getElementById("chat-messages-area");
     if (!messagesArea) return;
 
@@ -498,14 +498,16 @@ function renderActiveConversationWithPending() {
         createImageAttachmentCard,
         createFileAttachmentCard,
         scheduleScrollToBottom,
-        onReact: handleReaction
+        onReact: handleReaction,
+        autoScroll
     });
 
     renderPendingMessages({
         messagesArea,
         pendingMessages,
         activeConversationId,
-        scheduleScrollToBottom
+        scheduleScrollToBottom,
+        autoScroll
     });
 }
 
@@ -1103,8 +1105,11 @@ async function handleSendMessage(content) {
 ========================= */
 
 async function handleReaction({ messageId, emoji }) {
-
     if (!currentUserId || !messageId || !emoji) return;
+
+    const messagesArea = document.getElementById("chat-messages-area");
+    const prevScrollTop = messagesArea ? messagesArea.scrollTop : 0;
+    const prevScrollHeight = messagesArea ? messagesArea.scrollHeight : 0;
 
     const { data: existingReaction, error: existingError } = await supabase
         .from("message_reactions")
@@ -1159,7 +1164,12 @@ async function handleReaction({ messageId, emoji }) {
     }
 
     updateMessageReactionLocally({ messageId, emoji });
-    renderActiveConversationWithPending();
+    renderActiveConversationWithPending({ autoScroll: false });
+
+    if (messagesArea) {
+        const newScrollHeight = messagesArea.scrollHeight;
+        messagesArea.scrollTop = prevScrollTop + (newScrollHeight - prevScrollHeight);
+    }
 }
 
 function updateMessageReactionLocally({ messageId, emoji }) {
