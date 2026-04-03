@@ -119,6 +119,8 @@ function renderSingleRealMessage({
 
         const reactionPicker = createReactionPicker({
             messageId: message.id,
+            reactions: message.reactions || [],
+            currentUserId,
             onReact
         });
         stack.appendChild(reactionPicker);
@@ -771,8 +773,19 @@ function groupMessageReactions(reactions = [], currentUserId) {
     return Array.from(map.values());
 }
 
-function createReactionPicker({ messageId, onReact }) {
+function createReactionPicker({
+    messageId,
+    reactions = [],
+    currentUserId,
+    onReact
+}) {
     const emojis = ["❤️", "👍", "😂", "😮", "😢", "🔥"];
+
+    const myReaction = reactions.find(
+        (reaction) => reaction.user_id === currentUserId
+    );
+
+    const myEmoji = myReaction?.emoji || null;
 
     const wrap = document.createElement("div");
     wrap.className = "message-reaction-picker-wrap";
@@ -785,6 +798,10 @@ function createReactionPicker({ messageId, onReact }) {
         btn.type = "button";
         btn.className = "message-reaction-picker-btn";
         btn.textContent = emoji;
+
+        if (emoji === myEmoji) {
+            btn.classList.add("is-selected");
+        }
 
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -803,7 +820,9 @@ function createReactionPicker({ messageId, onReact }) {
 
     if (!window.__messageReactionOutsideClickBound) {
         document.addEventListener("click", () => {
-            document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
+            document
+                .querySelectorAll(".message-reaction-picker-wrap.is-open")
+                .forEach((node) => {
                 node.classList.remove("is-open");
             });
         });

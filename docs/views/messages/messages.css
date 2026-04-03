@@ -1460,24 +1460,30 @@
    REACTION PICKER
 ========================= */
 
+/* =========================
+   REACTION PICKER POSITION FIX
+========================= */
+
 .message-reaction-picker-wrap {
     position: absolute;
-    bottom: calc(100% + 8px);
+    bottom: calc(100% + 6px); /* tighter to bubble */
     z-index: 6;
+
     opacity: 0;
     pointer-events: none;
     transform: translateY(4px);
     transition: opacity 180ms ease, transform 180ms ease;
 }
 
+/* ✅ anchor to INNER edge of bubble */
 .message-row.own .message-reaction-picker-wrap {
-    left: 10px;
-    right: auto;
+    right: 6px;   /* inside edge of blue bubble */
+    left: auto;
 }
 
 .message-row.other .message-reaction-picker-wrap {
-    right: 10px;
-    left: auto;
+    left: 6px;    /* inside edge of grey bubble */
+    right: auto;
 }
 
 .message-reaction-picker-wrap.is-open {
@@ -1510,4 +1516,9 @@
 
 .message-reaction-picker-btn:hover {
     background: rgba(0, 0, 0, 0.06);
+}
+
+.message-reaction-picker-btn.is-selected {
+    background: rgba(234, 234, 234, 1);
+    transform: scale(1.12);
 }
