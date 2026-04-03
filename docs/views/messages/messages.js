@@ -1103,6 +1103,7 @@ async function handleSendMessage(content) {
 ========================= */
 
 async function handleReaction({ messageId, emoji }) {
+
     if (!currentUserId || !messageId || !emoji) return;
 
     const { data: existingReaction, error: existingError } = await supabase
@@ -1157,7 +1158,40 @@ async function handleReaction({ messageId, emoji }) {
         }
     }
 
-    await loadMessages(activeConversationId);
+    updateMessageReactionLocally({ messageId, emoji });
+    renderActiveConversationWithPending();
+}
+
+function updateMessageReactionLocally({ messageId, emoji }) {
+    activeConversationMessages = activeConversationMessages.map((message) => {
+        if (message.id !== messageId) return message;
+
+        const reactions = Array.isArray(message.reactions) ? [...message.reactions] : [];
+        const existingIndex = reactions.findIndex(
+            (reaction) => reaction.user_id === currentUserId
+        );
+
+        if (existingIndex === -1) {
+            reactions.push({
+                id: `local-${crypto.randomUUID()}`,
+                user_id: currentUserId,
+                emoji,
+                created_at: new Date().toISOString()
+            });
+        } else if (reactions[existingIndex].emoji === emoji) {
+            reactions.splice(existingIndex, 1);
+        } else {
+            reactions[existingIndex] = {
+                ...reactions[existingIndex],
+                emoji
+            };
+        }
+
+        return {
+            ...message,
+            reactions
+        };
+    });
 }
 
 function subscribeToActiveConversation() {
