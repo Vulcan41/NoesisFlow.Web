@@ -1399,7 +1399,7 @@
     border: 0;
     background: transparent;
     box-shadow: none;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1;
     pointer-events: auto;
 }
@@ -1433,24 +1433,70 @@
 
     /* this creates the "eaten behind" effect */
     text-shadow:
-    -3px 0 0 #f5f5f5,
-    3px 0 0 #f5f5f5,
-    0 -3px 0 #f5f5f5,
-    0  3px 0 #f5f5f5,
-    -2px -2px 0 #f5f5f5,
-    2px -2px 0 #f5f5f5,
-    -2px  2px 0 #f5f5f5,
-    2px  2px 0 #f5f5f5;
+    -2px 0 0 #ffffff,
+    2px 0 0 #ffffff,
+    0 -2px 0 #ffffff,
+    0  2px 0 #ffffff,
+    -1px -1px 0 #ffffff,
+    1px -1px 0 #ffffff,
+    -1px  1px 0 #ffffff,
+    1px  1px 0 #ffffff;
 }
 
 /* =========================
-   HOVER REACTION PICKER
+   HOVER REACTION TRIGGER + PICKER
 ========================= */
+
+.message-reaction-picker-wrap {
+    position: absolute;
+    top: -34px;
+    z-index: 6;
+}
+
+.message-row.own .message-reaction-picker-wrap {
+    left: 10px;   /* inner edge for own bubble */
+    right: auto;
+}
+
+.message-row.other .message-reaction-picker-wrap {
+    right: 10px;  /* inner edge for other bubble */
+    left: auto;
+}
+
+.message-reaction-trigger {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #dddddd;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #666666;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px) scale(0.96);
+    transition: opacity 180ms ease, transform 180ms ease, background 140ms ease;
+}
+
+.message-stack:hover .message-reaction-trigger,
+.message-reaction-picker-wrap.is-open .message-reaction-trigger {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+.message-reaction-trigger:hover {
+    background: #f7f7f7;
+}
 
 .message-reaction-picker {
     position: absolute;
-    top: -38px;
-    left: 0;
+    top: 30px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -1463,19 +1509,21 @@
     pointer-events: none;
     transform: translateY(4px);
     transition: opacity 180ms ease, transform 180ms ease;
-    z-index: 5;
-}
-
-.message-stack:hover .message-reaction-picker,
-.message-reaction-picker:hover {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
+    white-space: nowrap;
 }
 
 .message-row.own .message-reaction-picker {
-    left: auto;
+    left: 0;
+}
+
+.message-row.other .message-reaction-picker {
     right: 0;
+}
+
+.message-reaction-picker-wrap.is-open .message-reaction-picker {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
 .message-reaction-picker-btn {

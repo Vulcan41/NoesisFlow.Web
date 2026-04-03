@@ -764,7 +764,15 @@ function createReactionPicker({ messageId, onReact }) {
     const emojis = ["❤️", "👍", "😂", "😮", "😢", "🔥"];
 
     const wrap = document.createElement("div");
-    wrap.className = "message-reaction-picker";
+    wrap.className = "message-reaction-picker-wrap";
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "message-reaction-trigger";
+    trigger.textContent = "+";
+
+    const picker = document.createElement("div");
+    picker.className = "message-reaction-picker";
 
     emojis.forEach((emoji) => {
         const btn = document.createElement("button");
@@ -774,14 +782,41 @@ function createReactionPicker({ messageId, onReact }) {
 
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
+            wrap.classList.remove("is-open");
+
             onReact?.({
                 messageId,
                 emoji
             });
         });
 
-        wrap.appendChild(btn);
+        picker.appendChild(btn);
     });
+
+    trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
+            if (node !== wrap) {
+                node.classList.remove("is-open");
+            }
+        });
+
+        wrap.classList.toggle("is-open");
+    });
+
+    wrap.appendChild(trigger);
+    wrap.appendChild(picker);
+
+    if (!window.__messageReactionOutsideClickBound) {
+        document.addEventListener("click", () => {
+            document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
+                node.classList.remove("is-open");
+            });
+        });
+
+        window.__messageReactionOutsideClickBound = true;
+    }
 
     return wrap;
 }
