@@ -1,3 +1,8 @@
+#chat-panel {
+    --chat-offset-own: 10px;
+    --chat-offset-other: 16px;
+}
+
 /* =========================
    PAGE LAYOUT
 ========================= */
@@ -305,12 +310,12 @@
 
 .message-row.own .message-stack {
     align-items: flex-end;
-    margin-right: 0;
+    margin-right: var(--chat-offset-own);
 }
 
 .message-row.other .message-stack {
     align-items: flex-start;
-    margin-left: 12px;
+    margin-left: var(--chat-offset-other);
 }
 
 .message-row.own .message-stack .message-bubble,
