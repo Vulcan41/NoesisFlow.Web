@@ -9,6 +9,7 @@ import {
 renderConversationsPanel,
 getConversationItemByOtherUserId
 } from "./layout/conversationsPanel.js";
+import { renderChatHeader } from "./layout/chatHeader.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -268,19 +269,7 @@ function renderChatSkeleton(chatPanel, conversation) {
     chatPanel.innerHTML = `
         <div class="chat-layout">
 
-            <div class="chat-header">
-                <div class="chat-user-link">
-                    <img class="chat-header-avatar"
-                         src="${conversation.avatarUrl}" />
-
-                    <div class="chat-header-text">
-                        <div class="chat-header-name">${conversation.fullName}</div>
-                        <div class="chat-header-username">@${conversation.username}</div>
-                    </div>
-
-                    <div class="chat-user-tooltip">${t("messages.view_profile")}</div>
-                </div>
-            </div>
+            <div id="chat-header-root"></div>
 
             <div id="chat-messages-area" class="chat-messages-area"></div>
 
@@ -356,31 +345,15 @@ function renderChatSkeleton(chatPanel, conversation) {
         </div>
     `;
 
-    const avatar = chatPanel.querySelector(".chat-header-avatar");
-    if (avatar) {
-        avatar.onerror = () => {
-            avatar.src = DEFAULT_AVATAR;
-        };
-    }
+    const headerRoot = chatPanel.querySelector("#chat-header-root");
 
-    const userLink = chatPanel.querySelector(".chat-user-link");
-    const tooltip = chatPanel.querySelector(".chat-user-tooltip");
-
-    if (userLink && tooltip) {
-        userLink.addEventListener("mouseenter", () => {
-            tooltip.classList.add("tooltip-visible");
-        });
-
-        userLink.addEventListener("mouseleave", () => {
-            tooltip.classList.remove("tooltip-visible");
-        });
-    }
-
-    if (userLink && conversation.userId) {
-        userLink.addEventListener("click", () => {
-            loadView("profileOther", conversation.userId);
-        });
-    }
+    renderChatHeader({
+        container: headerRoot,
+        conversation,
+        labels: {
+            viewProfile: t("messages.view_profile")
+        }
+    });
 }
 
 /* =========================

@@ -1,42 +1,70 @@
 export function initComposer({ onSend, onFilesSelected }) {
-    const input = document.getElementById("chat-input");
-    const sendBtn = document.getElementById("chat-send-btn");
+    const elements = getComposerElements();
 
-    const attachBtn = document.querySelector(".text-tool-attach");
-    const imageBtn = document.querySelector(".text-tool-image");
-    const emojiBtn = document.querySelector(".text-tool-emoji");
+    if (!elements.input) return;
 
-    const attachInput = document.getElementById("chat-attach-input");
-    const imageInput = document.getElementById("chat-image-input");
-    const inputArea = document.getElementById("chat-input-area");
+    setupAutoResize(elements.input);
+    setupSendMessage(elements, onSend);
+    setupToolButtons(elements);
+    setupFileInputs(elements, onFilesSelected);
+    setupDragAndDrop(elements.inputArea, onFilesSelected);
+}
 
+/* =========================
+   ELEMENTS
+========================= */
+
+function getComposerElements() {
+    return {
+        input: document.getElementById("chat-input"),
+        sendBtn: document.getElementById("chat-send-btn"),
+        attachBtn: document.querySelector(".text-tool-attach"),
+        imageBtn: document.querySelector(".text-tool-image"),
+        emojiBtn: document.querySelector(".text-tool-emoji"),
+        attachInput: document.getElementById("chat-attach-input"),
+        imageInput: document.getElementById("chat-image-input"),
+        inputArea: document.getElementById("chat-input-area")
+    };
+}
+
+/* =========================
+   AUTO RESIZE
+========================= */
+
+function setupAutoResize(input) {
     if (!input) return;
 
-    // =========================
-    // AUTO RESIZE
-    // =========================
     const resize = () => {
         input.style.height = "24px";
         input.style.height = `${Math.min(input.scrollHeight, 48)}px`;
-
-        input.style.overflowY =
-        input.scrollHeight > 48 ? "auto" : "hidden";
+        input.style.overflowY = input.scrollHeight > 48 ? "auto" : "hidden";
     };
 
     input.addEventListener("input", resize);
     resize();
+}
 
-    // =========================
-    // SEND MESSAGE
-    // =========================
+/* =========================
+   SEND MESSAGE
+========================= */
+
+function setupSendMessage(elements, onSend) {
+    const { input, sendBtn } = elements;
+    if (!input) return;
+
+    const resizeAfterClear = () => {
+        input.style.height = "24px";
+        input.style.height = `${Math.min(input.scrollHeight, 48)}px`;
+        input.style.overflowY = input.scrollHeight > 48 ? "auto" : "hidden";
+    };
+
     const handleSendClick = async () => {
         const text = input.value.trim();
-
         const didSend = await onSend?.(text);
 
         if (didSend !== false) {
             input.value = "";
-            resize();
+            resizeAfterClear();
         }
     };
 
@@ -50,10 +78,22 @@ export function initComposer({ onSend, onFilesSelected }) {
             await handleSendClick();
         }
     });
+}
 
-    // =========================
-    // BUTTONS
-    // =========================
+/* =========================
+   TOOL BUTTONS
+========================= */
+
+function setupToolButtons(elements) {
+    const {
+        input,
+        attachBtn,
+        imageBtn,
+        emojiBtn,
+        attachInput,
+        imageInput
+    } = elements;
+
     attachBtn?.addEventListener("click", () => {
         attachInput?.click();
     });
@@ -63,31 +103,41 @@ export function initComposer({ onSend, onFilesSelected }) {
     });
 
     emojiBtn?.addEventListener("click", () => {
+        if (!input) return;
+
         input.value += "😊";
         input.dispatchEvent(new Event("input", { bubbles: true }));
         input.focus();
     });
+}
 
-    // =========================
-    // FILE INPUTS
-    // =========================
+/* =========================
+   FILE INPUTS
+========================= */
+
+function setupFileInputs(elements, onFilesSelected) {
+    const { attachInput, imageInput } = elements;
+
     attachInput?.addEventListener("change", () => {
-        if (attachInput.files.length) {
+        if (attachInput.files?.length) {
             onFilesSelected?.(attachInput.files);
         }
         attachInput.value = "";
     });
 
     imageInput?.addEventListener("change", () => {
-        if (imageInput.files.length) {
+        if (imageInput.files?.length) {
             onFilesSelected?.(imageInput.files);
         }
         imageInput.value = "";
     });
+}
 
-    // =========================
-    // DRAG & DROP
-    // =========================
+/* =========================
+   DRAG & DROP
+========================= */
+
+function setupDragAndDrop(inputArea, onFilesSelected) {
     if (!inputArea) return;
 
     let dragCounter = 0;
@@ -124,7 +174,7 @@ export function initComposer({ onSend, onFilesSelected }) {
         e.preventDefault();
         clearDrag();
 
-        const files = Array.from(e.dataTransfer.files || []);
+        const files = Array.from(e.dataTransfer?.files || []);
         if (files.length) {
             onFilesSelected?.(files);
         }
