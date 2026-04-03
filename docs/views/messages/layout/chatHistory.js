@@ -145,7 +145,23 @@ function renderSingleRealMessage({
 
             bubble.addEventListener("click", (e) => {
                 e.stopPropagation();
-                reactionPicker.classList.toggle("is-open");
+
+                // close others
+                document.querySelectorAll(".message-reaction-picker-wrap.is-open").forEach((node) => {
+                    if (node !== reactionPicker) {
+                        node.classList.remove("is-open");
+                    }
+                });
+
+                document.querySelectorAll(".message-row.is-active").forEach((rowEl) => {
+                    if (rowEl !== row) {
+                        rowEl.classList.remove("is-active");
+                    }
+                });
+
+                const isOpen = reactionPicker.classList.toggle("is-open");
+
+                row.classList.toggle("is-active", isOpen);
             });
 
             stack.appendChild(bubble);
@@ -828,12 +844,16 @@ function createReactionPicker({
     wrap.appendChild(picker);
 
     if (!window.__messageReactionOutsideClickBound) {
-        document.addEventListener("click", () => {
-            document
-                .querySelectorAll(".message-reaction-picker-wrap.is-open")
-                .forEach((node) => {
-                node.classList.remove("is-open");
-            });
+        document
+            .querySelectorAll(".message-reaction-picker-wrap.is-open")
+            .forEach((node) => {
+            node.classList.remove("is-open");
+        });
+
+        document
+            .querySelectorAll(".message-row.is-active")
+            .forEach((row) => {
+            row.classList.remove("is-active");
         });
 
         window.__messageReactionOutsideClickBound = true;

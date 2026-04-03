@@ -1526,3 +1526,16 @@
     background: rgba(234, 234, 234, 1);
     transform: scale(1.12);
 }
+
+/* =========================
+   ACTIVE MESSAGE (on picker open)
+========================= */
+
+.message-row {
+    position: relative;
+    z-index: 1;
+}
+
+.message-row.is-active {
+    z-index: 20;
+}
