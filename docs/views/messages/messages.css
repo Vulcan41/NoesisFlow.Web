@@ -1364,7 +1364,7 @@
    MESSAGE REACTIONS
 ========================= */
 
-.message-stack {
+.message-bubble {
     position: relative;
 }
 
@@ -1454,6 +1454,10 @@
 
 .message-bubble-reactable:hover {
     transform: scale(1.02);
+}
+
+.message-bubble.has-reactions {
+    margin-bottom: 10px;
 }
 
 /* =========================

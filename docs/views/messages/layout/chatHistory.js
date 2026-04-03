@@ -125,6 +125,8 @@ function renderSingleRealMessage({
         });
         stack.appendChild(reactionPicker);
 
+        let lastBubble = null;
+
         if (hasText) {
             const bubble = document.createElement("div");
             bubble.className = `message-bubble message-bubble-${groupPosition} message-bubble-reactable`;
@@ -148,19 +150,23 @@ function renderSingleRealMessage({
             });
 
             stack.appendChild(bubble);
+            lastBubble = bubble;
         }
 
         if (hasLinkPreview) {
             const previewCard = createLinkPreviewCard(message);
-
             stack.appendChild(previewCard);
         }
 
         if (message.reactions?.length) {
-            const reactionsNode = createMessageReactions(message.reactions, currentUserId);
-            if (reactionsNode) {
-                stack.appendChild(reactionsNode);
-                stack.classList.add("has-reactions");
+            const reactionsNode = createMessageReactions(
+                message.reactions,
+                currentUserId
+            );
+
+            if (reactionsNode && lastBubble) {
+                lastBubble.appendChild(reactionsNode);
+                lastBubble.classList.add("has-reactions");
             }
         }
 
@@ -199,10 +205,14 @@ function renderSingleRealMessage({
         stack.appendChild(bubble);
 
         if (message.reactions?.length) {
-            const reactionsNode = createMessageReactions(message.reactions, currentUserId);
+            const reactionsNode = createMessageReactions(
+                message.reactions,
+                currentUserId
+            );
+
             if (reactionsNode) {
-                stack.appendChild(reactionsNode);
-                stack.classList.add("has-reactions");
+                bubble.appendChild(reactionsNode);
+                bubble.classList.add("has-reactions");
             }
         }
 
