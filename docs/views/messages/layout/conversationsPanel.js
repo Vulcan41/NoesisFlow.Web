@@ -355,7 +355,7 @@ export function moveConversationRowToTop({
         updatedRows.forEach((item) => {
             if (!firstRects.has(item)) return;
 
-            item.style.transition = "transform 220ms ease";
+            item.style.transition = "transform 300ms cubic-bezier(0.34, 1.2, 0.64, 1)";
             item.style.transform = "translateY(0)";
         });
     });
