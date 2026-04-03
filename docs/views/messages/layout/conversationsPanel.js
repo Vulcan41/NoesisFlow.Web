@@ -325,9 +325,51 @@ export function moveConversationRowToTop({
     if (!row || !container) return;
 
     const first = container.firstElementChild;
-
     if (first === row) return;
 
+    const rows = Array.from(container.children);
+    const firstRects = new Map();
+
+    rows.forEach((item) => {
+        firstRects.set(item, item.getBoundingClientRect());
+    });
+
     container.insertBefore(row, first);
+
+    const updatedRows = Array.from(container.children);
+
+    updatedRows.forEach((item) => {
+        const firstRect = firstRects.get(item);
+        if (!firstRect) return;
+
+        const lastRect = item.getBoundingClientRect();
+        const deltaY = firstRect.top - lastRect.top;
+
+        if (deltaY !== 0) {
+            item.style.transition = "none";
+            item.style.transform = `translateY(${deltaY}px)`;
+        }
+    });
+
+    requestAnimationFrame(() => {
+        updatedRows.forEach((item) => {
+            if (!firstRects.has(item)) return;
+
+            item.style.transition = "transform 220ms ease";
+            item.style.transform = "translateY(0)";
+        });
+    });
+
+    const cleanup = (event) => {
+        if (event.propertyName !== "transform") return;
+
+        event.currentTarget.style.transition = "";
+        event.currentTarget.style.transform = "";
+        event.currentTarget.removeEventListener("transitionend", cleanup);
+    };
+
+    updatedRows.forEach((item) => {
+        item.addEventListener("transitionend", cleanup);
+    });
 }
 
