@@ -128,6 +128,11 @@ function renderSingleRealMessage({
             stack.appendChild(createLinkPreviewCard(message));
         }
 
+        if (message.reactions?.length) {
+            const reactionsNode = createMessageReactions(message.reactions);
+            stack.appendChild(reactionsNode);
+        }
+
         if (showTime) {
             const time = document.createElement("div");
             time.className = "message-time";
@@ -161,6 +166,11 @@ function renderSingleRealMessage({
 
         bubble.appendChild(contentWrap);
         stack.appendChild(bubble);
+
+        if (message.reactions?.length) {
+            const reactionsNode = createMessageReactions(message.reactions);
+            stack.appendChild(reactionsNode);
+        }
 
         if (showTime) {
             const time = document.createElement("div");
@@ -670,4 +680,56 @@ function createLinkPreviewCard(message) {
 
 function getLocale() {
     return localStorage.getItem("lang") || "en";
+}
+
+/* =========================
+   REACTIONS
+========================= */
+
+function createMessageReactions(reactions = []) {
+    const grouped = groupMessageReactions(reactions);
+
+    if (!grouped.length) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "message-reactions";
+
+    grouped.forEach((item) => {
+        const pill = document.createElement("div");
+        pill.className = "message-reaction-pill";
+
+        const emoji = document.createElement("span");
+        emoji.className = "message-reaction-emoji";
+        emoji.textContent = item.emoji;
+
+        const count = document.createElement("span");
+        count.className = "message-reaction-count";
+        count.textContent = item.count;
+
+        pill.appendChild(emoji);
+        pill.appendChild(count);
+        wrap.appendChild(pill);
+    });
+
+    return wrap;
+}
+
+function groupMessageReactions(reactions = []) {
+    const map = new Map();
+
+    reactions.forEach((reaction) => {
+        const emoji = reaction?.emoji;
+        if (!emoji) return;
+
+        if (!map.has(emoji)) {
+            map.set(emoji, {
+                emoji,
+                count: 0
+            });
+        }
+
+        map.get(emoji).count += 1;
+    });
+
+    return Array.from(map.values());
 }

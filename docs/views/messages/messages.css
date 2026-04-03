@@ -1355,3 +1355,33 @@
 .pending-attachment-image {
     position: relative;
 }
+
+.message-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.message-reaction-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f2f2f2;
+    border: 1px solid #e2e2e2;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.message-reaction-emoji {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.message-reaction-count {
+    font-weight: 600;
+    color: #555;
+    line-height: 1;
+}

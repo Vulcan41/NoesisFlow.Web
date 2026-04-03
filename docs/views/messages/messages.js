@@ -527,24 +527,30 @@ async function loadMessages(conversationId, showLoading = false) {
     const { data, error } = await supabase
         .from("messages")
         .select(`
-            id,
-            sender_id,
-            content,
-            created_at,
-            link_url,
-            link_title,
-            link_description,
-            link_image,
-            link_site,
-            attachments:message_attachments (
-                id,
-                object_key,
-                file_name,
-                mime_type,
-                size_bytes,
-                created_at
-            )
-        `)
+    id,
+    sender_id,
+    content,
+    created_at,
+    link_url,
+    link_title,
+    link_description,
+    link_image,
+    link_site,
+    attachments:message_attachments (
+        id,
+        object_key,
+        file_name,
+        mime_type,
+        size_bytes,
+        created_at
+    ),
+    reactions:message_reactions (
+        id,
+        user_id,
+        emoji,
+        created_at
+    )
+`)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
@@ -1118,25 +1124,33 @@ function subscribeToActiveConversation() {
 
             const { data, error } = await supabase
                 .from("messages")
+            const { data, error } = await supabase
+                .from("messages")
                 .select(`
-                        id,
-                        sender_id,
-                        content,
-                        created_at,
-                        link_url,
-                        link_title,
-                        link_description,
-                        link_image,
-                        link_site,
-                        attachments:message_attachments (
-                            id,
-                            object_key,
-                            file_name,
-                            mime_type,
-                            size_bytes,
-                            created_at
-                        )
-                    `)
+        id,
+        sender_id,
+        content,
+        created_at,
+        link_url,
+        link_title,
+        link_description,
+        link_image,
+        link_site,
+        attachments:message_attachments (
+            id,
+            object_key,
+            file_name,
+            mime_type,
+            size_bytes,
+            created_at
+        ),
+        reactions:message_reactions (
+            id,
+            user_id,
+            emoji,
+            created_at
+        )
+    `)
                 .eq("id", messageId)
                 .single();
 
