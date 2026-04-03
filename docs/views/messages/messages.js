@@ -5,6 +5,10 @@ import { t, getLocale } from "../../core/i18n.js";
 import { initLightboxModal, openLightboxGallery } from "../../components/lightboxModal/lightboxModal.js";
 import { initComposer } from "./layout/composer.js";
 import { renderMessages, renderPendingMessages } from "./layout/chatHistory.js";
+import {
+renderConversationsPanel,
+clearConversationSelection
+} from "./layout/conversationsPanel.js";
 
 let conversationsLoadToken = 0;
 let activeConversationId = null;
@@ -68,24 +72,6 @@ export async function initMessages(targetUserId = null) {
     currentUserId = user.id;
 
     await loadConversations(targetUserId);
-}
-
-/* =========================
-   FADE HELPER FUNCTION
-========================= */
-
-function applyFadeIfOverflow(element) {
-    if (!element) return;
-
-    requestAnimationFrame(() => {
-        const isOverflowing = element.scrollWidth > element.clientWidth + 1;
-
-        if (isOverflowing) {
-            element.classList.add("is-overflowing");
-        } else {
-            element.classList.remove("is-overflowing");
-        }
-    });
 }
 
 /* =========================
@@ -160,97 +146,50 @@ async function loadConversations(targetUserId = null) {
     ? t("messages.conversation_count_one", { count: 1 })
     : t("messages.conversation_count_other", { count: data.length });
 
-    data.forEach((conversation) => {
+    const items = data
+        .map((conversation) => {
         const friendship = conversation.friendship;
-        if (!friendship) return;
+        if (!friendship) return null;
 
         const isRequester = friendship.requester_id === currentUserId;
         const otherUser = isRequester ? friendship.receiver : friendship.requester;
-        const otherUserId = otherUser?.id;
-
-        const row = document.createElement("div");
-        row.dataset.conversationId = conversation.id;
-
-        const avatar = document.createElement("img");
-        avatar.className = "conversation-avatar";
-        avatar.src = otherUser?.avatar_url || DEFAULT_AVATAR;
-        avatar.onerror = () => {
-            avatar.src = DEFAULT_AVATAR;
-        };
-
-        const text = document.createElement("div");
-        text.className = "conversation-text";
-
-        const name = document.createElement("div");
-        name.className = "conversation-name";
-
-        const nameText = document.createElement("span");
-        nameText.className = "conversation-name-text";
-        nameText.textContent =
-        otherUser?.full_name ||
-        otherUser?.username ||
-        t("messages.user_fallback");
-
-        const newBadge = document.createElement("span");
-        newBadge.className = "conversation-new-badge";
-        newBadge.textContent = t("messages.new_badge");
-
-        name.appendChild(nameText);
-        name.appendChild(newBadge);
-
-        const username = document.createElement("div");
-        username.className = "conversation-username";
-        username.textContent = "@" + (otherUser?.username ?? "user");
-
-        const meta = document.createElement("div");
-        meta.className = "conversation-meta";
 
         const latestMessage = latestMessagesMap.get(conversation.id);
+        const isOwnMessage = latestMessage?.sender_id === currentUserId;
 
-        if (latestMessage) {
-            const isOwnMessage = latestMessage.sender_id === currentUserId;
+        const previewText = latestMessage
+        ? getConversationPreviewText(latestMessage, isOwnMessage)
+        : t("messages.no_messages_yet");
 
-            meta.textContent = getConversationPreviewText(latestMessage, isOwnMessage);
+        const lastReadAt = conversation.last_read_at;
 
-            const lastReadAt = conversation.last_read_at;
+        const isUnread = !!latestMessage &&
+        latestMessage.sender_id !== currentUserId &&
+        (!lastReadAt || new Date(latestMessage.created_at) > new Date(lastReadAt));
 
-            const isUnread =
-            latestMessage.sender_id !== currentUserId &&
-            (!lastReadAt ||
-            new Date(latestMessage.created_at) > new Date(lastReadAt));
+        return {
+            conversationId: conversation.id,
+            otherUserId: otherUser?.id || null,
+            status: friendship.status,
+            fullName:
+            otherUser?.full_name ||
+            otherUser?.username ||
+            t("messages.user_fallback"),
+            username: otherUser?.username || "user",
+            avatarUrl: otherUser?.avatar_url || DEFAULT_AVATAR,
+            previewText,
+            isUnread,
+            isSelected: conversation.id === selectedConversationId,
+            newBadgeText: t("messages.new_badge")
+        };
+    })
+        .filter(Boolean);
 
-            if (isUnread) {
-                meta.classList.add("unread");
-                row.classList.add("unread-conversation");
-                newBadge.style.display = "inline-block";
-            } else {
-                meta.classList.remove("unread");
-                row.classList.remove("unread-conversation");
-                newBadge.style.display = "none";
-            }
-        } else {
-            meta.textContent = t("messages.no_messages_yet");
-            meta.classList.remove("unread");
-            row.classList.remove("unread-conversation");
-        }
-
-        applyFadeIfOverflow(meta);
-
-        text.appendChild(name);
-        text.appendChild(meta);
-
-        row.appendChild(avatar);
-        row.appendChild(text);
-
-        if (conversation.id === selectedConversationId) {
-            row.classList.add("selected-conversation");
-        }
-
-        row.addEventListener("click", async () => {
-            document
-                .querySelectorAll("#conversations-list > div")
-                .forEach((el) => el.classList.remove("selected-conversation"));
-
+    renderConversationsPanel({
+        container,
+        items,
+        onConversationClick: async (item, row) => {
+            clearConversationSelection(container);
             row.classList.add("selected-conversation");
 
             const metaEl = row.querySelector(".conversation-meta");
@@ -260,7 +199,7 @@ async function loadConversations(targetUserId = null) {
             const badge = row.querySelector(".conversation-new-badge");
             if (badge) badge.style.display = "none";
 
-            activeConversationId = conversation.id;
+            activeConversationId = item.conversationId;
             activeConversationMessages = [];
             renderedMessageIds.clear();
 
@@ -269,18 +208,15 @@ async function loadConversations(targetUserId = null) {
                 .update({
                 last_read_at: new Date().toISOString()
             })
-                .eq("id", conversation.id);
+                .eq("id", item.conversationId);
 
             activeConversationData = {
-                conversationId: conversation.id,
-                userId: otherUser?.id,
-                status: friendship.status,
-                fullName:
-                otherUser?.full_name ||
-                otherUser?.username ||
-                t("messages.user_fallback"),
-                username: otherUser?.username || "user",
-                avatarUrl: otherUser?.avatar_url || DEFAULT_AVATAR
+                conversationId: item.conversationId,
+                userId: item.otherUserId,
+                status: item.status,
+                fullName: item.fullName,
+                username: item.username,
+                avatarUrl: item.avatarUrl
             };
 
             renderChatSkeleton(chatPanel, activeConversationData);
@@ -301,16 +237,22 @@ async function loadConversations(targetUserId = null) {
                 });
             }
 
-            await loadMessages(conversation.id, true);
+            await loadMessages(item.conversationId, true);
             subscribeToActiveConversation();
-        });
-
-        container.appendChild(row);
-
-        if (targetUserId && otherUserId === targetUserId) {
-            setTimeout(() => row.click(), 0);
         }
     });
+
+    if (targetUserId) {
+        const targetItem = items.find((item) => item.otherUserId === targetUserId);
+        if (targetItem) {
+            const targetRow = container.querySelector(
+                `[data-conversation-id="${targetItem.conversationId}"]`
+            );
+            if (targetRow) {
+                setTimeout(() => targetRow.click(), 0);
+            }
+        }
+    }
 }
 
 function getConversationPreviewText(message, isOwnMessage) {
@@ -765,7 +707,6 @@ function renderActiveConversationWithPending() {
     const messagesArea = document.getElementById("chat-messages-area");
     if (!messagesArea) return;
 
-    // Full rerender with real messages + pending messages appended after
     renderMessages({
         messagesArea,
         messages: activeConversationMessages,
@@ -817,24 +758,24 @@ async function loadMessages(conversationId, showLoading = false) {
     const { data, error } = await supabase
         .from("messages")
         .select(`
-    id,
-    sender_id,
-    content,
-    created_at,
-    link_url,
-    link_title,
-    link_description,
-    link_image,
-    link_site,
-    attachments:message_attachments (
-        id,
-        object_key,
-        file_name,
-        mime_type,
-        size_bytes,
-        created_at
-    )
-`)
+            id,
+            sender_id,
+            content,
+            created_at,
+            link_url,
+            link_title,
+            link_description,
+            link_image,
+            link_site,
+            attachments:message_attachments (
+                id,
+                object_key,
+                file_name,
+                mime_type,
+                size_bytes,
+                created_at
+            )
+        `)
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: true });
 
@@ -1378,24 +1319,24 @@ function subscribeToActiveConversation() {
             const { data, error } = await supabase
                 .from("messages")
                 .select(`
-    id,
-    sender_id,
-    content,
-    created_at,
-    link_url,
-    link_title,
-    link_description,
-    link_image,
-    link_site,
-    attachments:message_attachments (
-        id,
-        object_key,
-        file_name,
-        mime_type,
-        size_bytes,
-        created_at
-    )
-`)
+                        id,
+                        sender_id,
+                        content,
+                        created_at,
+                        link_url,
+                        link_title,
+                        link_description,
+                        link_image,
+                        link_site,
+                        attachments:message_attachments (
+                            id,
+                            object_key,
+                            file_name,
+                            mime_type,
+                            size_bytes,
+                            created_at
+                        )
+                    `)
                 .eq("id", messageId)
                 .single();
 
