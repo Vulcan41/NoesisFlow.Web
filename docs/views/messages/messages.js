@@ -289,13 +289,13 @@ async function loadConversations(targetUserId = null) {
             activeConversationMessages = [];
             renderedMessageIds.clear();
 
-            // keep old behavior for now; Step 6B will move this to conversation_participants
             await supabase
-                .from("conversations")
+                .from("conversation_participants")
                 .update({
                 last_read_at: new Date().toISOString()
             })
-                .eq("id", item.conversationId);
+                .eq("conversation_id", item.conversationId)
+                .eq("user_id", currentUserId);
 
             activeConversationData = {
                 conversationId: item.conversationId,
