@@ -72,6 +72,144 @@ export async function initMessages(targetUserId = null) {
     await loadConversations(targetUserId);
 }
 
+async function loadConversationMemberships() {
+    const { data, error } = await supabase
+        .from("conversation_participants")
+        .select(`
+            conversation_id,
+            last_read_at,
+            conversation:conversation_id (
+                id,
+                type,
+                title,
+                avatar_url,
+                friendship_id,
+                created_at,
+                updated_at,
+                last_message_at
+            )
+        `)
+        .eq("user_id", currentUserId)
+        .is("left_at", null)
+        .order("created_at", { foreignTable: "conversation", ascending: false });
+
+    if (error) {
+        console.error("Failed to load conversation memberships:", error);
+        return [];
+    }
+
+    return data || [];
+}
+
+async function loadParticipantsMap(conversationIds) {
+    const map = new Map();
+
+    if (!conversationIds?.length) return map;
+
+    const { data, error } = await supabase
+        .from("conversation_participants")
+        .select(`
+            conversation_id,
+            user_id,
+            role,
+            joined_at,
+            left_at,
+            profile:user_id (
+                id,
+                username,
+                full_name,
+                avatar_url
+            )
+        `)
+        .in("conversation_id", conversationIds)
+        .is("left_at", null);
+
+    if (error) {
+        console.error("Failed to load conversation participants:", error);
+        return map;
+    }
+
+    (data || []).forEach((row) => {
+        if (!map.has(row.conversation_id)) {
+            map.set(row.conversation_id, []);
+        }
+        map.get(row.conversation_id).push(row);
+    });
+
+    return map;
+}
+
+async function loadFriendshipsMap(friendshipIds) {
+    const map = new Map();
+
+    if (!friendshipIds?.length) return map;
+
+    const { data, error } = await supabase
+        .from("friendships")
+        .select(`
+            id,
+            status,
+            requester_id,
+            receiver_id
+        `)
+        .in("id", friendshipIds);
+
+    if (error) {
+        console.error("Failed to load friendships:", error);
+        return map;
+    }
+
+    (data || []).forEach((row) => {
+        map.set(row.id, row);
+    });
+
+    return map;
+}
+
+function normalizeConversationForPanel({
+    membership,
+    participantsMap,
+    friendshipsMap
+}) {
+    const conversation = membership.conversation;
+    if (!conversation) return null;
+
+    const participants = participantsMap.get(conversation.id) || [];
+    const friendship = conversation.friendship_id
+    ? friendshipsMap.get(conversation.friendship_id) || null
+    : null;
+
+    const otherParticipant = participants.find(
+        (p) => p.user_id !== currentUserId
+    );
+
+    const requesterId = friendship?.requester_id || currentUserId;
+    const receiverId = friendship?.receiver_id || otherParticipant?.user_id || null;
+
+    const requesterProfile =
+    participants.find((p) => p.user_id === requesterId)?.profile || null;
+
+    const receiverProfile =
+    participants.find((p) => p.user_id === receiverId)?.profile ||
+    otherParticipant?.profile ||
+    null;
+
+    return {
+        id: conversation.id,
+        created_at: conversation.created_at,
+        last_message_at: conversation.last_message_at,
+        last_read_at: membership.last_read_at,
+        friendship: {
+            id: friendship?.id || conversation.friendship_id || null,
+            status: friendship?.status || "accepted",
+            requester_id: requesterId,
+            receiver_id: receiverId,
+            requester: requesterProfile,
+            receiver: receiverProfile
+        }
+    };
+}
+
 /* =========================
    LOAD CONVERSATIONS
 ========================= */
@@ -87,69 +225,62 @@ async function loadConversations(targetUserId = null) {
 
     const selectedConversationId = activeConversationId;
 
-    const { data, error } = await supabase
-        .from("conversations")
-        .select(`
-            id,
-            created_at,
-            last_message_at,
-            last_read_at,
-            friendship:friendship_id (
-                id,
-                status,
-                requester_id,
-                receiver_id,
-                requester:requester_id (
-                    id,
-                    username,
-                    full_name,
-                    avatar_url
-                ),
-                receiver:receiver_id (
-                    id,
-                    username,
-                    full_name,
-                    avatar_url
-                )
-            )
-        `)
-        .order("last_message_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false });
+    const memberships = await loadConversationMemberships();
 
     if (localLoadToken !== conversationsLoadToken) return;
     if (!container.isConnected || !info.isConnected) return;
 
     container.innerHTML = "";
 
-    if (error) {
-        console.error("Failed to load conversations:", error);
-        info.textContent = t("messages.failed_to_load_conversations");
-        return;
-    }
-
-    if (!data || data.length === 0) {
+    if (!memberships || memberships.length === 0) {
         info.textContent = t("messages.no_conversations");
         return;
     }
 
-    const latestMessagesMap = await loadLatestMessagesMap(data.map((c) => c.id));
+    const conversationIds = memberships
+        .map((m) => m.conversation_id)
+        .filter(Boolean);
+
+    const friendshipIds = memberships
+        .map((m) => m.conversation?.friendship_id)
+        .filter(Boolean);
+
+    const [participantsMap, friendshipsMap, latestMessagesMap] = await Promise.all([
+        loadParticipantsMap(conversationIds),
+        loadFriendshipsMap(friendshipIds),
+        loadLatestMessagesMap(conversationIds)
+    ]);
 
     if (localLoadToken !== conversationsLoadToken) return;
     if (!container.isConnected || !info.isConnected) return;
 
-    const conversationsWithLatest = data.map((conversation) => ({
+    const normalizedConversations = memberships
+        .map((membership) =>
+    normalizeConversationForPanel({
+        membership,
+        participantsMap,
+        friendshipsMap
+    })
+    )
+        .filter(Boolean)
+        .map((conversation) => ({
         ...conversation,
         latestMessage: latestMessagesMap.get(conversation.id) || null
-    }));
+    }))
+        .sort((a, b) => {
+        const aTime = a.last_message_at || a.created_at || "";
+        const bTime = b.last_message_at || b.created_at || "";
+        return new Date(bTime) - new Date(aTime);
+    });
 
     info.textContent =
-    conversationsWithLatest.length === 1
+    normalizedConversations.length === 1
     ? t("messages.conversation_count_one", { count: 1 })
-    : t("messages.conversation_count_other", { count: conversationsWithLatest.length });
+    : t("messages.conversation_count_other", { count: normalizedConversations.length });
 
     const items = renderConversationsPanel({
         container,
-        conversations: conversationsWithLatest,
+        conversations: normalizedConversations,
         currentUserId,
         selectedConversationId,
         labels: getConversationPanelLabels(),
@@ -158,6 +289,7 @@ async function loadConversations(targetUserId = null) {
             activeConversationMessages = [];
             renderedMessageIds.clear();
 
+            // keep old behavior for now; Step 6B will move this to conversation_participants
             await supabase
                 .from("conversations")
                 .update({
