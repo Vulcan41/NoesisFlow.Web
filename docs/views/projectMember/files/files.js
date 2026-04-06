@@ -1,4 +1,5 @@
 import { supabase } from "../../../core/supabase.js";
+import { apiRequest } from "../../../core/apiClient.js";
 import { showInfo } from "../../../components/info.js";
 import {
 ensureFolderModal,
@@ -472,7 +473,7 @@ async function deleteFolder(folder) {
             try {
                 const headers = await getAuthHeaders();
 
-                const res = await fetch("/api/project-files/delete-folder", {
+                const res = await apiRequest("/api/project-files/delete-folder", {
                     method: "POST",
                     headers,
                     body: JSON.stringify({ folderId: folder.id })
@@ -913,7 +914,7 @@ function createFileRow(file) {
         try {
             const headers = await getAuthHeaders();
 
-            const res = await fetch("/api/project-files/download-url", {
+            const res = await apiRequest("/api/project-files/download-url", {
                 method: "POST",
                 headers,
                 body: JSON.stringify({ fileId: file.id })
@@ -1028,7 +1029,7 @@ async function uploadSingleFileToFolder(file, folderId, targetFilename = null) {
     const finalFilename = targetFilename || file.name;
     const headers = await getAuthHeaders();
 
-    const res = await fetch("/api/project-files/upload-url", {
+    const res = await apiRequest("/api/project-files/upload-url", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -1080,7 +1081,7 @@ async function uploadSingleFileToFolder(file, folderId, targetFilename = null) {
 async function checkFileConflicts(folderId, filenames) {
     const headers = await getAuthHeaders();
 
-    const res = await fetch("/api/project-files/check-conflicts", {
+    const res = await apiRequest("/api/project-files/check-conflicts", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -1143,7 +1144,7 @@ async function generateRenamedFilename(folderId, originalFilename) {
 async function deleteExistingFileById(fileId) {
     const headers = await getAuthHeaders();
 
-    const res = await fetch("/api/project-files/delete-file", {
+    const res = await apiRequest("/api/project-files/delete-file", {
         method: "POST",
         headers,
         body: JSON.stringify({ fileId })
@@ -1343,7 +1344,7 @@ async function deleteFile(file) {
             try {
                 const headers = await getAuthHeaders();
 
-                const res = await fetch("/api/project-files/delete-file", {
+                const res = await apiRequest("/api/project-files/delete-file", {
                     method: "POST",
                     headers,
                     body: JSON.stringify({ fileId: file.id })
