@@ -1,4 +1,5 @@
 import { supabase } from "../../core/supabase.js";
+import { apiRequest, API_PATHS } from "../../core/apiClient.js";
 import { DEFAULT_AVATAR } from "../../state/userStore.js";
 import { loadView } from "../../core/router.js";
 import { t } from "../../core/i18n.js";
@@ -491,7 +492,7 @@ async function getMessageAttachmentDownloadUrl(objectKey, fileName) {
 
     const headers = await getMessagesAuthHeaders();
 
-    const res = await fetch("/api/messages/download-attachment-url", {
+    const res = await apiRequest("/api/messages/download-attachment-url", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -923,7 +924,7 @@ async function uploadMessageAttachment(conversationId, pendingItem) {
     const file = pendingItem.file;
     const headers = await getMessagesAuthHeaders();
 
-    const res = await fetch("/api/messages/upload-attachment-url", {
+    const res = await apiRequest("/api/messages/upload-attachment-url", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -966,7 +967,7 @@ async function uploadMessageAttachmentForPendingMessage(conversationId, tempMess
     const file = tempAttachment.file;
     const headers = await getMessagesAuthHeaders();
 
-    const res = await fetch("/api/messages/upload-attachment-url", {
+    const res = await apiRequest("/api/messages/upload-attachment-url", {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -1040,7 +1041,7 @@ function extractFirstUrl(text = "") {
 }
 
 async function fetchLinkPreview(url) {
-    const res = await fetch("/api/messages/link-preview", {
+    const res = await apiRequest("/api/messages/link-preview", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
