@@ -1,4 +1,4 @@
-const BASE_URL = 'https://localhost:7236';
+const BASE_URL = '';
 
 export async function apiRequest(path, options = {}) {
   const url = BASE_URL ? `${BASE_URL}${path}` : path;
