@@ -13,7 +13,6 @@ export async function getMyProjects() {
       )
     `)
     .eq('user_id', user.id)
-    .eq('status', 'active')
   if (error) throw error
   return data.map(row => ({ ...row.projects, role: row.role }))
 }
