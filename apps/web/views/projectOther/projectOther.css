@@ -1,0 +1,403 @@
+.project-other-view {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+
+.project-other-topbar {
+    display: flex;
+    align-items: center;
+}
+
+.project-other-back-btn {
+    border: 1px solid #e6e6e6;
+    background: #ffffff;
+    color: #1c1c1c;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.project-other-back-btn:hover {
+    background: #f7fafc;
+    border-color: #d7dbe2;
+}
+
+/* =========================
+   ERROR
+========================= */
+
+.project-other-error {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 14px;
+    border: 1px solid #fecaca;
+}
+
+/* =========================
+   SHELL
+========================= */
+
+.project-other-shell {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.project-other-hero-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+    background: #ffffff;
+    border: none;
+    border-radius: 22px;
+    padding: 28px 22px;
+    box-sizing: border-box;
+}
+
+.project-other-hero-main {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    min-width: 0;
+    width: 100%;
+}
+
+.project-other-title-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.project-other-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-other-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.project-other-avatar-fallback {
+    font-size: 28px;
+    font-weight: 700;
+    color: #555;
+}
+
+.project-other-title-block {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.project-other-title {
+    margin: 20px 0 14px;
+    font-size: 34px;
+    line-height: 1.05;
+    color: #171717;
+    letter-spacing: -0.02em;
+    word-break: break-word;
+}
+
+.project-other-description {
+    margin: 0;
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.65;
+    max-width: 600px;
+    text-align: center;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* =========================
+   META + CTA ROW
+========================= */
+
+.project-other-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+}
+
+.project-other-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.project-other-meta-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.project-other-by-label {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9aa0a6;
+}
+
+.project-other-meta-divider {
+    width: 1px;
+    height: 42px;
+    background: #e5e7eb;
+    flex-shrink: 0;
+}
+
+/* =========================
+   OWNER
+========================= */
+
+.project-other-owner-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+}
+
+.project-other-owner-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.project-other-owner-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.project-other-owner-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+
+.project-other-owner-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1c1c1c;
+    line-height: 1.2;
+}
+
+.project-other-owner-username {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.2;
+}
+
+/* =========================
+   FRIEND MEMBERS
+========================= */
+
+.project-other-friends-members {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 0;
+}
+
+.project-other-friends-members-text {
+    font-size: 12px;
+    color: #9aa0a6;
+    text-align: left;
+}
+
+.project-other-friends-members-avatars {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.project-other-friend-member-avatar {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ffffff;
+    background: #f3f4f6;
+    margin-left: -10px;
+    flex-shrink: 0;
+}
+
+.project-other-friend-member-avatar:first-child {
+    margin-left: 0;
+}
+
+.project-other-friend-member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.project-other-friend-member-avatar-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #666;
+    background: #f3f4f6;
+}
+
+/* =========================
+   BUTTON AREA
+========================= */
+
+.project-other-sidepanel {
+    display: flex;
+    justify-content: flex-start;
+    width: auto;
+}
+
+.project-other-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.project-request-btn {
+    margin-top: 16px;
+    border: none;
+    background: #111827;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.project-request-btn:hover {
+    background: #1f2937;
+}
+
+.project-request-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.project-request-message {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+    min-height: 20px;
+}
+
+/* =========================
+   UTIL
+========================= */
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 640px) {
+    .project-other-view {
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .project-other-hero-card {
+        padding: 20px 16px;
+        border-radius: 18px;
+    }
+
+    .project-other-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 18px;
+    }
+
+    .project-other-title {
+        font-size: 28px;
+    }
+
+    .project-other-description {
+        font-size: 14px;
+    }
+
+    .project-other-bottom-row {
+        gap: 18px;
+    }
+
+    .project-other-meta {
+        justify-content: center;
+    }
+
+    .project-other-meta-group,
+    .project-other-friends-members,
+    .project-other-action-card {
+        align-items: center;
+    }
+
+    .project-other-friends-members-text {
+        text-align: center;
+    }
+
+    .project-other-sidepanel {
+        width: 100%;
+        justify-content: center;
+    }
+}

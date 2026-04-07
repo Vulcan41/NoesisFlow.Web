@@ -1,0 +1,476 @@
+.friends-page {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.friends-page-shell {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 24px 24px;
+    box-sizing: border-box;
+}
+
+.friends-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.friends-section {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.friends-section-header h1 {
+    margin: 0 0 6px 0;
+    font-size: 24px;
+}
+
+.friends-section-header p {
+    margin: 0;
+    color: #7a7a84;
+    font-size: 13px;
+}
+
+#friends-page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#friends-page-content.no-requests {
+    gap: 8px;
+}
+
+/* =========================
+   GROUPS
+========================= */
+
+.friends-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.friends-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8b8b95;
+}
+
+.friends-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.friends-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.friend-empty {
+    padding: 16px;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    color: #7a7a84;
+    font-size: 13px;
+    background: #fafafa;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+.friends-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 2px 0 2px;
+}
+
+.friends-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.friends-sort-select {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #333;
+}
+
+.friends-sort-select:hover {
+    background: #f9fafb;
+}
+
+.friends-search-input {
+    height: 32px;
+    min-width: 220px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 12px;
+    color: #333;
+    outline: none;
+}
+
+.friends-search-input::placeholder {
+    color: #9aa0a6;
+}
+
+.friends-search-input:focus {
+    border-color: #d1d5db;
+    background: #fff;
+}
+
+.friends-toolbar-btn {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: #ffffff;
+    color: #333;
+}
+
+.friends-toolbar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.friends-toolbar-btn-secondary {
+    border-color: #e5e7eb;
+    background: #ffffff;
+    color: #333;
+}
+
+.friends-toolbar-btn-secondary:hover:not(:disabled) {
+    background: #f9fafb;
+}
+
+.friends-toolbar-btn-danger {
+    border-color: #fecaca;
+    background: #fff1f2;
+    color: #b42318;
+}
+
+.friends-toolbar-btn-danger:hover:not(:disabled) {
+    background: #ffe4e6;
+}
+
+.friends-group-toggle-btn {
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #444;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.friends-group-toggle-btn:hover {
+    background: #f9fafb;
+}
+
+/* =========================
+   ROWS
+========================= */
+
+.request-row,
+.friend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.request-row:last-child,
+.friend-row:last-child {
+    border-bottom: none;
+}
+
+.request-row-left,
+.friend-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.request-profile-link,
+.friend-profile-link {
+    position: relative;
+    cursor: pointer;
+}
+
+.request-avatar,
+.friend-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.request-avatar-image,
+.friend-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.request-info,
+.friend-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.request-name,
+.friend-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #171717;
+    line-height: 1.2;
+}
+
+.request-username,
+.friend-username {
+    font-size: 12px;
+    color: #777;
+    line-height: 1.2;
+}
+
+.request-row-right,
+.friend-row-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.request-meta,
+.friend-meta {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.request-time {
+    color: #8a8f98;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+.request-dot {
+    margin-right: 6px;
+}
+
+.request-action-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.request-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* Vertical divider */
+.request-divider-vertical {
+    width: 1px;
+    height: 28px;
+    background: #e5e7eb;
+    flex-shrink: 0;
+}
+
+/* Make profile block horizontal */
+.request-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    cursor: pointer;
+}
+
+.request-accept-btn {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.request-reject-btn {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.friend-pill {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1;
+    border: 1px solid transparent;
+    background: #f8f8f8;
+    color: #5f6673;
+    border-color: #ececec;
+}
+
+/* =========================
+   TOOLTIP
+========================= */
+
+.request-tooltip,
+.friend-tooltip {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%);
+    background: #000000;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.tooltip-visible {
+    opacity: 1;
+}
+
+/* =========================
+   FRIENDS SELECTABLE LAYOUT
+========================= */
+
+#friends-active-list {
+    border: none;
+    background: transparent;
+    overflow: visible;
+    padding: 0;
+}
+
+.friends-active-layout {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    column-gap: 10px;
+    align-items: stretch;
+}
+
+.friends-active-checkboxes {
+    display: flex;
+    flex-direction: column;
+}
+
+.friends-active-box {
+    border: 1px solid #e6e6e6;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.friend-row-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 63px;
+    box-sizing: border-box;
+    border-bottom: 1px solid transparent;
+}
+
+.friend-row-checkbox:last-child {
+    border-bottom: none;
+}
+
+.friend-row-inside-box {
+    min-height: 63px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.friend-row-inside-box:last-child {
+    border-bottom: none;
+}
+
+.friend-select-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+    accent-color: #111111;
+    transform: translateY(1px);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 760px) {
+    .request-row,
+    .friend-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .request-row-right,
+    .friend-row-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .friends-toolbar-left {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .friends-search-input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .friends-active-layout {
+        grid-template-columns: 24px minmax(0, 1fr);
+        column-gap: 8px;
+    }
+}
