@@ -9,6 +9,7 @@ import NotificationsPage from '@features/notifications/NotificationsPage.jsx'
 import ProfilePage from '@features/profile/ProfilePage.jsx'
 import ProfileEditPage from '@features/profile/ProfileEditPage.jsx'
 import ProfileOtherPage from '@features/profile/ProfileOtherPage.jsx'
+import SettingsPage from '@features/settings/SettingsPage.jsx'
 
 function ProtectedRoute({ children }) {
   const [checking, setChecking] = useState(true)
@@ -39,7 +40,7 @@ export default function App() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
       <Route path="/profile/:userId" element={<ProtectedRoute><ProfileOtherPage /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Settings coming soon</h1></div></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   )
