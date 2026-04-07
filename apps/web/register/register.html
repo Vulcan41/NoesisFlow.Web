@@ -1,0 +1,122 @@
+<div id="register-overlay">
+
+    <div id="register-modal">
+
+        <h2>Create New Account</h2>
+
+        <!-- AVATAR -->
+
+        <div id="avatar-section">
+
+            <label id="avatar-upload">
+
+                <div id="avatar-image-wrapper">
+                    <div id="register-avatar-preview" class="register-avatar-preview-shell">
+                        <img src="assets/avatar.png" alt="Avatar preview">
+                    </div>
+                    <div id="avatar-mask"></div>
+                </div>
+
+                <div id="avatar-overlay">Change</div>
+
+                <input type="file" id="register-avatar-input" accept="image/*">
+
+            </label>
+
+            <div class="register-avatar-help">
+                PNG, JPG or WEBP<br>
+                Recommended: square image
+            </div>
+
+        </div>
+
+        <!-- ACCOUNT INFO -->
+
+        <h3 class="register-section">ACCOUNT DETAILS</h3>
+
+        <div class="form-field">
+            <input
+                    id="register-email"
+                    type="email"
+                    placeholder="Email"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                This will be used for login
+            </div>
+        </div>
+
+        <div class="form-field password-wrapper">
+
+            <input
+                    id="register-password"
+                    type="password"
+                    placeholder="Password"
+                    autocomplete="new-password"
+            >
+
+            <button type="button" id="toggle-password" class="password-eye">
+                <img id="password-icon" src="assets/no_view.png" alt="Toggle password visibility">
+            </button>
+
+            <div class="field-hint">
+                Choose a strong password
+            </div>
+
+        </div>
+
+        <!-- PROFILE INFO -->
+
+        <h3 class="register-section">PROFILE DETAILS</h3>
+
+        <div class="form-field username-field">
+            <span class="username-prefix">@</span>
+            <input
+                    id="register-username"
+                    type="text"
+                    placeholder="Username"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                The name other users will see
+            </div>
+        </div>
+
+        <div class="form-field">
+            <input
+                    id="register-fullname"
+                    type="text"
+                    placeholder="Full Name"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                Your real name
+            </div>
+        </div>
+
+        <div class="form-field">
+            <input
+                    id="register-bio"
+                    type="text"
+                    placeholder="Bio"
+                    autocomplete="off"
+            >
+            <div class="field-hint">
+                A short description
+            </div>
+        </div>
+
+        <!-- BUTTONS -->
+
+        <div class="auth-buttons">
+            <button class="glow-btn" id="register-cancel">
+                <span>Cancel</span>
+            </button>
+            <button class="glow-btn" id="register-submit">
+                <span>Create</span>
+            </button>
+        </div>
+
+    </div>
+
+</div>

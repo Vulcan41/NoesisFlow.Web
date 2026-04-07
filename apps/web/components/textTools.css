@@ -1,0 +1,128 @@
+/* ======================================================
+TEXT TOOLS BAR
+====================================================== */
+
+.text-tools-bar {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 8px;
+    gap: 8px;
+    border: 1px solid #e2e2e2;
+    border-radius: 10px;
+    background: #fafafa;
+}
+
+/* ======================================================
+GROUPS
+====================================================== */
+
+.text-tools-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ======================================================
+DIVIDER
+====================================================== */
+
+.text-tools-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(173, 173, 173, 1);
+    margin: 0 2px;
+}
+
+/* ======================================================
+BUTTONS
+====================================================== */
+
+.text-tool-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #696969;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.text-tool-btn:hover {
+    background: rgba(239, 239, 239, 1);
+}
+
+/* ======================================================
+FORMAT BUTTONS
+====================================================== */
+
+.text-tool-bold {
+    font-weight: 700;
+}
+
+.text-tool-italic {
+    font-style: italic;
+}
+
+/* ======================================================
+ICON IMAGES
+====================================================== */
+
+.text-tool-btn img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ======================================================
+TEXT TOOL TOOLTIP
+====================================================== */
+
+.text-tool-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 20;
+}
+
+.text-tool-btn:hover .text-tool-tooltip {
+    opacity: 1;
+}
+
+/* left edge buttons */
+.text-tool-btn.tooltip-left .text-tool-tooltip {
+    left: -18px;
+    transform: none;
+}
+
+/* right edge buttons */
+.text-tool-btn.tooltip-right .text-tool-tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+
+
+
+
