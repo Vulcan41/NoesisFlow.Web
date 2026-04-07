@@ -4,6 +4,7 @@ import { getSession } from '@features/auth/authService.js'
 import LoginPage from '@features/auth/LoginPage.jsx'
 import Layout from './Layout.jsx'
 import DashboardPage from '@features/dashboard/DashboardPage.jsx'
+import FriendsPage from '@features/friends/FriendsPage.jsx'
 
 function ProtectedRoute({ children }) {
   const [checking, setChecking] = useState(true)
@@ -29,7 +30,7 @@ export default function App() {
       <Route path="/home" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/project/:id" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Project coming soon</h1></div></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Messages coming soon</h1></div></ProtectedRoute>} />
-      <Route path="/friends" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Friends coming soon</h1></div></ProtectedRoute>} />
+      <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Notifications coming soon</h1></div></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Profile coming soon</h1></div></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><div style={{ padding: '2rem' }}><h1>Settings coming soon</h1></div></ProtectedRoute>} />
