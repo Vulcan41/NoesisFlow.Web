@@ -78,7 +78,7 @@ export async function sendMessage({ conversationId, content, attachments = [] })
 
   const { data, error } = await supabase
     .from('messages')
-    .insert({ conversation_id: conversationId, sender_id: user.id, content: content || '', type: attachments.length ? 'attachment' : 'text' })
+    .insert({ conversation_id: conversationId, sender_id: user.id, content: content || '', message_type: attachments.length ? 'attachment' : 'text' })
     .select()
     .single()
   if (error) throw error
