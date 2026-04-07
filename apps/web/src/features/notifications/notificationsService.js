@@ -1,0 +1,35 @@
+import { supabase } from '@core/supabase.js'
+
+export async function getMyNotifications() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+  const { data, error } = await supabase
+    .from('notifications')
+    .select(`
+      id, type, content, read, created_at,
+      sender:sender_id (id, username, full_name, avatar_url)
+    `)
+    .eq('receiver_id', user.id)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data
+}
+
+export async function markAsRead(notificationId) {
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('id', notificationId)
+  if (error) throw error
+}
+
+export async function markAllAsRead() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read: true })
+    .eq('receiver_id', user.id)
+    .eq('read', false)
+  if (error) throw error
+}
