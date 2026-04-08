@@ -25,16 +25,21 @@ export async function getProfileById(userId) {
 export async function updateMyProfile({ username, fullName, bio, avatarFile }) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
-  let avatarUrl = null
+
+  const updates = { username, full_name: fullName, bio: bio || null }
+
   if (avatarFile) {
     const ext = avatarFile.name.split('.').pop()
-    const path = `${user.id}/avatar.${ext}`
-    await supabase.storage.from('avatars').upload(path, avatarFile, { upsert: true })
+    const timestamp = Date.now()
+    const path = `${user.id}/${timestamp}_${avatarFile.name}`
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, avatarFile, { upsert: false })
+    if (uploadError) throw new Error('Avatar upload failed: ' + uploadError.message)
     const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
-    avatarUrl = pub.publicUrl
+    if (pub?.publicUrl) updates.avatar_url = pub.publicUrl
   }
-  const updates = { username, full_name: fullName, bio: bio || null }
-  if (avatarUrl) updates.avatar_url = avatarUrl
+
   const { error } = await supabase.from('profiles').update(updates).eq('id', user.id)
   if (error) throw error
 }
