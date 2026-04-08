@@ -27,7 +27,7 @@ export default function Header() {
     <header style={{ height: '52px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.25rem', background: 'var(--bg-card)', flexShrink: 0, zIndex: 100 }}>
       <div onClick={() => navigate('/home')} style={{ fontWeight: '800', fontSize: '1.1rem', letterSpacing: '0.08em', cursor: 'pointer', color: 'var(--text)' }}>NOESIS</div>
       <input placeholder="Search..." style={{ padding: '0.35rem 1rem', border: '1px solid var(--border)', borderRadius: '20px', width: '240px', outline: 'none', background: 'var(--input-bg)', color: 'var(--text)', fontSize: '0.9rem' }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
         <button onClick={() => navigate('/home')} title="Dashboard"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
           <img src="/assets/home_icon.png" alt="Home" style={{ width: '18px', height: '18px', opacity: 1 }} />
