@@ -226,42 +226,14 @@ function PrivacyTab({ settings, onUpdate }) {
 }
 
 function AppearanceTab() {
-  const { theme } = useAppContext()
   const [accentColor, setAccentColor] = useState(
     getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#246e9d'
   )
-  const [borderRadius, setBorderRadius] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue('--radius').trim() || '6px'
-  )
-  const [fontSize, setFontSize] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue('--font-size-md').trim() || '0.9rem'
-  )
-
-  function applyToken(token, value) {
-    document.documentElement.style.setProperty(token, value)
-  }
 
   function handleAccent(val) {
     setAccentColor(val)
-    applyToken('--accent', val)
+    document.documentElement.style.setProperty('--accent', val)
   }
-
-  function handleRadius(val) {
-    setBorderRadius(val)
-    applyToken('--radius', val)
-    applyToken('--radius-lg', `${parseInt(val) + 4}px`)
-  }
-
-  function handleFontSize(val) {
-    setFontSize(val)
-    applyToken('--font-size-md', val)
-    applyToken('--font-size-sm', `${parseFloat(val) - 0.1}rem`)
-    applyToken('--font-size-lg', `${parseFloat(val) + 0.1}rem`)
-    document.documentElement.style.fontSize = val === '0.9rem' ? '16px' : val === '1rem' ? '17px' : '15px'
-  }
-
-  const labelStyle = { fontSize: '0.85rem', fontWeight: '500', color: 'var(--text)', marginBottom: '0.4rem', display: 'block' }
-  const rowStyle = { display: 'flex', flexDirection: 'column', gap: '0.4rem' }
 
   return (
     <div style={{ maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -270,66 +242,69 @@ function AppearanceTab() {
         Changes apply instantly. Database persistence coming soon.
       </p>
 
-      <section style={rowStyle}>
-        <label style={labelStyle}>Accent Color</label>
+      <section style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <label style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text)' }}>Accent Color</label>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <input type="color" value={accentColor} onChange={e => handleAccent(e.target.value)}
-            style={{ width: '48px', height: '36px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', cursor: 'pointer', padding: '2px' }} />
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: accentColor, border: '2px solid var(--border)', flexShrink: 0 }} />
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{accentColor}</span>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-          {['#246e9d', '#7c3aed', '#059669', '#dc2626', '#d97706', '#0891b2', '#111111'].map(c => (
-            <div key={c} onClick={() => handleAccent(c)}
-              style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, cursor: 'pointer', border: accentColor === c ? '3px solid var(--text)' : '3px solid transparent', boxShadow: accentColor === c ? `0 0 0 3px ${c}40` : 'none', transition: 'transform 0.1s, box-shadow 0.1s' }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
-          ))}
-        </div>
-      </section>
-
-      <section style={rowStyle}>
-        <label style={labelStyle}>Border Radius</label>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {[{ label: 'Sharp', value: '2px' }, { label: 'Default', value: '6px' }, { label: 'Rounded', value: '12px' }, { label: 'Pill', value: '999px' }].map(opt => {
-            const isSelected = borderRadius === opt.value
-            return (
-              <div key={opt.value} onClick={() => handleRadius(opt.value)}
-                style={{ padding: '0.4rem 0.85rem', border: `1px solid ${isSelected ? accentColor : 'var(--border)'}`, borderRadius: opt.value === '999px' ? '999px' : '6px', cursor: 'pointer', fontSize: '0.82rem', color: isSelected ? accentColor : 'var(--text)', fontWeight: isSelected ? '600' : '400', background: isSelected ? `${accentColor}18` : 'transparent', transition: 'all 0.15s' }}>
-                {opt.label}
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      <section style={rowStyle}>
-        <label style={labelStyle}>Font Size</label>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {[{ label: 'Small', value: '0.8rem' }, { label: 'Default', value: '0.9rem' }, { label: 'Large', value: '1rem' }].map(opt => {
-            const isSelected = fontSize === opt.value
-            return (
-              <div key={opt.value} onClick={() => handleFontSize(opt.value)}
-                style={{ padding: '0.4rem 0.85rem', border: `1px solid ${isSelected ? accentColor : 'var(--border)'}`, borderRadius: '6px', cursor: 'pointer', fontSize: opt.value, color: isSelected ? accentColor : 'var(--text)', fontWeight: isSelected ? '600' : '400', background: isSelected ? `${accentColor}18` : 'transparent', transition: 'all 0.15s' }}>
-                {opt.label}
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      <section style={rowStyle}>
-        <label style={labelStyle}>Preview</label>
-        <div style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button style={{ padding: '0.4rem 1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius)', fontSize: 'var(--font-size-md)', cursor: 'pointer' }}>Primary</button>
-            <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 'var(--font-size-md)', cursor: 'pointer' }}>Secondary</button>
-            <button style={{ padding: '0.4rem 1rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: 'var(--radius)', fontSize: 'var(--font-size-md)', cursor: 'pointer' }}>Danger</button>
+        <div style={{ position: 'relative', height: '28px', borderRadius: '999px', overflow: 'hidden', cursor: 'crosshair', background: 'linear-gradient(to right, #ff0000, #ff8800, #ffff00, #00cc00, #0088ff, #8800ff, #ff0088)' }}
+          onClick={e => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const pct = x / rect.width
+            const canvas = document.createElement('canvas')
+            canvas.width = 100; canvas.height = 1
+            const ctx = canvas.getContext('2d')
+            const grad = ctx.createLinearGradient(0, 0, 100, 0)
+            grad.addColorStop(0, '#ff0000')
+            grad.addColorStop(1/6, '#ff8800')
+            grad.addColorStop(2/6, '#ffff00')
+            grad.addColorStop(3/6, '#00cc00')
+            grad.addColorStop(4/6, '#0088ff')
+            grad.addColorStop(5/6, '#8800ff')
+            grad.addColorStop(1, '#ff0088')
+            ctx.fillStyle = grad
+            ctx.fillRect(0, 0, 100, 1)
+            const [r, g, b] = ctx.getImageData(Math.floor(pct * 99), 0, 1, 1).data
+            handleAccent(`rgb(${r},${g},${b})`)
+          }}
+          onMouseMove={e => {
+            const rect = e.currentTarget.getBoundingClientRect()
+            const x = e.clientX - rect.left
+            const pct = x / rect.width
+            const canvas = document.createElement('canvas')
+            canvas.width = 100; canvas.height = 1
+            const ctx = canvas.getContext('2d')
+            const grad = ctx.createLinearGradient(0, 0, 100, 0)
+            grad.addColorStop(0, '#ff0000')
+            grad.addColorStop(1/6, '#ff8800')
+            grad.addColorStop(2/6, '#ffff00')
+            grad.addColorStop(3/6, '#00cc00')
+            grad.addColorStop(4/6, '#0088ff')
+            grad.addColorStop(5/6, '#8800ff')
+            grad.addColorStop(1, '#ff0088')
+            ctx.fillStyle = grad
+            ctx.fillRect(0, 0, 100, 1)
+            const [r, g, b] = ctx.getImageData(Math.floor(pct * 99), 0, 1, 1).data
+            e.currentTarget.style.cursor = `crosshair`
+          }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: 'rgba(255,255,255,0.8)', pointerEvents: 'none', letterSpacing: '0.05em' }}>
+            drag to pick color
           </div>
-          <input placeholder="Input preview..." style={{ padding: '0.4rem 0.75rem', border: '1px solid var(--input-border)', borderRadius: 'var(--radius)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 'var(--font-size-md)', outline: 'none', width: '100%' }} />
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span style={{ padding: '0.2rem 0.6rem', borderRadius: '20px', background: 'var(--accent-subtle)', color: 'var(--accent)', fontSize: 'var(--font-size-sm)' }}>Badge</span>
-            <span style={{ padding: '0.2rem 0.6rem', borderRadius: '20px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>Default</span>
-          </div>
+        </div>
+        <input type="range" min="0" max="360" defaultValue="210"
+          onChange={e => {
+            const h = e.target.value
+            const color = `hsl(${h}, 70%, 45%)`
+            handleAccent(color)
+          }}
+          style={{ width: '100%', height: '4px', cursor: 'pointer', accentColor: accentColor }} />
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <input type="color" value={accentColor.startsWith('#') ? accentColor : '#246e9d'}
+            onChange={e => handleAccent(e.target.value)}
+            style={{ width: '36px', height: '28px', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', padding: '2px' }} />
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Or pick exact color</span>
         </div>
       </section>
     </div>
