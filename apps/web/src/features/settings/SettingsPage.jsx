@@ -280,7 +280,7 @@ function AppearanceTab() {
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
           {['#246e9d', '#7c3aed', '#059669', '#dc2626', '#d97706', '#0891b2', '#111111'].map(c => (
             <div key={c} onClick={() => handleAccent(c)}
-              style={{ width: '24px', height: '24px', borderRadius: '50%', background: c, cursor: 'pointer', border: accentColor === c ? '2px solid var(--text)' : '2px solid transparent', transition: 'transform 0.1s' }}
+              style={{ width: '28px', height: '28px', borderRadius: '50%', background: c, cursor: 'pointer', border: accentColor === c ? '3px solid var(--text)' : '3px solid transparent', boxShadow: accentColor === c ? `0 0 0 3px ${c}40` : 'none', transition: 'transform 0.1s, box-shadow 0.1s' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
           ))}
@@ -290,24 +290,30 @@ function AppearanceTab() {
       <section style={rowStyle}>
         <label style={labelStyle}>Border Radius</label>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {[{ label: 'Sharp', value: '2px' }, { label: 'Default', value: '6px' }, { label: 'Rounded', value: '12px' }, { label: 'Pill', value: '999px' }].map(opt => (
-            <div key={opt.value} onClick={() => handleRadius(opt.value)}
-              style={{ padding: '0.4rem 0.85rem', border: `1px solid ${borderRadius === opt.value ? 'var(--accent)' : 'var(--border)'}`, borderRadius: opt.value === '999px' ? '999px' : '6px', cursor: 'pointer', fontSize: '0.82rem', color: borderRadius === opt.value ? 'var(--accent)' : 'var(--text)', fontWeight: borderRadius === opt.value ? '600' : '400' }}>
-              {opt.label}
-            </div>
-          ))}
+          {[{ label: 'Sharp', value: '2px' }, { label: 'Default', value: '6px' }, { label: 'Rounded', value: '12px' }, { label: 'Pill', value: '999px' }].map(opt => {
+            const isSelected = borderRadius === opt.value
+            return (
+              <div key={opt.value} onClick={() => handleRadius(opt.value)}
+                style={{ padding: '0.4rem 0.85rem', border: `1px solid ${isSelected ? accentColor : 'var(--border)'}`, borderRadius: opt.value === '999px' ? '999px' : '6px', cursor: 'pointer', fontSize: '0.82rem', color: isSelected ? accentColor : 'var(--text)', fontWeight: isSelected ? '600' : '400', background: isSelected ? `${accentColor}18` : 'transparent', transition: 'all 0.15s' }}>
+                {opt.label}
+              </div>
+            )
+          })}
         </div>
       </section>
 
       <section style={rowStyle}>
         <label style={labelStyle}>Font Size</label>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          {[{ label: 'Small', value: '0.8rem' }, { label: 'Default', value: '0.9rem' }, { label: 'Large', value: '1rem' }].map(opt => (
-            <div key={opt.value} onClick={() => handleFontSize(opt.value)}
-              style={{ padding: '0.4rem 0.85rem', border: `1px solid ${fontSize === opt.value ? 'var(--accent)' : 'var(--border)'}`, borderRadius: '6px', cursor: 'pointer', fontSize: opt.value, color: fontSize === opt.value ? 'var(--accent)' : 'var(--text)', fontWeight: fontSize === opt.value ? '600' : '400' }}>
-              {opt.label}
-            </div>
-          ))}
+          {[{ label: 'Small', value: '0.8rem' }, { label: 'Default', value: '0.9rem' }, { label: 'Large', value: '1rem' }].map(opt => {
+            const isSelected = fontSize === opt.value
+            return (
+              <div key={opt.value} onClick={() => handleFontSize(opt.value)}
+                style={{ padding: '0.4rem 0.85rem', border: `1px solid ${isSelected ? accentColor : 'var(--border)'}`, borderRadius: '6px', cursor: 'pointer', fontSize: opt.value, color: isSelected ? accentColor : 'var(--text)', fontWeight: isSelected ? '600' : '400', background: isSelected ? `${accentColor}18` : 'transparent', transition: 'all 0.15s' }}>
+                {opt.label}
+              </div>
+            )
+          })}
         </div>
       </section>
 
