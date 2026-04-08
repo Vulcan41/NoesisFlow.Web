@@ -1,22 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from '@features/auth/authService.js'
-import { supabase } from '@core/supabase.js'
+import { useAppContext } from '@app/AppProviders.jsx'
 
 export default function Header() {
-  const [profile, setProfile] = useState(null)
+  const { profile } = useAppContext()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data } = await supabase.from('profiles').select('username, avatar_url, credits').eq('id', user.id).single()
-      setProfile(data)
-    }
-    loadProfile()
-  }, [])
 
   async function handleSignOut() {
     await signOut()

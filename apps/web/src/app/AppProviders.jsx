@@ -1,4 +1,4 @@
-import { useEffect, useState, createContext, useContext } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { applyTheme } from '@shared/hooks/useTheme.js'
 import { supabase } from '@core/supabase.js'
 
@@ -11,8 +11,19 @@ export function useAppContext() {
 export default function AppProviders({ children }) {
   const [theme, setThemeState] = useState(() => localStorage.getItem('theme') || 'system')
   const [language, setLanguageState] = useState(() => localStorage.getItem('language') || 'en')
+  const [profile, setProfile] = useState(null)
 
   useEffect(() => { applyTheme(theme) }, [theme])
+
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('profiles').select('id, username, full_name, avatar_url, credits').eq('id', user.id).single()
+      setProfile(data)
+    }
+    loadProfile()
+  }, [])
 
   function setTheme(t) {
     localStorage.setItem('theme', t)
@@ -25,16 +36,15 @@ export default function AppProviders({ children }) {
     setLanguageState(l)
   }
 
-  async function syncPreferencesFromDB() {
+  async function refreshProfile() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase.from('profiles').select('theme, language').eq('id', user.id).single()
-    if (data?.theme) setTheme(data.theme)
-    if (data?.language) setLanguage(data.language)
+    const { data } = await supabase.from('profiles').select('id, username, full_name, avatar_url, credits').eq('id', user.id).single()
+    setProfile(data)
   }
 
   return (
-    <AppContext.Provider value={{ theme, setTheme, language, setLanguage, syncPreferencesFromDB }}>
+    <AppContext.Provider value={{ theme, setTheme, language, setLanguage, profile, setProfile, refreshProfile }}>
       {children}
     </AppContext.Provider>
   )

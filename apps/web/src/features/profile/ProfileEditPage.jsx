@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMyProfile, updateMyProfile } from './profileService.js'
+import { useAppContext } from '@app/AppProviders.jsx'
 
 export default function ProfileEditPage() {
   const [form, setForm] = useState({ username: '', fullName: '', bio: '' })
@@ -10,6 +11,7 @@ export default function ProfileEditPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
+  const { refreshProfile } = useAppContext()
 
   useEffect(() => {
     getMyProfile().then(p => {
@@ -30,6 +32,7 @@ export default function ProfileEditPage() {
     setError(null)
     try {
       await updateMyProfile({ ...form, avatarFile })
+      await refreshProfile()
       navigate('/profile')
     } catch (e) {
       setError(e.message)
