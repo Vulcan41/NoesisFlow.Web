@@ -1,13 +1,13 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
+import { useAppContext } from '@app/AppProviders.jsx'
 
 export default function FriendsList({ collapsed }) {
   const [friends, setFriends] = useState([])
-  const [onlineIds, setOnlineIds] = useState(new Set())
   const [unreadCounts, setUnreadCounts] = useState({})
   const [currentUserId, setCurrentUserId] = useState(null)
-  const channelRef = useRef(null)
+  const { onlineIds } = useAppContext()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -16,11 +16,9 @@ export default function FriendsList({ collapsed }) {
       if (!user) return
       setCurrentUserId(user.id)
       await loadFriends(user.id)
-      setupPresence(user.id)
       await loadUnreadCounts(user.id)
     }
     init()
-    return () => { channelRef.current?.unsubscribe() }
   }, [])
 
   async function loadFriends(userId) {
@@ -55,22 +53,6 @@ export default function FriendsList({ collapsed }) {
       if (count > 0) counts[p.conversation_id] = count
     }
     setUnreadCounts(counts)
-  }
-
-  function setupPresence(userId) {
-    channelRef.current = supabase.channel('online-users', {
-      config: { presence: { key: userId } }
-    })
-    channelRef.current
-      .on('presence', { event: 'sync' }, () => {
-        const state = channelRef.current.presenceState()
-        setOnlineIds(new Set(Object.keys(state)))
-      })
-      .subscribe(async status => {
-        if (status === 'SUBSCRIBED') {
-          await channelRef.current.track({ user_id: userId, online_at: new Date().toISOString() })
-        }
-      })
   }
 
   function handleFriendClick(friendId) {
