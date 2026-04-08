@@ -1,15 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
-import { getConversations, getMessages, sendMessage, getOrCreateConversation, markConversationRead } from './messagesService.js'
-import ConversationsPanel from './components/ConversationsPanel.jsx'
+import { getMessages, sendMessage, getOrCreateConversation, markConversationRead } from './messagesService.js'
 import ChatHeader from './components/ChatHeader.jsx'
 import ChatHistory from './components/ChatHistory.jsx'
 import Composer from './components/Composer.jsx'
 
 export default function MessagesPage() {
-  const [conversations, setConversations] = useState([])
-  const [activeConv, setActiveConv] = useState(null)
+  const [conv, setConv] = useState(null)
+  const [other, setOther] = useState(null)
   const [messages, setMessages] = useState([])
   const [pendingMessages, setPendingMessages] = useState([])
   const [currentUserId, setCurrentUserId] = useState(null)
@@ -22,38 +21,29 @@ export default function MessagesPage() {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUserId(user?.id)
-      const { conversations, userId } = await getConversations()
-      setConversations(conversations)
-      setLoading(false)
 
       const targetUserId = searchParams.get('userId')
-      if (targetUserId) {
-        const convId = await getOrCreateConversation(targetUserId)
-        const found = conversations.find(c => c.id === convId)
-        if (found) selectConversation(found)
-        else {
-          const fresh = await getConversations()
-          setConversations(fresh.conversations)
-          const c = fresh.conversations.find(c => c.id === convId)
-          if (c) selectConversation(c)
-        }
-      }
+      if (!targetUserId) { setLoading(false); return }
 
-      subscribeToList(user?.id)
+      const { data: otherProfile } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, avatar_url')
+        .eq('id', targetUserId)
+        .single()
+      setOther(otherProfile)
+
+      const convId = await getOrCreateConversation(targetUserId)
+      setConv({ id: convId })
+
+      const msgs = await getMessages(convId)
+      setMessages(msgs)
+      await markConversationRead(convId)
+      subscribeToMessages(convId)
+      setLoading(false)
     }
     init()
-    return () => { realtimeRef.current?.unsubscribe() }
-  }, [])
-
-  async function selectConversation(conv) {
-    setActiveConv(conv)
-    setMessages([])
-    setPendingMessages([])
-    const msgs = await getMessages(conv.id)
-    setMessages(msgs)
-    await markConversationRead(conv.id)
-    subscribeToMessages(conv.id)
-  }
+    return () => realtimeRef.current?.unsubscribe()
+  }, [searchParams.get('userId')])
 
   function subscribeToMessages(conversationId) {
     realtimeRef.current?.unsubscribe()
@@ -66,33 +56,21 @@ export default function MessagesPage() {
           .eq('id', payload.new.id)
           .single()
         if (data) {
-          setMessages(prev => {
-            if (prev.find(m => m.id === data.id)) return prev
-            return [...prev, data]
-          })
+          setMessages(prev => prev.find(m => m.id === data.id) ? prev : [...prev, data])
           setPendingMessages([])
         }
       })
       .subscribe()
   }
 
-  function subscribeToList(userId) {
-    supabase.channel('conv-list')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async () => {
-        const { conversations } = await getConversations()
-        setConversations(conversations)
-      })
-      .subscribe()
-  }
-
   async function handleSend({ content, attachments }) {
-    if (!activeConv) return
+    if (!conv) return
     setSending(true)
     const tempId = Date.now().toString()
     const optimistic = { id: `pending-${tempId}`, tempId, content, sender_id: currentUserId, created_at: new Date().toISOString(), pending: true, message_attachments: [] }
     setPendingMessages(prev => [...prev, optimistic])
     try {
-      await sendMessage({ conversationId: activeConv.id, content, attachments })
+      await sendMessage({ conversationId: conv.id, content, attachments })
     } catch (e) {
       console.error('Send failed:', e)
       setPendingMessages(prev => prev.filter(p => p.tempId !== tempId))
@@ -101,22 +79,19 @@ export default function MessagesPage() {
     }
   }
 
-  if (loading) return <div style={{ padding: '2rem' }}>Loading...</div>
+  if (loading) return <div style={{ padding: '2rem', color: 'var(--text)' }}>Loading...</div>
+
+  if (!searchParams.get('userId')) return (
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+      Select a conversation from the panel
+    </div>
+  )
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      <ConversationsPanel conversations={conversations} activeId={activeConv?.id} onSelect={selectConversation} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {!activeConv ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>Select a conversation to start chatting</div>
-        ) : (
-          <>
-            <ChatHeader other={activeConv.other} />
-            <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} />
-            <Composer onSend={handleSend} disabled={sending} />
-          </>
-        )}
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <ChatHeader other={other} />
+      <ChatHistory messages={messages} currentUserId={currentUserId} pendingMessages={pendingMessages} />
+      <Composer onSend={handleSend} disabled={sending} />
     </div>
   )
 }
