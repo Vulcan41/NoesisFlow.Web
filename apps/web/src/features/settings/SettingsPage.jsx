@@ -4,7 +4,7 @@ import { getMySettings, updatePreferences, updatePassword, updateEmail, deleteAc
 import { signOut } from '@features/auth/authService.js'
 import { useAppContext } from '@app/AppProviders.jsx'
 
-const TABS = ['Account', 'Preferences', 'Privacy', 'Danger Zone']
+const TABS = ['Account', 'Preferences', 'Appearance', 'Privacy', 'Danger Zone']
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('Account')
@@ -31,6 +31,7 @@ export default function SettingsPage() {
       <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
         {activeTab === 'Account' && <AccountTab settings={settings} onUpdate={setSettings} />}
         {activeTab === 'Preferences' && <PreferencesTab settings={settings} onUpdate={setSettings} />}
+        {activeTab === 'Appearance' && <AppearanceTab />}
         {activeTab === 'Privacy' && <PrivacyTab settings={settings} onUpdate={setSettings} />}
         {activeTab === 'Danger Zone' && <DangerTab />}
       </main>
@@ -220,6 +221,111 @@ function PrivacyTab({ settings, onUpdate }) {
         style={{ padding: '0.6rem 1.5rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', alignSelf: 'flex-start' }}>
         {saving ? 'Saving...' : 'Save privacy settings'}
       </button>
+    </div>
+  )
+}
+
+function AppearanceTab() {
+  const { theme } = useAppContext()
+  const [accentColor, setAccentColor] = useState(
+    getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#246e9d'
+  )
+  const [borderRadius, setBorderRadius] = useState(
+    getComputedStyle(document.documentElement).getPropertyValue('--radius').trim() || '6px'
+  )
+  const [fontSize, setFontSize] = useState(
+    getComputedStyle(document.documentElement).getPropertyValue('--font-size-md').trim() || '0.9rem'
+  )
+
+  function applyToken(token, value) {
+    document.documentElement.style.setProperty(token, value)
+  }
+
+  function handleAccent(val) {
+    setAccentColor(val)
+    applyToken('--accent', val)
+  }
+
+  function handleRadius(val) {
+    setBorderRadius(val)
+    applyToken('--radius', val)
+    applyToken('--radius-lg', `${parseInt(val) + 4}px`)
+  }
+
+  function handleFontSize(val) {
+    setFontSize(val)
+    applyToken('--font-size-md', val)
+    applyToken('--font-size-sm', `${parseFloat(val) - 0.1}rem`)
+    applyToken('--font-size-lg', `${parseFloat(val) + 0.1}rem`)
+    document.documentElement.style.fontSize = val === '0.9rem' ? '16px' : val === '1rem' ? '17px' : '15px'
+  }
+
+  const labelStyle = { fontSize: '0.85rem', fontWeight: '500', color: 'var(--text)', marginBottom: '0.4rem', display: 'block' }
+  const rowStyle = { display: 'flex', flexDirection: 'column', gap: '0.4rem' }
+
+  return (
+    <div style={{ maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <h1 style={{ margin: 0, color: 'var(--text)' }}>Appearance</h1>
+      <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.85rem' }}>
+        Changes apply instantly. Database persistence coming soon.
+      </p>
+
+      <section style={rowStyle}>
+        <label style={labelStyle}>Accent Color</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <input type="color" value={accentColor} onChange={e => handleAccent(e.target.value)}
+            style={{ width: '48px', height: '36px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', cursor: 'pointer', padding: '2px' }} />
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{accentColor}</span>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+          {['#246e9d', '#7c3aed', '#059669', '#dc2626', '#d97706', '#0891b2', '#111111'].map(c => (
+            <div key={c} onClick={() => handleAccent(c)}
+              style={{ width: '24px', height: '24px', borderRadius: '50%', background: c, cursor: 'pointer', border: accentColor === c ? '2px solid var(--text)' : '2px solid transparent', transition: 'transform 0.1s' }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.2)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} />
+          ))}
+        </div>
+      </section>
+
+      <section style={rowStyle}>
+        <label style={labelStyle}>Border Radius</label>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {[{ label: 'Sharp', value: '2px' }, { label: 'Default', value: '6px' }, { label: 'Rounded', value: '12px' }, { label: 'Pill', value: '999px' }].map(opt => (
+            <div key={opt.value} onClick={() => handleRadius(opt.value)}
+              style={{ padding: '0.4rem 0.85rem', border: `1px solid ${borderRadius === opt.value ? 'var(--accent)' : 'var(--border)'}`, borderRadius: opt.value === '999px' ? '999px' : '6px', cursor: 'pointer', fontSize: '0.82rem', color: borderRadius === opt.value ? 'var(--accent)' : 'var(--text)', fontWeight: borderRadius === opt.value ? '600' : '400' }}>
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={rowStyle}>
+        <label style={labelStyle}>Font Size</label>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          {[{ label: 'Small', value: '0.8rem' }, { label: 'Default', value: '0.9rem' }, { label: 'Large', value: '1rem' }].map(opt => (
+            <div key={opt.value} onClick={() => handleFontSize(opt.value)}
+              style={{ padding: '0.4rem 0.85rem', border: `1px solid ${fontSize === opt.value ? 'var(--accent)' : 'var(--border)'}`, borderRadius: '6px', cursor: 'pointer', fontSize: opt.value, color: fontSize === opt.value ? 'var(--accent)' : 'var(--text)', fontWeight: fontSize === opt.value ? '600' : '400' }}>
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={rowStyle}>
+        <label style={labelStyle}>Preview</label>
+        <div style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button style={{ padding: '0.4rem 1rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius)', fontSize: 'var(--font-size-md)', cursor: 'pointer' }}>Primary</button>
+            <button style={{ padding: '0.4rem 1rem', background: 'var(--bg-card)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: 'var(--font-size-md)', cursor: 'pointer' }}>Secondary</button>
+            <button style={{ padding: '0.4rem 1rem', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: 'var(--radius)', fontSize: 'var(--font-size-md)', cursor: 'pointer' }}>Danger</button>
+          </div>
+          <input placeholder="Input preview..." style={{ padding: '0.4rem 0.75rem', border: '1px solid var(--input-border)', borderRadius: 'var(--radius)', background: 'var(--input-bg)', color: 'var(--text)', fontSize: 'var(--font-size-md)', outline: 'none', width: '100%' }} />
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <span style={{ padding: '0.2rem 0.6rem', borderRadius: '20px', background: 'var(--accent-subtle)', color: 'var(--accent)', fontSize: 'var(--font-size-sm)' }}>Badge</span>
+            <span style={{ padding: '0.2rem 0.6rem', borderRadius: '20px', background: 'var(--bg-secondary)', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>Default</span>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
