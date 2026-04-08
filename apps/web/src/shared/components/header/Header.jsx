@@ -30,7 +30,7 @@ export default function Header() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         <button onClick={() => navigate('/home')} title="Dashboard"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
-          <img src="/assets/home_icon.png" alt="Home" style={{ width: '22px', height: '22px', opacity: 0.75 }} />
+          <img src="/assets/home_icon.png" alt="Home" style={{ width: '18px', height: '18px', opacity: 1 }} />
         </button>
         <button onClick={() => navigate('/notifications')} title="Notifications"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
