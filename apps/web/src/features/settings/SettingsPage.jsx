@@ -300,12 +300,10 @@ function AppearanceTab() {
             handleAccent(color)
           }}
           style={{ width: '100%', height: '4px', cursor: 'pointer', accentColor: accentColor }} />
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <input type="color" value={accentColor.startsWith('#') ? accentColor : '#246e9d'}
-            onChange={e => handleAccent(e.target.value)}
-            style={{ width: '36px', height: '28px', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', padding: '2px' }} />
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Or pick exact color</span>
-        </div>
+        <button onClick={() => handleAccent('#246e9d')}
+          style={{ alignSelf: 'flex-start', padding: '0.35rem 0.85rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer' }}>
+          Reset to default
+        </button>
       </section>
     </div>
   )
