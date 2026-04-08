@@ -227,7 +227,7 @@ function PrivacyTab({ settings, onUpdate }) {
 
 function AppearanceTab() {
   const [accentColor, setAccentColor] = useState(
-    getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#246e9d'
+    getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#000000'
   )
 
   function handleAccent(val) {
@@ -300,7 +300,7 @@ function AppearanceTab() {
             handleAccent(color)
           }}
           style={{ width: '100%', height: '4px', cursor: 'pointer', accentColor: accentColor }} />
-        <button onClick={() => handleAccent('#246e9d')}
+        <button onClick={() => handleAccent('#000000')}
           style={{ alignSelf: 'flex-start', padding: '0.35rem 0.85rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'transparent', color: 'var(--text-secondary)', fontSize: '0.8rem', cursor: 'pointer' }}>
           Reset to default
         </button>
