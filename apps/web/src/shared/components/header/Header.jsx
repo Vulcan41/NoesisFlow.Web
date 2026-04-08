@@ -32,8 +32,10 @@ export default function Header() {
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0.5rem', borderRadius: '20px', transition: 'background 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '0.75rem', flexShrink: 0 }}>
-              {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (profile?.username?.[0]?.toUpperCase() ?? '?')}
+            <div style={{ width: '26px', height: '26px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              {profile?.avatar_url
+                ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
             </div>
             <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text)', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.username ?? ''}</span>
           </div>

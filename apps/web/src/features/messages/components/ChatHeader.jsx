@@ -3,8 +3,10 @@ export default function ChatHeader({ other }) {
   const initial = other.full_name?.[0]?.toUpperCase() ?? '?'
   return (
     <div style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-      <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', flexShrink: 0 }}>
-        {other.avatar_url ? <img src={other.avatar_url} alt={other.full_name} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+      <div style={{ width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {other.avatar_url
+          ? <img src={other.avatar_url} alt={other.full_name} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
       </div>
       <div>
         <div style={{ fontWeight: '600' }}>{other.full_name}</div>

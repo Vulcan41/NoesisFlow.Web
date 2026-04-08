@@ -51,8 +51,10 @@ export default function ProfileEditPage() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.5rem', flexShrink: 0 }}>
-            {avatarPreview ? <img src={avatarPreview} alt="avatar" crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+          <div style={{ width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {avatarPreview
+              ? <img src={avatarPreview} alt="avatar" crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
           </div>
           <input type="file" accept="image/*" onChange={handleAvatarChange} />
         </div>
