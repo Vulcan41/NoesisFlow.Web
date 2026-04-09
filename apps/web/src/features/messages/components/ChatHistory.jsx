@@ -27,7 +27,14 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
       lastDate = msgDate
       currentGroup = null
     }
-    if (currentGroup && currentGroup.senderId === msg.sender_id) {
+
+    const msgTime = new Date(msg.created_at).getTime()
+    const lastMsgTime = currentGroup?.messages?.length
+      ? new Date(currentGroup.messages[currentGroup.messages.length - 1].created_at).getTime()
+      : null
+    const withinTimeWindow = lastMsgTime && (msgTime - lastMsgTime) < 10 * 60 * 1000
+
+    if (currentGroup && currentGroup.senderId === msg.sender_id && withinTimeWindow) {
       currentGroup.messages.push(msg)
     } else {
       currentGroup = { type: 'group', senderId: msg.sender_id, isOwn: msg.sender_id === currentUserId, messages: [msg] }
