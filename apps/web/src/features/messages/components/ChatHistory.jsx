@@ -86,39 +86,14 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                     <div>
                       {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
                         /^https?:\/\//.test(part)
-                          ? <a key={idx} href={part} target="_blank" rel="noopener noreferrer"
-                              style={{ color: '#7c3aed', fontWeight: '600', textDecoration: 'none', wordBreak: 'break-all' }}>{part}</a>
+                          ? <LinkWithPreview key={idx} url={part}
+                              title={msg.link_url === part ? msg.link_title : null}
+                              description={msg.link_url === part ? msg.link_description : null}
+                              image={msg.link_url === part ? msg.link_image : null}
+                              site={msg.link_url === part ? msg.link_site : null} />
                           : <span key={idx}>{part}</span>
                       )}
                     </div>
-                  )}
-                  {msg.link_url && (
-                    <a href={msg.link_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block', marginTop: '0.4rem' }}>
-                      <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-secondary)', maxWidth: '480px', transition: 'background 0.15s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-secondary)'}>
-                        <div style={{ width: '4px', flexShrink: 0, background: 'var(--btn-primary)' }} />
-                        <div style={{ flex: 1, padding: '0.6rem 0.75rem', minWidth: 0 }}>
-                          {msg.link_site && (
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.03em' }}>{msg.link_site}</div>
-                          )}
-                          {msg.link_title && (
-                            <div style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text)', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{msg.link_title}</div>
-                          )}
-                          {msg.link_description && (
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{msg.link_description}</div>
-                          )}
-                          {!msg.link_title && (
-                            <div style={{ fontSize: '0.82rem', color: 'var(--btn-primary)', wordBreak: 'break-all' }}>{msg.link_url}</div>
-                          )}
-                        </div>
-                        {msg.link_image && (
-                          <div style={{ width: '80px', flexShrink: 0 }}>
-                            <img src={msg.link_image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          </div>
-                        )}
-                      </div>
-                    </a>
                   )}
                   {(() => {
                     const images = msg.message_attachments?.filter(a => a.mime_type?.startsWith('image/')) ?? []
@@ -160,6 +135,50 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
       })}
       <div ref={bottomRef} />
     </div>
+  )
+}
+
+function LinkWithPreview({ url, title, description, image, site }) {
+  const [hovered, setHovered] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const linkRef = useRef(null)
+  const hasPreview = !!(title || description || image)
+
+  function handleMouseEnter() {
+    if (!hasPreview) return
+    const rect = linkRef.current?.getBoundingClientRect()
+    if (rect) {
+      setPos({
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.min(rect.left + window.scrollX, window.innerWidth - 320 - 16)
+      })
+    }
+    setHovered(true)
+  }
+
+  return (
+    <>
+      <a ref={linkRef} href={url} target="_blank" rel="noopener noreferrer"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={() => setHovered(false)}
+        style={{ color: '#7c3aed', fontWeight: '600', textDecoration: 'none', wordBreak: 'break-all', cursor: 'pointer' }}>
+        {url}
+      </a>
+      {hovered && hasPreview && (
+        <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, width: '300px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.15)', zIndex: 500, overflow: 'hidden', pointerEvents: 'auto' }}>
+          {image && (
+            <img src={image} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover', display: 'block' }} />
+          )}
+          <div style={{ padding: '0.75rem' }}>
+            {site && <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>{site}</div>}
+            {title && <div style={{ fontSize: '0.88rem', fontWeight: '600', color: 'var(--text)', marginBottom: '0.2rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</div>}
+            {description && <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{description}</div>}
+            <div style={{ fontSize: '0.72rem', color: '#7c3aed', marginTop: '0.4rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url}</div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
