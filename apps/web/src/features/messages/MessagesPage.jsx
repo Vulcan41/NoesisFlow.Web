@@ -20,6 +20,12 @@ export default function MessagesPage() {
 
   useEffect(() => {
     async function init() {
+      setMessages([])
+      setPendingMessages([])
+      setOther(null)
+      setConv(null)
+      setLoading(true)
+
       const { data: { user } } = await supabase.auth.getUser()
       setCurrentUserId(user?.id)
       const { data: myProfile } = await supabase.from('profiles').select('id, username, full_name, avatar_url').eq('id', user.id).single()
