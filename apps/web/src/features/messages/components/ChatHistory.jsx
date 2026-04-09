@@ -74,11 +74,11 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ marginBottom: '0.2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.2rem' }}>
                 <span style={{ fontWeight: '600', fontSize: '0.9rem', color: group.isOwn ? 'var(--btn-primary)' : 'var(--text)' }}>
                   {displayName}
                 </span>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>{time}</div>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{time}</span>
               </div>
               {group.messages.map((msg, j) => (
                 <div key={msg.id || `pending-${j}`} style={{ fontSize: '0.92rem', color: msg.pending ? 'var(--text-secondary)' : 'var(--text)', lineHeight: 1.5, marginBottom: '0.1rem', wordBreak: 'break-word' }}>
