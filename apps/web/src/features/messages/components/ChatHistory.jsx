@@ -82,7 +82,16 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
               </div>
               {group.messages.map((msg, j) => (
                 <div key={msg.id || `pending-${j}`} style={{ fontSize: '0.92rem', color: msg.pending ? 'var(--text-secondary)' : 'var(--text)', lineHeight: 1.5, marginBottom: '0.1rem', wordBreak: 'break-word' }}>
-                  {msg.content && <div>{msg.content}</div>}
+                  {msg.content && (
+                    <div>
+                      {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
+                        /^https?:\/\//.test(part)
+                          ? <a key={idx} href={part} target="_blank" rel="noopener noreferrer"
+                              style={{ color: 'var(--btn-primary)', wordBreak: 'break-all' }}>{part}</a>
+                          : <span key={idx}>{part}</span>
+                      )}
+                    </div>
+                  )}
                   {msg.link_url && (
                     <a href={msg.link_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block', marginTop: '0.4rem' }}>
                       <div style={{ display: 'flex', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--bg-secondary)', maxWidth: '480px', transition: 'background 0.15s' }}
