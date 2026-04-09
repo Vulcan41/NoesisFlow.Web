@@ -145,7 +145,11 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                           ))}
                         </div>
                       )}
-                      {files.map(att => <FileAttachmentCard key={att.id} attachment={att} conversationId={conversationId} />)}
+                      {files.length > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '0.35rem' }}>
+                          {files.map(att => <FileAttachmentCard key={att.id} attachment={att} conversationId={conversationId} />)}
+                        </div>
+                      )}
                     </>
                   })()}
                 </div>
@@ -284,7 +288,6 @@ function FileAttachmentCard({ attachment, conversationId }) {
         cursor: 'pointer',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         transition: 'background 0.15s, border-color 0.15s',
-        marginTop: '0.35rem',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
