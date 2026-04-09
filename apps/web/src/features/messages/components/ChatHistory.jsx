@@ -68,7 +68,7 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatarUrl
                   ? <img src={avatarUrl} alt={avatarName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <img src="/assets/user_icon_2.jpg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 0, paddingTop: '4px' }}>

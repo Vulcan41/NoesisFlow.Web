@@ -7,6 +7,7 @@ export default function FriendsList() {
   const [friends, setFriends] = useState([])
   const [convMap, setConvMap] = useState({}) // friendId -> conversationId
   const [currentUserId, setCurrentUserId] = useState(null)
+  const [justMovedId, setJustMovedId] = useState(null)
   const { onlineIds } = useAppContext()
   const channelRef = useRef(null)
   const msgChannelRef = useRef(null)
@@ -111,6 +112,8 @@ export default function FriendsList() {
             const updated = [...prev]
             const [friend] = updated.splice(idx, 1)
             updated.unshift(friend)
+            setJustMovedId(friendId)
+            setTimeout(() => setJustMovedId(null), 800)
             return updated
           })
 
@@ -131,24 +134,31 @@ export default function FriendsList() {
   return (
     <div style={{ overflowY: 'auto', flex: 1 }}>
       {friends.map(f => (
-        <FriendRow key={f.id} friend={f} online={onlineIds.has(f.id)} onClick={() => handleFriendClick(f.id)} />
+        <FriendRow key={f.id} friend={f} online={onlineIds.has(f.id)} onClick={() => handleFriendClick(f.id)} justMoved={justMovedId === f.id} />
       ))}
     </div>
   )
 }
 
-function FriendRow({ friend, online, onClick }) {
+function FriendRow({ friend, online, onClick, justMoved }) {
   const initial = friend.full_name?.[0]?.toUpperCase() ?? '?'
   return (
     <div onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', cursor: 'pointer', borderRadius: '6px', margin: '0 0.5rem 0.1rem', transition: 'background 0.1s' }}
-      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
-      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+      style={{
+        display: 'flex', alignItems: 'center', gap: '0.6rem',
+        padding: '0.4rem 0.75rem', cursor: 'pointer', borderRadius: '6px',
+        margin: '0 0.5rem 0.1rem',
+        transition: 'background 0.6s ease, transform 0.3s ease',
+        background: justMoved ? 'var(--bg-secondary)' : 'transparent',
+        transform: justMoved ? 'translateX(4px)' : 'translateX(0)',
+      }}
+      onMouseEnter={e => { if (!justMoved) e.currentTarget.style.background = 'var(--bg-secondary)' }}
+      onMouseLeave={e => { if (!justMoved) e.currentTarget.style.background = 'transparent' }}>
       <div style={{ position: 'relative', flexShrink: 0 }}>
         <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: '#e0e0e0' }}>
           {friend.avatar_url
             ? <img src={friend.avatar_url} alt={friend.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
-            : <img src="/assets/user_icon_2.jpg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+            : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
         <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', background: online ? '#3ba55c' : '#747f8d', border: '2px solid var(--bg-card)' }} />
       </div>
