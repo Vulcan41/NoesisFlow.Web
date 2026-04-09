@@ -134,6 +134,19 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
   )
 }
 
+function getFileIcon(fileName = '') {
+  const ext = fileName.split('.').pop()?.toLowerCase() || ''
+  if (['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext)) return '/assets/icons_img.png'
+  if (ext === 'pdf') return '/assets/icon_pdf.png'
+  if (['doc', 'docx'].includes(ext)) return '/assets/icon_doc.png'
+  if (ext === 'txt') return '/assets/icon_txt.png'
+  if (['xls', 'xlsx', 'csv'].includes(ext)) return '/assets/icon_xls.png'
+  if (['zip', 'rar', '7z'].includes(ext)) return '/assets/icon_zip.png'
+  if (['mp4', 'mov', 'avi'].includes(ext)) return '/assets/icon_video.png'
+  if (['mp3', 'wav'].includes(ext)) return '/assets/icon_audio.png'
+  return '/assets/icon_file_file.png'
+}
+
 function AttachmentCard({ attachment }) {
   async function handleClick() {
     const url = await getDownloadUrl(attachment.object_key)
@@ -141,11 +154,14 @@ function AttachmentCard({ attachment }) {
   }
   return (
     <div onClick={handleClick}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', padding: '0.5rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text)' }}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', padding: '0.5rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text)', maxWidth: '280px' }}
       onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
       onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-secondary)'}>
-      📎 <span>{attachment.file_name}</span>
-      {attachment.size_bytes && <span style={{ color: 'var(--text-secondary)' }}>({Math.round(attachment.size_bytes / 1024)}KB)</span>}
+      <img src={getFileIcon(attachment.file_name)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0 }} />
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attachment.file_name}</div>
+        {attachment.size_bytes && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{Math.round(attachment.size_bytes / 1024)}KB</div>}
+      </div>
     </div>
   )
 }
