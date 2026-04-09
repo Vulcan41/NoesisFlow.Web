@@ -181,7 +181,18 @@ export default function Composer({ onSend, disabled }) {
           </div>
         </div>
         <button onClick={handleSend} disabled={disabled || uploading || (!text.trim() && !files.length)}
-          style={{ padding: '0.5rem 1.1rem', background: 'var(--btn-primary)', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', flexShrink: 0, opacity: (disabled || uploading || (!text.trim() && !files.length)) ? 0.5 : 1 }}>
+          style={{
+            padding: '0 1.1rem',
+            background: 'var(--btn-primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            flexShrink: 0,
+            alignSelf: 'stretch',
+            opacity: (disabled || uploading || (!text.trim() && !files.length)) ? 0.5 : 1
+          }}>
           Send
         </button>
       </div>
