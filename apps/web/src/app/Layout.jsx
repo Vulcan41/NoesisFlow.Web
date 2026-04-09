@@ -2,10 +2,14 @@ import { useState } from 'react'
 import Header from '@components/header/Header.jsx'
 import IconBar from '@shared/components/sidebar/IconBar.jsx'
 import SidePanel from '@shared/components/sidebar/SidePanel.jsx'
+import Modal from '@shared/components/ui/Modal.jsx'
+import SettingsPage from '@features/settings/SettingsPage.jsx'
+import { useAppContext } from '@app/AppProviders.jsx'
 
 export default function Layout({ children }) {
   const [activeSection, setActiveSection] = useState('friends')
   const [panelCollapsed, setPanelCollapsed] = useState(false)
+  const { settingsOpen, setSettingsOpen } = useAppContext()
 
   function handleIconSelect(section) {
     if (activeSection === section && !panelCollapsed) {
@@ -26,6 +30,11 @@ export default function Layout({ children }) {
           {children}
         </main>
       </div>
+      {settingsOpen && (
+        <Modal onClose={() => setSettingsOpen(false)}>
+          <SettingsPage />
+        </Modal>
+      )}
     </div>
   )
 }

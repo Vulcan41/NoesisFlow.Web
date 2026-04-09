@@ -9,7 +9,6 @@ import NotificationsPage from '@features/notifications/NotificationsPage.jsx'
 import ProfilePage from '@features/profile/ProfilePage.jsx'
 import ProfileEditPage from '@features/profile/ProfileEditPage.jsx'
 import ProfileOtherPage from '@features/profile/ProfileOtherPage.jsx'
-import SettingsPage from '@features/settings/SettingsPage.jsx'
 import MessagesPage from '@features/messages/MessagesPage.jsx'
 import ForgotPasswordPage from '@features/auth/ForgotPasswordPage.jsx'
 import ResetPasswordPage from '@features/auth/ResetPasswordPage.jsx'
@@ -44,7 +43,7 @@ export default function App() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
       <Route path="/profile/:userId" element={<ProtectedRoute><ProfileOtherPage /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<Navigate to="/home" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />

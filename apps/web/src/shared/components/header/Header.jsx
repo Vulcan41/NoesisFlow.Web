@@ -4,7 +4,7 @@ import { signOut } from '@features/auth/authService.js'
 import { useAppContext } from '@app/AppProviders.jsx'
 
 export default function Header() {
-  const { profile } = useAppContext()
+  const { profile, setSettingsOpen } = useAppContext()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const navigate = useNavigate()
 
@@ -22,7 +22,7 @@ export default function Header() {
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
           <img src="/assets/home.png" alt="Home" style={{ width: '18px', height: '18px', opacity: 1 }} />
         </button>
-        <button onClick={() => navigate('/settings')} title="Settings"
+        <button onClick={() => setSettingsOpen(true)} title="Settings"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
           <img src="/assets/settings.png" alt="Settings" style={{ width: '18px', height: '18px' }} />
         </button>
@@ -42,7 +42,7 @@ export default function Header() {
           {dropdownOpen && (
             <div style={{ position: 'absolute', right: 0, top: '38px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px', boxShadow: 'var(--shadow)', minWidth: '160px', zIndex: 200 }}>
               <div onClick={() => { navigate('/profile'); setDropdownOpen(false) }} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--text)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem' }}>Profile</div>
-              <div onClick={() => { navigate('/settings'); setDropdownOpen(false) }} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--text)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem' }}>Settings</div>
+              <div onClick={() => { setSettingsOpen(true); setDropdownOpen(false) }} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--text)', borderBottom: '1px solid var(--border)', fontSize: '0.9rem' }}>Settings</div>
               <div onClick={handleSignOut} style={{ padding: '0.7rem 1rem', cursor: 'pointer', color: 'var(--danger)', fontSize: '0.9rem' }}>Log out</div>
             </div>
           )}
