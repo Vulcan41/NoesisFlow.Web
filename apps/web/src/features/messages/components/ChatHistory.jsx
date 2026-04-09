@@ -264,19 +264,38 @@ function ImageAttachmentCard({ attachment, conversationId, allImages, index, spa
 }
 
 function FileAttachmentCard({ attachment, conversationId }) {
+  const [hovered, setHovered] = useState(false)
+
   async function handleClick() {
     const url = await getDownloadUrl(attachment.object_key, attachment.file_name, conversationId)
     window.open(url, '_blank')
   }
+
   return (
     <div onClick={handleClick}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', padding: '0.5rem 0.75rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--text)', maxWidth: '280px' }}
-      onMouseEnter={e => e.currentTarget.style.background = 'var(--border)'}
-      onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-secondary)'}>
-      <img src={getFileIcon(attachment.file_name)} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain', flexShrink: 0 }} />
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attachment.file_name}</div>
-        {attachment.size_bytes && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{Math.round(attachment.size_bytes / 1024)}KB</div>}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: '240px',
+        border: `1px solid ${hovered ? '#d7dde5' : '#e6e9ee'}`,
+        background: hovered ? '#f8fafc' : '#ffffff',
+        borderRadius: '14px',
+        padding: '10px 12px',
+        cursor: 'pointer',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+        transition: 'background 0.15s, border-color 0.15s',
+        marginTop: '0.35rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        minWidth: 0,
+      }}>
+      <img src={getFileIcon(attachment.file_name)} alt="" style={{ width: '28px', height: '28px', objectFit: 'contain', flexShrink: 0, display: 'block' }} />
+      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: '13px', fontWeight: '600', color: '#171717', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attachment.file_name}</div>
+        <div style={{ fontSize: '11px', color: '#7a7a84', marginTop: '2px' }}>
+          {attachment.size_bytes ? (attachment.size_bytes < 1024 * 1024 ? `${(attachment.size_bytes / 1024).toFixed(1)} KB` : `${(attachment.size_bytes / (1024 * 1024)).toFixed(1)} MB`) : ''}
+        </div>
       </div>
     </div>
   )
