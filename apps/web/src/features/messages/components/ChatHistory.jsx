@@ -63,9 +63,7 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
         const displayName = group.isOwn ? (currentUserProfile?.full_name ?? 'You') : (otherProfile?.full_name ?? 'User')
 
         return (
-          <div key={`group-${i}`} style={{ display: 'flex', gap: '0.85rem', padding: '0.15rem 1rem', alignItems: 'flex-start' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+          <div key={`group-${i}`} style={{ display: 'flex', gap: '0.85rem', padding: '0.15rem 1rem', alignItems: 'flex-start' }}>
             <div style={{ width: '32px', flexShrink: 0 }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatarUrl
