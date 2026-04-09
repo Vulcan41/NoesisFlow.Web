@@ -1,6 +1,4 @@
-import { useState, useRef } from 'react'
-import Picker from '@emoji-mart/react'
-import data from '@emoji-mart/data'
+import { useState, useRef, useEffect } from 'react'
 
 function getFileIcon(fileName = '') {
   const ext = fileName.split('.').pop()?.toLowerCase() || ''
@@ -34,7 +32,30 @@ export default function Composer({ onSend, disabled }) {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
   const imageInputRef = useRef(null)
+  const pickerRef = useRef(null)
   let dragCounter = 0
+
+  useEffect(() => {
+    if (!showEmojiPicker || !pickerRef.current) return
+    import('emoji-mart').then(({ Picker }) => {
+      pickerRef.current.innerHTML = ''
+      const picker = new Picker({
+        data: async () => {
+          const response = await fetch('https://cdn.jsdelivr.net/npm/@emoji-mart/data')
+          return response.json()
+        },
+        onEmojiSelect: (emoji) => {
+          setText(t => t + emoji.native)
+          setShowEmojiPicker(false)
+        },
+        theme: 'auto',
+        previewPosition: 'none',
+        skinTonePosition: 'none',
+        maxFrequentRows: 2,
+      })
+      pickerRef.current.appendChild(picker)
+    })
+  }, [showEmojiPicker])
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -152,20 +173,9 @@ export default function Composer({ onSend, disabled }) {
                 <img src="/assets/icon_emoji_2.png" alt="Emoji" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
               </button>
               {showEmojiPicker && (
-                <div style={{ position: 'absolute', bottom: '40px', right: '0', zIndex: 500 }}
-                  onMouseLeave={() => setShowEmojiPicker(false)}>
-                  <Picker
-                    data={data}
-                    onEmojiSelect={emoji => {
-                      setText(t => t + emoji.native)
-                      setShowEmojiPicker(false)
-                    }}
-                    theme="auto"
-                    previewPosition="none"
-                    skinTonePosition="none"
-                    maxFrequentRows={2}
-                  />
-                </div>
+                <div ref={pickerRef}
+                  style={{ position: 'absolute', bottom: '40px', right: '0', zIndex: 500 }}
+                  onMouseLeave={() => setShowEmojiPicker(false)} />
               )}
             </div>
           </div>
