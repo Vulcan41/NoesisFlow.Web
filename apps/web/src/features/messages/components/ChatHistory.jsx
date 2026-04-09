@@ -87,7 +87,7 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
                       {msg.content.split(/(https?:\/\/[^\s]+)/g).map((part, idx) =>
                         /^https?:\/\//.test(part)
                           ? <a key={idx} href={part} target="_blank" rel="noopener noreferrer"
-                              style={{ color: 'var(--btn-primary)', wordBreak: 'break-all' }}>{part}</a>
+                              style={{ color: '#7c3aed', fontWeight: '600', textDecoration: 'none', wordBreak: 'break-all' }}>{part}</a>
                           : <span key={idx}>{part}</span>
                       )}
                     </div>
