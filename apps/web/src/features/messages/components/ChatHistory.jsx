@@ -66,19 +66,19 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
           <div key={`group-${i}`} style={{ display: 'flex', gap: '0.85rem', padding: '0.15rem 1rem', alignItems: 'flex-start' }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <div style={{ width: '40px', flexShrink: 0, paddingTop: '2px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '32px', flexShrink: 0, paddingTop: '2px' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatarUrl
                   ? <img src={avatarUrl} alt={avatarName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   : <img src="/assets/user_icon_2.jpg" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                <span style={{ fontWeight: '600', fontSize: '0.95rem', color: group.isOwn ? 'var(--btn-primary)' : 'var(--text)' }}>
+              <div style={{ marginBottom: '0.2rem' }}>
+                <span style={{ fontWeight: '600', fontSize: '0.9rem', color: group.isOwn ? 'var(--btn-primary)' : 'var(--text)' }}>
                   {displayName}
                 </span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>{time}</span>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>{time}</div>
               </div>
               {group.messages.map((msg, j) => (
                 <div key={msg.id || `pending-${j}`} style={{ fontSize: '0.92rem', color: msg.pending ? 'var(--text-secondary)' : 'var(--text)', lineHeight: 1.5, marginBottom: '0.1rem', wordBreak: 'break-word' }}>
