@@ -1,9 +1,9 @@
 export default function IconBar({ activeSection, onSelect }) {
   const icons = [
-    { id: 'home', icon: '/assets/home_icon.png', label: 'Dashboard' },
-    { id: 'friends', icon: '/assets/chat.png', iconSelected: '/assets/chat_selected.png', label: 'Direct Messages' },
-    { id: 'notifications', icon: '/assets/2222.png', label: 'Notifications' },
-    { id: 'settings', icon: '/assets/3333.png', label: 'Settings' },
+    { id: 'home', icon: '/assets/home.png', label: 'Dashboard' },
+    { id: 'friends', icon: '/assets/chat_1.png', iconSelected: '/assets/chat_2.png', label: 'Direct Messages' },
+    { id: 'notifications', icon: '/assets/notifications.png', label: 'Notifications' },
+    { id: 'settings', icon: '/assets/settings.png', label: 'Settings' },
   ]
 
   return (
