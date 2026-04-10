@@ -13,7 +13,7 @@ export default function IconBar({ activeSection, onSelect }) {
         const imgSrc = isActive && icon.iconSelected ? icon.iconSelected : icon.icon
         return (
           <button key={icon.id} onClick={() => onSelect(icon.id)} title={icon.label}
-            style={{ width: '36px', height: '36px', borderRadius: isActive ? '12px' : '50%', background: isActive ? 'var(--icon-active-bg)' : 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-radius 0.2s, background 0.2s' }}
+            style={{ width: '32px', height: '32px', borderRadius: isActive ? '12px' : '50%', background: isActive ? 'var(--icon-active-bg)' : 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'border-radius 0.2s, background 0.2s' }}
             onMouseEnter={e => { if (!isActive) e.currentTarget.style.borderRadius = '12px' }}
             onMouseLeave={e => { if (!isActive) e.currentTarget.style.borderRadius = '50%' }}>
             <img src={imgSrc} alt={icon.label} style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
