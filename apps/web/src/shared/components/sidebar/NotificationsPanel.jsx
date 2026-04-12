@@ -58,6 +58,11 @@ export default function NotificationsPanel() {
     return () => channel.unsubscribe()
   }, [])
 
+  async function handleMarkRead(id) {
+    await supabase.from('notifications').update({ read: true }).eq('id', id)
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+
   async function handleAccept(n) {
     const { error } = await supabase.from('friendships').update({ status: 'accepted' }).eq('id', n.friendship_id)
     if (error) { console.error('accept error:', error); return }
@@ -91,7 +96,8 @@ export default function NotificationsPanel() {
         : <div style={{ overflowY: 'auto', flex: 1 }}>
             {notifications.map(n => (
               <div key={n.id}
-                style={{ padding: '0.65rem 0.75rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
+                onClick={() => { if (n.type !== 'friend_request') handleMarkRead(n.id) }}
+                style={{ padding: '0.65rem 0.75rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)', cursor: n.type !== 'friend_request' ? 'pointer' : 'default' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: n.type === 'friend_request' ? '0.5rem' : 0 }}>
                   <Avatar url={n.sender?.avatar_url} name={n.sender?.full_name} size={28} />
                   <div style={{ flex: 1, minWidth: 0 }}>
