@@ -47,10 +47,17 @@ export async function updateMyProfile({ username, fullName, bio, avatarFile }) {
 export async function sendFriendRequest(targetUserId) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
-  const { error } = await supabase
+  const { data: friendship, error } = await supabase
     .from('friendships')
     .insert({ requester_id: user.id, receiver_id: targetUserId, status: 'pending' })
+    .select().single()
   if (error) throw error
+  await supabase.from('notifications').insert({
+    type: 'friend_request',
+    sender_id: user.id,
+    receiver_id: targetUserId,
+    friendship_id: friendship.id
+  })
 }
 
 export async function getFriendshipStatus(targetUserId) {
