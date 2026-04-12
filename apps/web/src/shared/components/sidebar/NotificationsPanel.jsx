@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
 import Avatar from '@shared/components/ui/Avatar.jsx'
@@ -6,6 +6,7 @@ import Avatar from '@shared/components/ui/Avatar.jsx'
 export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
+  const handledIds = useRef(new Set())
   const navigate = useNavigate()
 
   async function load() {
@@ -28,7 +29,11 @@ export default function NotificationsPanel() {
         supabase.from('notifications')
           .select('id, type, read, created_at, friendship_id, project_id, sender:sender_id (id, username, full_name, avatar_url)')
           .eq('id', payload.new.id).single()
-          .then(({ data }) => { if (data) setNotifications(prev => [data, ...prev]) })
+          .then(({ data }) => {
+            if (data && !handledIds.current.has(data.id)) {
+              setNotifications(prev => [data, ...prev])
+            }
+          })
       })
       .subscribe()
     return () => channel.unsubscribe()
@@ -50,12 +55,23 @@ export default function NotificationsPanel() {
     const { error } = await supabase.from('friendships').update({ status: 'accepted' }).eq('id', n.friendship_id)
     if (error) { console.error('accept error:', error); return }
     await supabase.from('notifications').update({ read: true }).eq('id', n.id)
+    handledIds.current.add(n.id)
     setNotifications(prev => prev.filter(x => x.id !== n.id))
   }
 
   async function handleReject(n) {
+    const { data: friendship } = await supabase
+      .from('friendships')
+      .select('status')
+      .eq('id', n.friendship_id)
+      .single()
+    if (!friendship || friendship.status !== 'pending') {
+      setNotifications(prev => prev.filter(x => x.id !== n.id))
+      return
+    }
     await supabase.from('friendships').delete().eq('id', n.friendship_id)
     await supabase.from('notifications').update({ read: true }).eq('id', n.id)
+    handledIds.current.add(n.id)
     setNotifications(prev => prev.filter(x => x.id !== n.id))
   }
 
