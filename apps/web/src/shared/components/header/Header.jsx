@@ -47,9 +47,9 @@ export default function Header() {
 
   return (
     <header style={{ height: '40px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 1.25rem', background: 'var(--bg-card)', flexShrink: 0, zIndex: 100 }}>
-      <img src="/assets/logo_5.png" alt="Noesis" onClick={() => navigate('/home')} style={{ height: '28px', cursor: 'pointer', objectFit: 'contain' }} />
+      <img src="/assets/logo_5.png" alt="Noesis" onClick={() => navigate('/home')} style={{ height: '22px', cursor: 'pointer', objectFit: 'contain' }} />
       <SearchBar />
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
         <ConnectionIndicator ping={ping} quality={quality} connType={connType} />
         {profile && <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
         <div style={{ position: 'relative' }}>
@@ -181,7 +181,9 @@ function SearchBar() {
               <Avatar url={user.avatar_url} name={user.full_name} size={36} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.full_name}</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>@{user.username}{user.mutuals > 0 ? ` · ${user.mutuals} mutual` : ''}</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                  {user.mutuals > 0 ? `${user.mutuals} mutual friend${user.mutuals > 1 ? 's' : ''}` : ''}
+                </div>
               </div>
             </div>
           ))}
