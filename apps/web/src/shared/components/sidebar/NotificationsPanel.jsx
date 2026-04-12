@@ -49,7 +49,9 @@ export default function NotificationsPanel() {
 
   async function handleAccept(n) {
     await supabase.from('friendships').update({ status: 'accepted' }).eq('id', n.friendship_id)
-    await supabase.from('notifications').insert({ type: 'friend_accepted', sender_id: n.receiver_id, receiver_id: n.sender_id, friendship_id: n.friendship_id })
+    try {
+      await supabase.from('notifications').insert({ type: 'friend_accepted', sender_id: n.receiver_id, receiver_id: n.sender_id, friendship_id: n.friendship_id })
+    } catch {}
     await handleMarkRead(n.id)
     setActed(prev => new Set([...prev, n.id]))
   }
