@@ -60,6 +60,16 @@ export async function sendFriendRequest(targetUserId) {
   })
 }
 
+export async function removeFriend(targetUserId) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+  const { error } = await supabase
+    .from('friendships')
+    .delete()
+    .or(`and(requester_id.eq.${user.id},receiver_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},receiver_id.eq.${user.id})`)
+  if (error) throw error
+}
+
 export async function getFriendshipStatus(targetUserId) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getProfileById, getFriendshipStatus, sendFriendRequest } from './profileService.js'
+import { getProfileById, getFriendshipStatus, sendFriendRequest, removeFriend } from './profileService.js'
 import { supabase } from '@core/supabase.js'
 import Avatar from '@shared/components/ui/Avatar.jsx'
 
@@ -51,7 +51,14 @@ export default function ProfileOtherPage() {
       </div>
       <div style={{ display: 'flex', gap: '1rem' }}>
         {isFriend ? (
-          <button onClick={() => navigate(`/messages?userId=${userId}`)} style={{ padding: '0.6rem 1.5rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Message</button>
+          <>
+            <button onClick={() => navigate(`/messages?userId=${userId}`)} style={{ padding: '0.6rem 1.5rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Message</button>
+            <button onClick={async () => {
+              if (!confirm('Remove this friend?')) return
+              await removeFriend(userId)
+              setFriendship(null)
+            }} style={{ padding: '0.5rem 1.25rem', background: 'transparent', color: 'var(--danger)', border: '1px solid var(--danger)', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>Remove Friend</button>
+          </>
         ) : isPending ? (
           <button disabled style={{ padding: '0.6rem 1.5rem', background: '#f0f0f0', color: '#888', border: 'none', borderRadius: '6px' }}>Pending</button>
         ) : (
