@@ -48,19 +48,18 @@ export default function NotificationsPanel() {
   }
 
   async function handleAccept(n) {
-    const { error } = await supabase
-      .from('friendships')
-      .update({ status: 'accepted' })
-      .eq('id', n.friendship_id)
+    const { error } = await supabase.from('friendships').update({ status: 'accepted' }).eq('id', n.friendship_id)
     if (error) { console.error('accept error:', error); return }
     await handleMarkRead(n.id)
     setActed(prev => new Set([...prev, n.id]))
+    setTimeout(() => setNotifications(prev => prev.filter(x => x.id !== n.id)), 1000)
   }
 
   async function handleReject(n) {
     await supabase.from('friendships').delete().eq('id', n.friendship_id)
     await handleMarkRead(n.id)
     setActed(prev => new Set([...prev, n.id]))
+    setTimeout(() => setNotifications(prev => prev.filter(x => x.id !== n.id)), 1000)
   }
 
   if (loading) return <div style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Loading...</div>
