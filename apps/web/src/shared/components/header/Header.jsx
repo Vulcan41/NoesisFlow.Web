@@ -196,14 +196,14 @@ function SearchBar() {
 
 function DiamondCredits({ credits }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'default' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'default' }}>
       <motion.div
-        animate={{ rotateY: 360 }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-        style={{ display: 'inline-block', fontSize: '1rem', filter: 'drop-shadow(0 0 4px #60c8f5) drop-shadow(0 0 8px #a78bfa)', transformStyle: 'preserve-3d' }}>
-        💎
-      </motion.div>
-      <span style={{ fontSize: '0.85rem', fontWeight: '700', background: 'linear-gradient(135deg, #60c8f5, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        animate={{ y: [-2, 2, -2] }}
+        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: 'linear-gradient(145deg, #f7d354, #e6a817)', boxShadow: '0 2px 6px rgba(230,168,23,0.5), inset 0 1px 2px rgba(255,255,200,0.6)', fontSize: '9px', fontWeight: '900', color: '#8a5a00', letterSpacing: '-0.5px' }}>
+          N
+        </motion.div>
+      <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>
         {credits}
       </span>
     </div>
