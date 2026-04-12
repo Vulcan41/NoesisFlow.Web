@@ -48,10 +48,21 @@ export default function NotificationsPanel() {
   }
 
   async function handleAccept(n) {
-    await supabase.from('friendships').update({ status: 'accepted' }).eq('id', n.friendship_id)
-    try {
-      await supabase.from('notifications').insert({ type: 'friend_accepted', sender_id: n.receiver_id, receiver_id: n.sender_id, friendship_id: n.friendship_id })
-    } catch {}
+    const { error: updateError } = await supabase
+      .from('friendships')
+      .update({ status: 'accepted' })
+      .eq('id', n.friendship_id)
+    if (updateError) { console.error('friendship update error:', updateError); return }
+    const { data: { user } } = await supabase.auth.getUser()
+    const { error: notifError } = await supabase
+      .from('notifications')
+      .insert({
+        type: 'friend_accepted',
+        sender_id: user.id,
+        receiver_id: n.sender.id,
+        friendship_id: n.friendship_id
+      })
+    if (notifError) console.error('notification insert error:', notifError)
     await handleMarkRead(n.id)
     setActed(prev => new Set([...prev, n.id]))
   }
