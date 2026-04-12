@@ -16,7 +16,6 @@ export default function NotificationsPanel() {
       .from('notifications')
       .select('id, type, read, created_at, friendship_id, project_id, sender:sender_id (id, username, full_name, avatar_url)')
       .eq('receiver_id', user.id)
-      .eq('read', false)
       .order('created_at', { ascending: false })
       .limit(30)
     if (!data) { setLoading(false); return }
@@ -60,7 +59,7 @@ export default function NotificationsPanel() {
 
   async function handleMarkRead(id) {
     await supabase.from('notifications').update({ read: true }).eq('id', id)
-    setNotifications(prev => prev.filter(n => n.id !== id))
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
   }
 
   async function handleAccept(n) {
@@ -97,7 +96,7 @@ export default function NotificationsPanel() {
             {notifications.map(n => (
               <div key={n.id}
                 onClick={() => { if (n.type !== 'friend_request') handleMarkRead(n.id) }}
-                style={{ padding: '0.65rem 0.75rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)', cursor: n.type !== 'friend_request' ? 'pointer' : 'default' }}>
+                style={{ padding: '0.65rem 0.75rem', borderBottom: '1px solid var(--border)', background: n.read ? 'transparent' : 'var(--bg-secondary)', cursor: n.type !== 'friend_request' ? 'pointer' : 'default' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: n.type === 'friend_request' ? '0.5rem' : 0 }}>
                   <Avatar url={n.sender?.avatar_url} name={n.sender?.full_name} size={28} />
                   <div style={{ flex: 1, minWidth: 0 }}>
