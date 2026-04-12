@@ -17,8 +17,26 @@ export default function NotificationsPanel() {
       .select('id, type, read, created_at, friendship_id, project_id, sender:sender_id (id, username, full_name, avatar_url)')
       .eq('receiver_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(20)
-    setNotifications(data ?? [])
+      .limit(30)
+    if (!data) { setLoading(false); return }
+
+    // For friend_request notifications, filter out ones where friendship is no longer pending
+    const friendRequestNotifs = data.filter(n => n.type === 'friend_request' && n.friendship_id)
+    let pendingFriendshipIds = new Set()
+    if (friendRequestNotifs.length) {
+      const { data: friendships } = await supabase
+        .from('friendships')
+        .select('id, status')
+        .in('id', friendRequestNotifs.map(n => n.friendship_id))
+      friendships?.forEach(f => { if (f.status === 'pending') pendingFriendshipIds.add(f.id) })
+    }
+
+    const filtered = data.filter(n => {
+      if (n.type === 'friend_request') return pendingFriendshipIds.has(n.friendship_id)
+      return true
+    })
+
+    setNotifications(filtered)
     setLoading(false)
   }
 
