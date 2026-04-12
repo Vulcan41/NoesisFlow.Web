@@ -204,8 +204,8 @@ function DiamondCredits({ credits }) {
       <motion.div
         animate={{ rotate: hovered ? 360 : 0, scale: hovered ? 1.2 : 1 }}
         transition={{ rotate: { duration: 0.5, ease: 'easeInOut' }, scale: { duration: 0.2 } }}
-        style={{ width: '18px', height: '18px', position: 'relative' }}>
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+        style={{ width: '14px', height: '14px', position: 'relative' }}>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
           <motion.path
             d="M12 2L2 9l10 13L22 9z"
             fill="url(#diamondGrad)"
@@ -221,9 +221,9 @@ function DiamondCredits({ credits }) {
           />
           <defs>
             <linearGradient id="diamondGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#a78bfa" />
-              <stop offset="50%" stopColor="#60c8f5" />
-              <stop offset="100%" stopColor="#a78bfa" />
+              <stop offset="0%" stopColor="#7c3aed" />
+              <stop offset="50%" stopColor="#a78bfa" />
+              <stop offset="100%" stopColor="#7c3aed" />
             </linearGradient>
           </defs>
         </svg>
@@ -231,7 +231,7 @@ function DiamondCredits({ credits }) {
       <motion.span
         animate={{ color: hovered ? '#a78bfa' : 'var(--text)' }}
         transition={{ duration: 0.2 }}
-        style={{ fontSize: '0.85rem', fontWeight: '700' }}>
+        style={{ fontSize: '0.8rem', fontWeight: '700' }}>
         {credits}
       </motion.span>
       {hovered && (
