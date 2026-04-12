@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMyProfile, updateMyProfile } from './profileService.js'
 import { useAppContext } from '@app/AppProviders.jsx'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function ProfileEditPage() {
   const [form, setForm] = useState({ username: '', fullName: '', bio: '' })
@@ -43,19 +44,13 @@ export default function ProfileEditPage() {
 
   if (loading) return <div style={{ padding: '2rem' }}>Loading...</div>
 
-  const initial = form.fullName?.[0]?.toUpperCase() ?? '?'
-
   return (
     <div style={{ padding: '2rem', maxWidth: '500px' }}>
       <h1 style={{ marginBottom: '2rem' }}>Edit Profile</h1>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '72px', height: '72px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            {avatarPreview
-              ? <img src={avatarPreview} alt="avatar" crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-          </div>
+          <Avatar url={avatarPreview} name={form.fullName} size={72} />
           <input type="file" accept="image/*" onChange={handleAvatarChange} />
         </div>
         <input placeholder="Username" value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px' }} />

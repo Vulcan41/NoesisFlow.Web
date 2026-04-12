@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
 import { useAppContext } from '@app/AppProviders.jsx'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function FriendsList() {
   const [friends, setFriends] = useState([])
@@ -141,7 +142,6 @@ export default function FriendsList() {
 }
 
 function FriendRow({ friend, online, onClick, justMoved }) {
-  const initial = friend.full_name?.[0]?.toUpperCase() ?? '?'
   return (
     <div onClick={onClick}
       style={{
@@ -155,11 +155,7 @@ function FriendRow({ friend, online, onClick, justMoved }) {
       onMouseEnter={e => { if (!justMoved) e.currentTarget.style.background = 'var(--bg-secondary)' }}
       onMouseLeave={e => { if (!justMoved) e.currentTarget.style.background = 'transparent' }}>
       <div style={{ position: 'relative', flexShrink: 0 }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: 'white' }}>
-          {friend.avatar_url
-            ? <img src={friend.avatar_url} alt={friend.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
-            : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-        </div>
+        <Avatar url={friend.avatar_url} name={friend.full_name} size={32} />
         <div style={{ position: 'absolute', bottom: 0, right: 0, width: '10px', height: '10px', borderRadius: '50%', background: online ? '#3ba55c' : '#747f8d', border: '2px solid var(--bg-card)' }} />
       </div>
       <div style={{ minWidth: 0, flex: 1 }}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([])
@@ -55,9 +56,7 @@ export default function NotificationsPanel() {
         ) : notifications.map(n => (
           <div key={n.id} onClick={() => !n.read && handleMarkRead(n.id)}
             style={{ padding: '0.65rem 0.75rem', borderBottom: '1px solid var(--border)', background: n.read ? 'transparent' : 'var(--bg-secondary)', cursor: n.read ? 'default' : 'pointer', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.7rem', fontWeight: 'bold', flexShrink: 0 }}>
-              {n.sender?.avatar_url ? <img src={n.sender.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" /> : (n.sender?.username?.[0]?.toUpperCase() ?? '?')}
-            </div>
+            <Avatar url={n.sender?.avatar_url} name={n.sender?.full_name ?? n.sender?.username} size={28} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.3 }}>{n.type}</div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>{new Date(n.created_at).toLocaleDateString()}</div>

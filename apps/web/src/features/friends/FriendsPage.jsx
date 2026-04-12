@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getMyFriends, acceptFriend, rejectFriend, removeFriend } from './friendsService.js'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function FriendsPage() {
   const [data, setData] = useState(null)
@@ -49,7 +50,7 @@ export default function FriendsPage() {
             return (
               <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', border: '1px solid #eee', borderRadius: '8px', marginBottom: '0.5rem', background: 'white' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Avatar profile={other} />
+                  <Avatar url={other?.avatar_url} name={other?.full_name} size={40} />
                   <div>
                     <div style={{ fontWeight: '500' }}>{other?.full_name}</div>
                     <div style={{ fontSize: '0.8rem', color: '#888' }}>@{other?.username}</div>
@@ -75,7 +76,7 @@ export default function FriendsPage() {
             return (
               <div key={f.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', border: '1px solid #eee', borderRadius: '8px', marginBottom: '0.5rem', background: 'white' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                  <Avatar profile={other} />
+                  <Avatar url={other?.avatar_url} name={other?.full_name} size={40} />
                   <div>
                     <div style={{ fontWeight: '500' }}>{other?.full_name}</div>
                     <div style={{ fontSize: '0.8rem', color: '#888' }}>@{other?.username}</div>
@@ -87,15 +88,6 @@ export default function FriendsPage() {
           })
         )}
       </section>
-    </div>
-  )
-}
-
-function Avatar({ profile }) {
-  const initial = profile?.full_name?.[0]?.toUpperCase() ?? '?'
-  return (
-    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', flexShrink: 0 }}>
-      {profile?.avatar_url ? <img src={profile.avatar_url} alt={profile.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
     </div>
   )
 }

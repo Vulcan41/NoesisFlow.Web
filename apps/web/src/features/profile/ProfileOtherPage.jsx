@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getProfileById, getFriendshipStatus, sendFriendRequest } from './profileService.js'
 import { supabase } from '@core/supabase.js'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function ProfileOtherPage() {
   const { userId } = useParams()
@@ -35,18 +36,13 @@ export default function ProfileOtherPage() {
   if (loading) return <div style={{ padding: '2rem' }}>Loading...</div>
   if (error) return <div style={{ padding: '2rem', color: 'red' }}>Error: {error}</div>
 
-  const initial = profile.full_name?.[0]?.toUpperCase() ?? '?'
   const isFriend = friendship?.status === 'accepted'
   const isPending = friendship?.status === 'pending'
 
   return (
     <div style={{ padding: '2rem', maxWidth: '600px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          {profile.avatar_url
-            ? <img src={profile.avatar_url} alt={profile.full_name} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-        </div>
+        <Avatar url={profile.avatar_url} name={profile.full_name} size={80} />
         <div>
           <h1 style={{ margin: 0 }}>{profile.full_name}</h1>
           <div style={{ color: '#888', marginTop: '0.25rem' }}>@{profile.username}</div>

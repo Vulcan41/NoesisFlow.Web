@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getDownloadUrl } from '../messagesService.js'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function ChatHistory({ messages, currentUserId, pendingMessages, otherProfile, currentUserProfile, conversationId, hasMore, loadingMore, onLoadMore }) {
   const containerRef = useRef(null)
@@ -113,11 +114,7 @@ export default function ChatHistory({ messages, currentUserId, pendingMessages, 
         return (
           <div key={`group-${i}`} style={{ display: 'flex', gap: '0.85rem', padding: '0.15rem 1rem', alignItems: 'flex-start' }}>
             <div style={{ width: '32px', flexShrink: 0 }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', background: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {avatarUrl
-                  ? <img src={avatarUrl} alt={avatarName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-              </div>
+              <Avatar url={avatarUrl} name={avatarName} size={32} />
             </div>
             <div style={{ flex: 1, minWidth: 0, paddingTop: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>

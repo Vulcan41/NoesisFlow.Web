@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getMyNotifications, markAsRead, markAllAsRead } from './notificationsService.js'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([])
@@ -48,7 +49,7 @@ export default function NotificationsPage() {
           {notifications.map(n => (
             <div key={n.id} onClick={() => !n.read && handleMarkRead(n.id)}
               style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', padding: '1rem', border: '1px solid #eee', borderRadius: '8px', background: n.read ? 'white' : '#f0f7ff', cursor: n.read ? 'default' : 'pointer' }}>
-              <Avatar profile={n.sender} />
+              <Avatar url={n.sender?.avatar_url} name={n.sender?.full_name} size={40} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.95rem' }}>{n.type}</div>
                 <div style={{ fontSize: '0.75rem', color: '#aaa', marginTop: '0.25rem' }}>{new Date(n.created_at).toLocaleString()}</div>
@@ -58,15 +59,6 @@ export default function NotificationsPage() {
           ))}
         </div>
       )}
-    </div>
-  )
-}
-
-function Avatar({ profile }) {
-  const initial = profile?.full_name?.[0]?.toUpperCase() ?? '?'
-  return (
-    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', flexShrink: 0 }}>
-      {profile?.avatar_url ? <img src={profile.avatar_url} alt={profile?.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
     </div>
   )
 }

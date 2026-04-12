@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { signOut } from '@features/auth/authService.js'
 import { supabase } from '@core/supabase.js'
 import { useAppContext } from '@app/AppProviders.jsx'
+import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function Header() {
   const { profile } = useAppContext()
@@ -56,11 +57,7 @@ export default function Header() {
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0.5rem', borderRadius: '20px', transition: 'background 0.15s' }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--accent)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '0.75rem', flexShrink: 0 }}>
-              {profile?.avatar_url
-                ? <img src={profile.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-            </div>
+            <Avatar url={profile?.avatar_url} name={profile?.username} size={26} />
             <span style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text)', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profile?.username ?? ''}</span>
           </div>
           {dropdownOpen && (
@@ -181,11 +178,7 @@ function SearchBar() {
               style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 1rem', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: '#e0e0e0' }}>
-                {user.avatar_url
-                  ? <img src={user.avatar_url} alt={user.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
-                  : <img src="/assets/user_icon.png" alt="default" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-              </div>
+              <Avatar url={user.avatar_url} name={user.full_name} size={36} />
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontWeight: '600', fontSize: '0.9rem', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user.full_name}</div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>@{user.username}{user.mutuals > 0 ? ` · ${user.mutuals} mutual` : ''}</div>
