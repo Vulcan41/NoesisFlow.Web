@@ -1,5 +1,5 @@
-import { motion, useMotionValue, useSpring } from 'framer-motion'
-import { useState, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { useRef } from 'react'
 
 const icons = [
   { id: 'home', icon: '/assets/home.png', iconSelected: '/assets/home_selected.png', label: 'Dashboard' },
@@ -9,30 +9,12 @@ const icons = [
 ]
 
 export default function IconBar({ activeSection, onSelect }) {
-  const [mouseY, setMouseY] = useState(null)
   const barRef = useRef(null)
-  const springY = useSpring(0, { stiffness: 200, damping: 20 })
-
-  function handleMouseMove(e) {
-    const rect = barRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const y = e.clientY - rect.top
-    setMouseY(y)
-    springY.set(y)
-  }
 
   return (
     <div
       ref={barRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={() => setMouseY(null)}
       style={{ width: '52px', background: 'var(--bg-secondary)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '0.75rem', gap: '0.15rem', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
-
-      {mouseY !== null && (
-        <motion.div
-          style={{ position: 'absolute', left: '50%', y: springY, translateX: '-50%', translateY: '-50%', width: '32px', height: '32px', borderRadius: '50%', background: 'var(--icon-active-bg)', opacity: 0.12, pointerEvents: 'none', zIndex: 0, filter: 'blur(6px)' }}
-        />
-      )}
 
       {icons.map(icon => (
         <IconButton key={icon.id} icon={icon} isActive={activeSection === icon.id} onSelect={onSelect} />
