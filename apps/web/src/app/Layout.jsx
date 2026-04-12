@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Header from '@components/header/Header.jsx'
 import IconBar from '@shared/components/sidebar/IconBar.jsx'
 import SidePanel from '@shared/components/sidebar/SidePanel.jsx'
@@ -8,6 +8,14 @@ export default function Layout({ children }) {
   const [activeSection, setActiveSection] = useState('home')
   const [panelCollapsed, setPanelCollapsed] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.pathname === '/messages') {
+      setActiveSection('friends')
+      setPanelCollapsed(false)
+    }
+  }, [location.pathname])
 
   function handleIconSelect(section) {
     if (section === 'home') {

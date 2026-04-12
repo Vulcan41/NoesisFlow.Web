@@ -55,7 +55,7 @@ export default function ProfileOtherPage() {
       </div>
       <div style={{ display: 'flex', gap: '1rem' }}>
         {isFriend ? (
-          <button onClick={() => navigate('/messages')} style={{ padding: '0.6rem 1.5rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Message</button>
+          <button onClick={() => navigate(`/messages?userId=${userId}`)} style={{ padding: '0.6rem 1.5rem', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Message</button>
         ) : isPending ? (
           <button disabled style={{ padding: '0.6rem 1.5rem', background: '#f0f0f0', color: '#888', border: 'none', borderRadius: '6px' }}>Pending</button>
         ) : (
