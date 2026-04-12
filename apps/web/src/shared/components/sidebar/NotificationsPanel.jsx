@@ -89,8 +89,8 @@ export default function NotificationsPanel() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text)', lineHeight: 1.3 }}>
                     {n.type === 'friend_request' && <><strong>{n.sender?.full_name}</strong> sent you a friend request</>}
-                    {n.type === 'friend_accepted' && <><strong>{n.sender?.full_name}</strong> accepted your friend request</>}
-                    {!['friend_request', 'friend_accepted'].includes(n.type) && n.type}
+                    {n.type === 'friend_request_accepted' && <><strong>{n.sender?.full_name}</strong> accepted your friend request</>}
+                    {!['friend_request', 'friend_request_accepted'].includes(n.type) && n.type}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>{new Date(n.created_at).toLocaleDateString()}</div>
                 </div>
