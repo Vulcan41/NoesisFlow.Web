@@ -4,6 +4,7 @@ import { signOut } from '@features/auth/authService.js'
 import { supabase } from '@core/supabase.js'
 import { useAppContext } from '@app/AppProviders.jsx'
 import Avatar from '@shared/components/ui/Avatar.jsx'
+import { motion } from 'framer-motion'
 
 export default function Header() {
   const { profile } = useAppContext()
@@ -51,7 +52,7 @@ export default function Header() {
       <SearchBar />
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.95rem' }}>
         <ConnectionIndicator ping={ping} quality={quality} connType={connType} />
-        {profile && <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text)' }}>{profile.credits ?? 0} ♦</span>}
+        {profile && <DiamondCredits credits={profile.credits ?? 0} />}
         <div style={{ position: 'relative' }}>
           <div onClick={() => setDropdownOpen(o => !o)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', padding: '0.25rem 0.5rem', borderRadius: '20px', transition: 'background 0.15s' }}
@@ -189,6 +190,22 @@ function SearchBar() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+function DiamondCredits({ credits }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'default' }}>
+      <motion.div
+        animate={{ rotateY: 360 }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+        style={{ display: 'inline-block', fontSize: '1rem', filter: 'drop-shadow(0 0 4px #60c8f5) drop-shadow(0 0 8px #a78bfa)', transformStyle: 'preserve-3d' }}>
+        💎
+      </motion.div>
+      <span style={{ fontSize: '0.85rem', fontWeight: '700', background: 'linear-gradient(135deg, #60c8f5, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        {credits}
+      </span>
     </div>
   )
 }
