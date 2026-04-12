@@ -204,7 +204,7 @@ function DiamondCredits({ credits }) {
       <motion.div
         animate={{ rotate: hovered ? 360 : 0, scale: hovered ? 1.2 : 1 }}
         transition={{ rotate: { duration: 0.5, ease: 'easeInOut' }, scale: { duration: 0.2 } }}
-        style={{ width: '14px', height: '14px', position: 'relative' }}>
+        style={{ width: '14px', height: '14px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transformOrigin: 'center center' }}>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
           <motion.path
             d="M12 2L2 9l10 13L22 9z"
