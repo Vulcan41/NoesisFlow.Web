@@ -195,18 +195,54 @@ function SearchBar() {
 }
 
 function DiamondCredits({ credits }) {
+  const [hovered, setHovered] = useState(false)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'default' }}>
+    <motion.div
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'default', position: 'relative' }}>
       <motion.div
-        animate={{ y: [-2, 2, -2] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', borderRadius: '50%', background: 'linear-gradient(145deg, #f7d354, #e6a817)', boxShadow: '0 2px 6px rgba(230,168,23,0.5), inset 0 1px 2px rgba(255,255,200,0.6)', fontSize: '9px', fontWeight: '900', color: '#8a5a00', letterSpacing: '-0.5px' }}>
-          N
-        </motion.div>
-      <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text)' }}>
+        animate={{ rotate: hovered ? 360 : 0, scale: hovered ? 1.2 : 1 }}
+        transition={{ rotate: { duration: 0.5, ease: 'easeInOut' }, scale: { duration: 0.2 } }}
+        style={{ width: '18px', height: '18px', position: 'relative' }}>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+          <motion.path
+            d="M12 2L2 9l10 13L22 9z"
+            fill="url(#diamondGrad)"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth="0.5"
+            animate={{ filter: hovered ? 'brightness(1.4)' : 'brightness(1)' }}
+          />
+          <motion.path
+            d="M2 9h20M12 2L6 9l6 13 6-13z"
+            stroke="rgba(255,255,255,0.25)"
+            strokeWidth="0.5"
+            fill="none"
+          />
+          <defs>
+            <linearGradient id="diamondGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#a78bfa" />
+              <stop offset="50%" stopColor="#60c8f5" />
+              <stop offset="100%" stopColor="#a78bfa" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </motion.div>
+      <motion.span
+        animate={{ color: hovered ? '#a78bfa' : 'var(--text)' }}
+        transition={{ duration: 0.2 }}
+        style={{ fontSize: '0.85rem', fontWeight: '700' }}>
         {credits}
-      </span>
-    </div>
+      </motion.span>
+      {hovered && (
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ position: 'absolute', top: '24px', left: '50%', transform: 'translateX(-50%)', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.25rem 0.6rem', fontSize: '0.72rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', boxShadow: 'var(--shadow)', zIndex: 300 }}>
+          Noesis Credits
+        </motion.div>
+      )}
+    </motion.div>
   )
 }
 
