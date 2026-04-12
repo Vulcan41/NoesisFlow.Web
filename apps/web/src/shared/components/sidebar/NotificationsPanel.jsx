@@ -95,7 +95,7 @@ export default function NotificationsPanel() {
                 </div>
                 {!n.read && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
               </div>
-              {n.type === 'friend_request' && !acted.has(n.id) && (
+              {n.type === 'friend_request' && n.friendship_id != null && !acted.has(n.id) && (
                 <div style={{ display: 'flex', gap: '0.5rem', paddingLeft: '36px' }}>
                   <button onClick={() => handleAccept(n)} style={{ padding: '0.25rem 0.75rem', background: 'var(--btn-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '600' }}>Accept</button>
                   <button onClick={() => handleReject(n)} style={{ padding: '0.25rem 0.75rem', background: 'var(--bg-secondary)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem' }}>Reject</button>
