@@ -18,33 +18,36 @@ export default function AppProviders({ children }) {
   useEffect(() => { applyTheme(theme) }, [theme])
 
   useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, avatar_url, credits')
-        .eq('id', user.id)
-        .single()
-      setProfile(data)
-
-      presenceRef.current = supabase.channel('global-presence', {
-        config: { presence: { key: user.id } }
-      })
-      presenceRef.current
-        .on('presence', { event: 'sync' }, () => {
-          const state = presenceRef.current.presenceState()
-          setOnlineIds(new Set(Object.keys(state)))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, avatar_url, credits')
+          .eq('id', session.user.id)
+          .single()
+        setProfile(data)
+        // setup presence
+        if (presenceRef.current) presenceRef.current.unsubscribe()
+        presenceRef.current = supabase.channel('global-presence', {
+          config: { presence: { key: session.user.id } }
         })
-        .subscribe(async status => {
-          if (status === 'SUBSCRIBED') {
-            await presenceRef.current.track({ user_id: user.id, online_at: new Date().toISOString() })
-          }
-        })
-    }
-    init()
-    return () => { presenceRef.current?.unsubscribe() }
+        presenceRef.current
+          .on('presence', { event: 'sync' }, () => {
+            const state = presenceRef.current.presenceState()
+            setOnlineIds(new Set(Object.keys(state)))
+          })
+          .subscribe(async status => {
+            if (status === 'SUBSCRIBED') {
+              await presenceRef.current.track({ user_id: session.user.id })
+            }
+          })
+      } else {
+        setProfile(null)
+        setOnlineIds(new Set())
+        presenceRef.current?.unsubscribe()
+      }
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   function setTheme(t) {
