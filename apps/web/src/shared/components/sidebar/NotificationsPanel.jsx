@@ -6,7 +6,6 @@ import Avatar from '@shared/components/ui/Avatar.jsx'
 export default function NotificationsPanel() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
-  const [acted, setActed] = useState(new Set())
   const navigate = useNavigate()
 
   async function load() {
@@ -50,16 +49,14 @@ export default function NotificationsPanel() {
   async function handleAccept(n) {
     const { error } = await supabase.from('friendships').update({ status: 'accepted' }).eq('id', n.friendship_id)
     if (error) { console.error('accept error:', error); return }
-    await handleMarkRead(n.id)
-    setActed(prev => new Set([...prev, n.id]))
-    setTimeout(() => setNotifications(prev => prev.filter(x => x.id !== n.id)), 1000)
+    await supabase.from('notifications').update({ read: true }).eq('id', n.id)
+    setNotifications(prev => prev.filter(x => x.id !== n.id))
   }
 
   async function handleReject(n) {
     await supabase.from('friendships').delete().eq('id', n.friendship_id)
-    await handleMarkRead(n.id)
-    setActed(prev => new Set([...prev, n.id]))
-    setTimeout(() => setNotifications(prev => prev.filter(x => x.id !== n.id)), 1000)
+    await supabase.from('notifications').update({ read: true }).eq('id', n.id)
+    setNotifications(prev => prev.filter(x => x.id !== n.id))
   }
 
   if (loading) return <div style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Loading...</div>
@@ -95,7 +92,7 @@ export default function NotificationsPanel() {
                 </div>
                 {!n.read && <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />}
               </div>
-              {n.type === 'friend_request' && n.friendship_id != null && !acted.has(n.id) && (
+              {n.type === 'friend_request' && n.friendship_id != null && (
                 <div style={{ display: 'flex', gap: '0.5rem', paddingLeft: '36px' }}>
                   <button onClick={() => handleAccept(n)} style={{ padding: '0.25rem 0.75rem', background: 'var(--btn-primary)', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '600' }}>Accept</button>
                   <button onClick={() => handleReject(n)} style={{ padding: '0.25rem 0.75rem', background: 'var(--bg-secondary)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem' }}>Reject</button>
