@@ -16,6 +16,7 @@ export default function AppProviders({ children }) {
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const presenceRef = useRef(null)
+  const unreadChannelRef = useRef(null)
 
   useEffect(() => { applyTheme(theme) }, [theme])
 
@@ -53,7 +54,10 @@ export default function AppProviders({ children }) {
         setProfile(data)
         loadUnreadCounts(userId)
 
-        const unreadChannel = supabase.channel('unread-counts')
+        if (unreadChannelRef.current) {
+          supabase.removeChannel(unreadChannelRef.current)
+        }
+        unreadChannelRef.current = supabase.channel(`unread-counts-${userId}`)
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
             if (payload.new.receiver_id === userId) setUnreadNotifications(c => c + 1)
           })
@@ -85,7 +89,11 @@ export default function AppProviders({ children }) {
         presenceRef.current?.unsubscribe()
       }
     })
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      presenceRef.current?.unsubscribe()
+      if (unreadChannelRef.current) supabase.removeChannel(unreadChannelRef.current)
+    }
   }, [])
 
   function setTheme(t) {
