@@ -58,7 +58,7 @@ function IconButton({ icon, isActive, onSelect, badge }) {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            style={{ position: 'absolute', top: '5px', right: '5px', minWidth: '10px', height: '10px', borderRadius: '50%', background: '#D62900', border: '2px solid var(--bg)' }}
+            style={{ position: 'absolute', top: '6px', right: '6px', minWidth: '10px', height: '10px', borderRadius: '50%', background: '#D60000', border: `2px solid ${isActive ? 'var(--bg-secondary)' : 'var(--bg)'}` }}
           />
         )}
       </motion.div>
