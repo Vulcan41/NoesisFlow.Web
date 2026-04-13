@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
+import { useAppContext } from '@app/AppProviders.jsx'
 import Avatar from '@shared/components/ui/Avatar.jsx'
 
 export default function NotificationsPanel() {
@@ -8,6 +9,7 @@ export default function NotificationsPanel() {
   const [loading, setLoading] = useState(true)
   const handledIds = useRef(new Set())
   const navigate = useNavigate()
+  const { setUnreadNotifications } = useAppContext()
 
   async function load() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -42,6 +44,7 @@ export default function NotificationsPanel() {
 
   useEffect(() => {
     load()
+    setUnreadNotifications(0)
     const channel = supabase.channel('notifications-panel')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
         supabase.from('notifications')

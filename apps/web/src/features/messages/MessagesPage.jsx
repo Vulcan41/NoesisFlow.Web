@@ -2,11 +2,13 @@ import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '@core/supabase.js'
 import { getMessages, sendMessage, getOrCreateConversation, markConversationRead } from './messagesService.js'
+import { useAppContext } from '@app/AppProviders.jsx'
 import ChatHeader from './components/ChatHeader.jsx'
 import ChatHistory from './components/ChatHistory.jsx'
 import Composer from './components/Composer.jsx'
 
 export default function MessagesPage() {
+  const { setUnreadMessages } = useAppContext()
   const [conv, setConv] = useState(null)
   const [other, setOther] = useState(null)
   const [messages, setMessages] = useState([])
@@ -53,6 +55,7 @@ export default function MessagesPage() {
       setHasMore(msgs.length === 50)
       setOldestMessageDate(msgs[0]?.created_at || null)
       await markConversationRead(convId)
+      setUnreadMessages(prev => Math.max(0, prev - 1))
       subscribeToMessages(convId)
       setLoading(false)
     }

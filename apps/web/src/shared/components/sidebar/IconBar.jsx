@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { useAppContext } from '@app/AppProviders.jsx'
 
 const icons = [
   { id: 'home', icon: '/assets/home.png', iconSelected: '/assets/home_selected.png', label: 'Dashboard' },
@@ -9,16 +10,24 @@ const icons = [
 ]
 
 export default function IconBar({ activeSection, onSelect }) {
+  const { unreadMessages, unreadNotifications } = useAppContext()
+
   return (
     <div style={{ width: '48px', background: 'var(--bg)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '1rem', paddingBottom: '1rem', gap: '0.1rem', flexShrink: 0 }}>
       {icons.map(icon => (
-        <IconButton key={icon.id} icon={icon} isActive={activeSection === icon.id} onSelect={onSelect} />
+        <IconButton
+          key={icon.id}
+          icon={icon}
+          isActive={activeSection === icon.id}
+          onSelect={onSelect}
+          badge={icon.id === 'friends' ? unreadMessages : icon.id === 'notifications' ? unreadNotifications : 0}
+        />
       ))}
     </div>
   )
 }
 
-function IconButton({ icon, isActive, onSelect }) {
+function IconButton({ icon, isActive, onSelect, badge }) {
   return (
     <motion.button
       onClick={() => onSelect(icon.id)}
@@ -37,7 +46,7 @@ function IconButton({ icon, isActive, onSelect }) {
         animate={{ background: isActive ? 'var(--bg-secondary)' : 'transparent' }}
         transition={{ duration: 0.2 }}
         whileHover={{ background: 'var(--bg-secondary)' }}
-        style={{ width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        style={{ position: 'relative', width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <motion.img
           src={isActive ? icon.iconSelected : icon.icon}
           alt={icon.label}
@@ -45,6 +54,13 @@ function IconButton({ icon, isActive, onSelect }) {
           transition={{ duration: 0.15 }}
           style={{ width: '18px', height: '18px', objectFit: 'contain' }}
         />
+        {badge > 0 && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            style={{ position: 'absolute', top: '4px', right: '4px', minWidth: '8px', height: '8px', borderRadius: '50%', background: '#e53e3e', border: '1.5px solid var(--bg)' }}
+          />
+        )}
       </motion.div>
     </motion.button>
   )
