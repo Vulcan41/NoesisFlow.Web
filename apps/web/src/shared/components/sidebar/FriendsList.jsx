@@ -73,14 +73,18 @@ export default function FriendsList() {
       friendToConv[p.user_id] = p.conversation_id
     })
 
-    // Sort friends by last_message_at of their conversation
-    friendList.sort((a, b) => {
+    // Filter to only conversations with at least one message
+    const friendsWithConversations = friendList.filter(f => {
+      const convId = friendToConv[f.id]
+      return convId && convToTime[convId]
+    })
+    friendsWithConversations.sort((a, b) => {
       const aTime = convToTime[friendToConv[a.id]] || ''
       const bTime = convToTime[friendToConv[b.id]] || ''
       return new Date(bTime) - new Date(aTime)
     })
 
-    setFriends(friendList)
+    setFriends(friendsWithConversations)
     setConvMap(friendToConv)
   }
 
@@ -129,7 +133,7 @@ export default function FriendsList() {
   }
 
   if (!friends.length) return (
-    <div style={{ padding: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>No friends yet</div>
+    <div style={{ padding: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)', textAlign: 'center' }}>No messages yet</div>
   )
 
   return (
