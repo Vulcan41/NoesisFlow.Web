@@ -53,7 +53,7 @@ export default function AppProviders({ children }) {
         setProfile(data)
         loadUnreadCounts(userId)
 
-        supabase.channel('unread-counts')
+        const unreadChannel = supabase.channel('unread-counts')
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
             if (payload.new.receiver_id === userId) setUnreadNotifications(c => c + 1)
           })
