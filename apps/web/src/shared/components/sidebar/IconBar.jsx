@@ -5,7 +5,7 @@ const icons = [
   { id: 'home', icon: '/assets/home.png', iconSelected: '/assets/home_selected.png', label: 'Dashboard' },
   { id: 'notifications', icon: '/assets/notifications_1.png', iconSelected: '/assets/notifications.png', label: 'Notifications' },
   { id: 'friends', icon: '/assets/chat_1.png', iconSelected: '/assets/chat_2.png', label: 'Messages' },
-  { id: 'people', icon: '/assets/user_icon.png', iconSelected: '/assets/user_icon.png', label: 'Friends' },
+  { id: 'people', icon: '/assets/friends.png', iconSelected: '/assets/friends_selected.png', label: 'Friends' },
   { id: 'settings', icon: '/assets/settings.png', iconSelected: '/assets/settings_selected.png', label: 'Settings' },
 ]
 
