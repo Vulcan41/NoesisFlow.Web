@@ -110,7 +110,6 @@ export default function NotificationsPanel() {
                     </div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>{new Date(n.created_at).toLocaleDateString()}</div>
                   </div>
-                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }} />
                 </div>
                 {n.type === 'friend_request' && n.friendship_id != null && (
                   <div style={{ display: 'flex', gap: '0.5rem', paddingLeft: '36px' }}>
